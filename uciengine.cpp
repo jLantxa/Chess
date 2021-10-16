@@ -120,9 +120,8 @@ void UCIEngine::ParseDepthInfo(const QStringList& args) {
     depth_info.line_id = args[line_id_ix + 1].toUInt();
 
     const auto score_ix = args.indexOf("score");
-    if (args[score_ix+1] == "cp") {
-        depth_info.score = args[score_ix+2].toInt();
-    }
+    depth_info.mate_counter = (args[score_ix+1] == "mate");
+    depth_info.score = args[score_ix+2].toInt();
 
     const auto pv_ix = args.indexOf("pv");
     for (int i = pv_ix+1; i < args.length(); ++i) {

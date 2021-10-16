@@ -19,8 +19,9 @@ public:
     struct DepthInfo {
         uint8_t line_id;
         uint8_t depth;
-        int score;
         QStringList pv;
+        bool mate_counter = false;
+        int score;
     };
 
     /** Start engine process */

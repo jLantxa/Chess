@@ -38,7 +38,7 @@ private:
     const char* WINDOW_TITLE = "Chess";
 
     UCIEngine m_engine;
-    const char* DEFAULT_ENGINE_CMD = "stockfish";
+    const char* DEFAULT_ENGINE_CMD = "./stockfish";
 
     uint8_t m_depth;
 

@@ -111,7 +111,12 @@ void MainWindow::UpdateLineInfo() {
             move_chain.push_back(QString::number(m_move_number + i) + ". " + info.pv[2*i] + " " + info.pv[2*i + 1]);
         }
 
-        QString score_str = "<b>[" + GetSignedScore(info.score) + "]</b>";
+        QString score_str;
+        if (!info.mate_counter) {
+            score_str = "<b>[" + GetSignedScore(info.score) + "]</b>";
+        } else {
+            score_str = "<b>[M" + QString::number(info.score) + "]</b>";
+        }
         ui->teLines->append(score_str + " " + move_chain.join("  ") + "<br>");
     }
 }
