@@ -30,6 +30,8 @@ private slots:
     void on_sbLines_editingFinished();
     void on_sbDepth_editingFinished();
 
+    void on_bSetPosition_clicked();
+
 private:
     Ui::MainWindow *ui;
     QLabel m_score_label;
@@ -51,6 +53,7 @@ private:
     void RestartSearch();
 
     void UpdateLineInfo();
+    void UpdateMoveList();
 
     void SetNumLines(uint8_t num_lines);
     void SetDepth(uint8_t depth);

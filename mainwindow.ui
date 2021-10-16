@@ -118,6 +118,16 @@
       </property>
      </widget>
     </item>
+    <item row="3" column="0">
+     <widget class="QPushButton" name="bSetPosition">
+      <property name="text">
+       <string>Set</string>
+      </property>
+     </widget>
+    </item>
+    <item row="2" column="0">
+     <widget class="QLineEdit" name="lePosition"/>
+    </item>
    </layout>
   </widget>
   <widget class="QMenuBar" name="menubar">

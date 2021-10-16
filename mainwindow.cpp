@@ -112,6 +112,22 @@ void MainWindow::UpdateLineInfo() {
     }
 }
 
+void MainWindow::UpdateMoveList() {
+    ui->teMoves->clear();
+    const int length = m_moves_list.length();
+    QString moves_str;
+    for (uint32_t i = 0; i < length; ++i) {
+        const QString&  move = m_moves_list[i];
+        if (i % 2 == 0) {
+            moves_str += QString::number(i/2 + 1) + ". " + "<b>" + move + "</b> ";
+        } else {
+            moves_str += "<b>" + move + "</b> ";
+        }
+    }
+
+    ui->teMoves->setHtml(moves_str);
+}
+
 void MainWindow::on_chInfinite_toggled(bool checked) {
     ui->lDepth->setEnabled(!checked);
     ui->sbDepth->setEnabled(!checked);
@@ -136,5 +152,16 @@ void MainWindow::on_sbLines_editingFinished() {
 void MainWindow::on_sbDepth_editingFinished() {
     const int depth = ui->sbDepth->value();
     SetDepth(depth);
+}
+
+
+void MainWindow::on_bSetPosition_clicked() {
+    m_moves_list.push_back(ui->lePosition->text().trimmed());
+    ui->lePosition->clear();
+    m_engine.SetPositionFromMoves(m_moves_list);
+
+    m_best_move.bestmove = "";
+    UpdateMoveList();
+    RestartSearch();
 }
 
