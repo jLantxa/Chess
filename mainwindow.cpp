@@ -8,8 +8,7 @@ MainWindow::MainWindow(QWidget *parent)
     ui(new Ui::MainWindow),
     m_depth(18),
     m_move_number(1),
-    m_white_moves(true),
-    m_current_eval(0)
+    m_white_moves(true)
 {
     m_engine.Init(DEFAULT_ENGINE_CMD);
 
@@ -45,16 +44,14 @@ void MainWindow::OnBestMoveAvailable(UCIEngine::BestMove best_move) {
 
 void MainWindow::OnDepthInfoAvailable(UCIEngine::DepthInfo depth_info) {
     // MultiPV starts at index 1
+    if (!m_white_moves) {
+        depth_info.score *= -1;
+    }
+
     const uint8_t line_id = depth_info.line_id - 1;
     m_depth_info[line_id] = depth_info;
 
-    int eval = 0;
-    for (auto& info : m_depth_info) {
-        eval += info.score;
-    }
-    m_current_eval = eval / m_depth_info.size();
-
-    m_score_label.setText(GetSignedScore(static_cast<float>(m_current_eval)/100));
+    m_score_label.setText(GetSignedScore(m_depth_info[0].score));
     UpdateLineInfo();
 }
 
@@ -79,6 +76,7 @@ void MainWindow::on_bEngineOn_toggled(bool checked) {
         }
     } else {
         m_engine.Stop();
+        m_score_label.setText("");
     }
 }
 
@@ -99,15 +97,24 @@ void MainWindow::UpdateLineInfo() {
     for (auto& info : m_depth_info) {
         QStringList move_chain;
 
-        if (!m_white_moves) {
-            info.pv.push_front("...");
+        /* If black plays, the first move in the sequence belongs to black, and
+         * we must omit white's move:
+         * n... <black> instead of n. <white> <black>
+         */
+        int first_white_move;
+        if (m_white_moves) {
+            first_white_move = 0;
+        } else {
+            first_white_move = 1;
+            move_chain.push_back(QString::number(m_move_number) + "... " + info.pv[0]);
         }
 
-        for (uint32_t i = 0; i < info.pv.length()/2; ++i) {
+        // The rest of the moves are easy
+        for (int i = first_white_move; i < info.pv.length()/2; ++i) {
             move_chain.push_back(QString::number(m_move_number + i) + ". " + info.pv[2*i] + " " + info.pv[2*i + 1]);
         }
 
-        QString score_str = "<b>[" + GetSignedScore(static_cast<float>(info.score)/100) + "]</b>";
+        QString score_str = "<b>[" + GetSignedScore(info.score) + "]</b>";
         ui->teLines->append(score_str + " " + move_chain.join("  ") + "<br>");
     }
 }
@@ -116,7 +123,7 @@ void MainWindow::UpdateMoveList() {
     ui->teMoves->clear();
     const int length = m_moves_list.length();
     QString moves_str;
-    for (uint32_t i = 0; i < length; ++i) {
+    for (int i = 0; i < length; ++i) {
         const QString&  move = m_moves_list[i];
         if (i % 2 == 0) {
             moves_str += QString::number(i/2 + 1) + ". " + "<b>" + move + "</b> ";
@@ -159,6 +166,8 @@ void MainWindow::on_bSetPosition_clicked() {
     m_moves_list.push_back(ui->lePosition->text().trimmed());
     ui->lePosition->clear();
     m_engine.SetPositionFromMoves(m_moves_list);
+    m_white_moves = ((m_moves_list.length() % 2) == 0);
+    m_move_number = (m_moves_list.length() / 2) + 1;
 
     m_best_move.bestmove = "";
     UpdateMoveList();

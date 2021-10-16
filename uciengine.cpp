@@ -129,11 +129,6 @@ void UCIEngine::ParseDepthInfo(const QStringList& args) {
         depth_info.pv.push_back(args[i]);
     }
 
-//    qDebug() << "Depth " << depth_info.depth <<
-//                ", line " << depth_info.line_id <<
-//                ", score " << depth_info.score <<
-//                ", pv " << depth_info.pv.join(SEPARATOR);
-
     emit DepthInfoAvailable(depth_info);
 }
 

@@ -47,7 +47,6 @@ private:
     bool m_white_moves;
     std::vector<UCIEngine::DepthInfo> m_depth_info;
     UCIEngine::BestMove m_best_move;
-    int m_current_eval;
     QStringList m_moves_list;
 
     void RestartSearch();
@@ -58,10 +57,9 @@ private:
     void SetNumLines(uint8_t num_lines);
     void SetDepth(uint8_t depth);
 
-    template <typename T>
-    QString GetSignedScore(T score) const {
-        QString sign = (score > 0)? "+" : "";
-        return sign + QString::number(score);
+    QString GetSignedScore(int cp_score) const {
+        QString sign = (cp_score > 0)? "+" : "";
+        return sign + QString::number(static_cast<float>(cp_score) / 100, 'f', 2);
     }
 
 };
