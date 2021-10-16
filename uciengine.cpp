@@ -1,12 +1,14 @@
 #include "uciengine.h"
 
+static const char* SEPARATOR = " ";
+
 UCIEngine::UCIEngine() {
     ConnectProcessSignals();
 }
 
 void UCIEngine::ConnectProcessSignals() {
-    connect(&m_engine_process, SIGNAL(readyReadStandardOutput()), this, SLOT(OnReadyReadStdout()));
-    connect(&m_engine_process, SIGNAL(started()), this, SLOT(OnStart()));
+    connect(&m_engine_process, &QProcess::readyReadStandardOutput, this, &UCIEngine::OnReadyReadStdout);
+    connect(&m_engine_process, &QProcess::started, this, &UCIEngine::OnStart);
 }
 
 void UCIEngine::Init(const QString& command) {
@@ -36,7 +38,6 @@ void UCIEngine::SetPosition(const QString &fen) {
 }
 
 void UCIEngine::SetPositionFromMoves(const QStringList &moves) {
-    const char* SEPARATOR = " ";
     Write("position startpos moves " + moves.join(SEPARATOR));
 }
 
@@ -59,7 +60,7 @@ void UCIEngine::SearchWithDepth(uint8_t depth) {
 }
 
 void UCIEngine::SearchWithTime(uint32_t msec) {
-    Write("go movetime" + QString::number(msec));
+    Write("go movetime " + QString::number(msec));
 }
 
 void UCIEngine::SearchInfinite() {
@@ -78,8 +79,7 @@ void UCIEngine::OnReadyReadStdout() {
 }
 
 void UCIEngine::ParseText(const QString& text) {
-    const char* SPLITTER = " ";
-    QStringList args = text.trimmed().split(SPLITTER, QString::SplitBehavior::SkipEmptyParts);
+    QStringList args = text.trimmed().split(SEPARATOR, QString::SplitBehavior::SkipEmptyParts);
 
     if (args.length() == 0) {
         return;
@@ -129,10 +129,10 @@ void UCIEngine::ParseDepthInfo(const QStringList& args) {
         depth_info.pv.push_back(args[i]);
     }
 
-    qDebug() << "Depth " << depth_info.depth <<
-                ", line " << depth_info.line_id <<
-                ", score " << depth_info.score <<
-                ", pv " << depth_info.pv.join(" ");
+//    qDebug() << "Depth " << depth_info.depth <<
+//                ", line " << depth_info.line_id <<
+//                ", score " << depth_info.score <<
+//                ", pv " << depth_info.pv.join(SEPARATOR);
 
     emit DepthInfoAvailable(depth_info);
 }
