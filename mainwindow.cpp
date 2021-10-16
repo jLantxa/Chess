@@ -108,7 +108,9 @@ void MainWindow::UpdateLineInfo() {
 
         // The rest of the moves are easy
         for (int i = first_white_move; i < info.pv.length()/2; ++i) {
-            move_chain.push_back(QString::number(m_move_number + i) + ". " + info.pv[2*i] + " " + info.pv[2*i + 1]);
+            move_chain.push_back(QString::number(m_move_number + i) + ". " +
+                                 info.pv[2*i - first_white_move] + " " +
+                                 info.pv[(2*i + 1) - first_white_move]);
         }
 
         QString score_str;
