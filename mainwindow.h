@@ -3,6 +3,7 @@
 
 #include <vector>
 
+#include <QLabel>
 #include <QMainWindow>
 
 #include "uciengine.h"
@@ -24,14 +25,16 @@ public slots:
 
 private slots:
     void on_bEngineOn_toggled(bool checked);
-    void on_sbDepth_valueChanged(int depth);
-    void on_sbLines_valueChanged(int num_lines);
-    void on_sbThreads_valueChanged(int arg1);
-
     void on_chInfinite_toggled(bool checked);
+    void on_sbThreads_editingFinished();
+    void on_sbLines_editingFinished();
+    void on_sbDepth_editingFinished();
 
 private:
     Ui::MainWindow *ui;
+    QLabel m_score_label;
+
+    const char* WINDOW_TITLE = "Chess";
 
     UCIEngine m_engine;
     const char* DEFAULT_ENGINE_CMD = "stockfish";
@@ -42,6 +45,7 @@ private:
     bool m_white_moves;
     std::vector<UCIEngine::DepthInfo> m_depth_info;
     UCIEngine::BestMove m_best_move;
+    int m_current_eval;
     QStringList m_moves_list;
 
     void RestartSearch();
@@ -50,6 +54,12 @@ private:
 
     void SetNumLines(uint8_t num_lines);
     void SetDepth(uint8_t depth);
+
+    template <typename T>
+    QString GetSignedScore(T score) const {
+        QString sign = (score > 0)? "+" : "";
+        return sign + QString::number(score);
+    }
 
 };
 #endif // MAINWINDOW_H

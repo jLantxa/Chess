@@ -8,11 +8,15 @@ MainWindow::MainWindow(QWidget *parent)
     ui(new Ui::MainWindow),
     m_depth(18),
     m_move_number(1),
-    m_white_moves(true)
+    m_white_moves(true),
+    m_current_eval(0)
 {
     m_engine.Init(DEFAULT_ENGINE_CMD);
 
     ui->setupUi(this);
+    ui->statusbar->addPermanentWidget(&m_score_label);
+
+    setWindowTitle(WINDOW_TITLE);
 
     ui->sbDepth->setValue(m_depth);
     SetNumLines(1);
@@ -43,6 +47,14 @@ void MainWindow::OnDepthInfoAvailable(UCIEngine::DepthInfo depth_info) {
     // MultiPV starts at index 1
     const uint8_t line_id = depth_info.line_id - 1;
     m_depth_info[line_id] = depth_info;
+
+    int eval = 0;
+    for (auto& info : m_depth_info) {
+        eval += info.score;
+    }
+    m_current_eval = eval / m_depth_info.size();
+
+    m_score_label.setText(GetSignedScore(static_cast<float>(m_current_eval)/100));
     UpdateLineInfo();
 }
 
@@ -70,15 +82,6 @@ void MainWindow::on_bEngineOn_toggled(bool checked) {
     }
 }
 
-void MainWindow::on_sbDepth_valueChanged(int depth) {
-    SetDepth(depth);
-}
-
-
-void MainWindow::on_sbLines_valueChanged(int num_lines) {
-    SetNumLines(num_lines);
-}
-
 void MainWindow::RestartSearch() {
     if (ui->bEngineOn->isChecked()) {
         m_engine.Stop();
@@ -93,8 +96,7 @@ void MainWindow::UpdateLineInfo() {
         ui->teLines->append("<b>Best:</b> " + m_best_move.bestmove + "<br>");
     }
 
-    for (auto info : m_depth_info) {
-        QString sign = (info.score > 0)? "+" : "";
+    for (auto& info : m_depth_info) {
         QStringList move_chain;
 
         if (!m_white_moves) {
@@ -105,16 +107,10 @@ void MainWindow::UpdateLineInfo() {
             move_chain.push_back(QString::number(m_move_number + i) + ". " + info.pv[2*i] + " " + info.pv[2*i + 1]);
         }
 
-        QString score_str = "<b>[" + sign + QString::number(static_cast<float>(info.score)/100) + "]</b>";
+        QString score_str = "<b>[" + GetSignedScore(static_cast<float>(info.score)/100) + "]</b>";
         ui->teLines->append(score_str + " " + move_chain.join("  ") + "<br>");
     }
 }
-
-
-void MainWindow::on_sbThreads_valueChanged(int threads) {
-    m_engine.SetNumThreads(threads);
-}
-
 
 void MainWindow::on_chInfinite_toggled(bool checked) {
     ui->lDepth->setEnabled(!checked);
@@ -123,5 +119,22 @@ void MainWindow::on_chInfinite_toggled(bool checked) {
     if (!checked) {
         m_engine.Stop();
     }
+}
+
+void MainWindow::on_sbThreads_editingFinished() {
+    const int threads = ui->sbThreads->value();
+    m_engine.SetNumThreads(threads);
+}
+
+
+void MainWindow::on_sbLines_editingFinished() {
+    const int num_lines = ui->sbLines->value();
+    SetNumLines(num_lines);
+}
+
+
+void MainWindow::on_sbDepth_editingFinished() {
+    const int depth = ui->sbDepth->value();
+    SetDepth(depth);
 }
 
