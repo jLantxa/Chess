@@ -13,7 +13,6 @@ MainWindow::MainWindow(QWidget *parent)
     m_engine.Init(DEFAULT_ENGINE_CMD);
 
     ui->setupUi(this);
-    ui->statusbar->addPermanentWidget(&m_score_label);
 
     setWindowTitle(WINDOW_TITLE);
 
@@ -51,7 +50,6 @@ void MainWindow::OnDepthInfoAvailable(UCIEngine::DepthInfo depth_info) {
     const uint8_t line_id = depth_info.line_id - 1;
     m_depth_info[line_id] = depth_info;
 
-    m_score_label.setText(GetSignedScore(m_depth_info[0].score));
     UpdateLineInfo();
 }
 
@@ -76,7 +74,6 @@ void MainWindow::on_bEngineOn_toggled(bool checked) {
         }
     } else {
         m_engine.Stop();
-        m_score_label.setText("");
     }
 }
 

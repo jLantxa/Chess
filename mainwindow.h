@@ -34,7 +34,6 @@ private slots:
 
 private:
     Ui::MainWindow *ui;
-    QLabel m_score_label;
 
     const char* WINDOW_TITLE = "Chess";
 
