@@ -98,7 +98,7 @@ void UCIEngine::OnReadyReadStdout() {
 }
 
 void UCIEngine::ParseText(const QString& text) {
-    QStringList args = text.trimmed().split(SEPARATOR, QString::SplitBehavior::SkipEmptyParts);
+    QStringList args = text.trimmed().split(SEPARATOR, Qt::SkipEmptyParts);
 
     if (args.length() == 0) {
         return;
