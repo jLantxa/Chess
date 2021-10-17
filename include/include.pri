@@ -1,5 +1,5 @@
 HEADERS += \
-    $$PWD/mainwindow.h \
-    $$PWD/uciengine.h
+    $$PWD/mainwindow.hpp \
+    $$PWD/uciengine.hpp
 
 INCLUDEPATH += $$PWD

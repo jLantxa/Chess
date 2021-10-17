@@ -1,4 +1,21 @@
-#include "mainwindow.h"
+/*
+ * Copyright (C) 2021  Javier Lancha Vázquez
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+*/
+
+#include "mainwindow.hpp"
 #include "ui_mainwindow.h"
 
 #include <QThread>
@@ -23,7 +40,8 @@ MainWindow::MainWindow(QWidget *parent)
     const int max_num_threads = QThread::idealThreadCount();
     const int initial_threads = max_num_threads / 4;
     ui->sbThreads->setMaximum(max_num_threads);
-    ui->sbThreads->setToolTip(QString("Maximum number of threads: " + QString::number(max_num_threads)));
+    ui->sbThreads->setToolTip(QString("Maximum number of threads: " +
+                                      QString::number(max_num_threads)));
     m_engine.SetNumThreads(initial_threads);
     ui->sbThreads->setValue(initial_threads);
 
@@ -119,7 +137,7 @@ void MainWindow::UpdateLineInfo() {
         } else {
             score_str = "<b>[M" + QString::number(info.score) + "]</b>";
         }
-        ui->teLines->append(score_str + " " + move_chain.join("  ") + "<br>");
+        ui->teLines->append(score_str + " " + move_chain.join(" ") + "<br>");
     }
 }
 
@@ -189,4 +207,3 @@ void MainWindow::on_bPrevMove_clicked() {
     UpdateMoveList();
     RestartSearch();
 }
-

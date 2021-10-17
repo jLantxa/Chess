@@ -1,4 +1,21 @@
-#include "uciengine.h"
+/*
+ * Copyright (C) 2021  Javier Lancha Vázquez
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+*/
+
+#include "uciengine.hpp"
 
 static const char* SEPARATOR = " ";
 
@@ -7,8 +24,10 @@ UCIEngine::UCIEngine() {
 }
 
 void UCIEngine::ConnectProcessSignals() {
-    connect(&m_engine_process, &QProcess::readyReadStandardOutput, this, &UCIEngine::OnReadyReadStdout);
-    connect(&m_engine_process, &QProcess::started, this, &UCIEngine::OnStart);
+    connect(&m_engine_process, &QProcess::readyReadStandardOutput,
+            this, &UCIEngine::OnReadyReadStdout);
+    connect(&m_engine_process, &QProcess::started,
+            this, &UCIEngine::OnStart);
 }
 
 void UCIEngine::Init(const QString& command) {
@@ -96,13 +115,13 @@ void UCIEngine::ParseText(const QString& text) {
 
 void UCIEngine::ParseInfo(const QStringList& args) {
     if (args[1] == "depth") {
-        /* Ignore currmove messages
-         * Upperbound and lowerbound messages are for engine debug and we ignore those messages
+        /* Ignore currmove messages.
+         * Upperbound and lowerbound messages are for engine debug and we ignore
+         * those messages.
          */
-        const bool ignore_message =
-                args.contains("currmove")   ||
-                args.contains("upperbound") ||
-                args.contains("lowerbound");
+        const bool ignore_message = args.contains("currmove")   ||
+                                    args.contains("upperbound") ||
+                                    args.contains("lowerbound");
 
         if (ignore_message) {
             return;
@@ -135,6 +154,7 @@ void UCIEngine::ParseBestMove(const QStringList& args) {
     if (args.length() != 4) {
         return;
     }
+
     BestMove best_move = {args[1], args[3]};
     qDebug() << "Best move " << best_move.bestmove << ", ponder " << best_move.ponder;
     emit BestMoveAvailable(best_move);
