@@ -127,8 +127,8 @@ public slots:
     void OnReadyReadStdout();
 
 signals:
-    void BestMoveAvailable(const BestMove& best_move);
-    void DepthInfoAvailable(const DepthInfo& depth_info);
+    void BestMoveAvailable(const UCIEngine::BestMove& best_move);
+    void DepthInfoAvailable(const UCIEngine::DepthInfo& depth_info);
 
 private:
     QProcess m_engine_process;
