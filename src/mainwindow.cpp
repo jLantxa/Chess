@@ -15,10 +15,10 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+#include <QThread>
+
 #include "mainwindow.hpp"
 #include "ui_mainwindow.h"
-
-#include <QThread>
 
 MainWindow::MainWindow(QWidget *parent)
 :   QMainWindow(parent),
@@ -59,22 +59,27 @@ void MainWindow::OnBestMoveAvailable(UCIEngine::BestMove best_move) {
     UpdateLineInfo();
 }
 
-void MainWindow::OnDepthInfoAvailable(UCIEngine::DepthInfo depth_info) {
-    // MultiPV starts at index 1
-    if (!m_white_moves) {
-        depth_info.score *= -1;
+void MainWindow::OnDepthInfoAvailable(const UCIEngine::DepthInfo& info) {
+    const uint32_t line_id = info.line_id;
+    if (line_id > m_depth_infos.size()) {
+        return;
     }
 
-    const uint8_t line_id = depth_info.line_id - 1;
-    m_depth_info[line_id] = depth_info;
+    m_num_received_lines = line_id;
+    m_depth_infos[line_id - 1] = info;  // Lines start counting at 1
+
+    // Black has negative score
+    if (!m_white_moves) {
+        m_depth_infos[line_id - 1].score *= -1;
+    }
 
     UpdateLineInfo();
 }
 
 void MainWindow::SetNumLines(uint8_t num_lines) {
+    m_depth_infos.clear();
+    m_depth_infos.resize(num_lines);
     m_engine.SetNumLines(num_lines);
-    m_depth_info.clear();
-    m_depth_info.resize(num_lines);
     RestartSearch();
 }
 
@@ -109,26 +114,26 @@ void MainWindow::UpdateLineInfo() {
         ui->teLines->append("<b>Best:</b> " + m_best_move.bestmove + "<br>");
     }
 
-    for (auto& info : m_depth_info) {
-        QStringList move_chain;
+    for (uint32_t i = 0; i < m_num_received_lines; ++i) {
+        auto& info = m_depth_infos[i];
+        QStringList move_str_chain;
 
         /* If black plays, the first move in the sequence belongs to black, and
          * we must omit white's move:
          * n... <black> instead of n. <white> <black>
          */
-        int first_white_move;
-        if (m_white_moves) {
-            first_white_move = 0;
-        } else {
-            first_white_move = 1;
-            move_chain.push_back(QString::number(m_move_number) + "... " + info.pv[0]);
-        }
+        uint8_t first_white_move = (m_white_moves)? 0 : 1;
+        for (int i = 0; i < info.pv.length(); ++i) {
+            if ((i % 2) == first_white_move) {
+                move_str_chain.push_back(QString::number(m_move_number + i) + ". " + info.pv[i]);
+            } else {
+                if ((i != 0) || m_white_moves) {
+                    move_str_chain.push_back(info.pv[i]);
+                } else {
+                    move_str_chain.push_back(QString::number(m_move_number + i) + "... " + info.pv[i]);
+                }
 
-        // The rest of the moves are easy
-        for (int i = first_white_move; i < info.pv.length()/2; ++i) {
-            move_chain.push_back(QString::number(m_move_number + i) + ". " +
-                                 info.pv[2*i - first_white_move] + " " +
-                                 info.pv[(2*i + 1) - first_white_move]);
+            }
         }
 
         QString score_str;
@@ -137,7 +142,8 @@ void MainWindow::UpdateLineInfo() {
         } else {
             score_str = "<b>[M" + QString::number(info.score) + "]</b>";
         }
-        ui->teLines->append(score_str + " " + move_chain.join(" ") + "<br>");
+
+        ui->teLines->append(score_str + " " + move_str_chain.join(" ") + "<br>");
     }
 }
 

@@ -38,7 +38,7 @@ public:
 
 public slots:
     void OnBestMoveAvailable(UCIEngine::BestMove best_move);
-    void OnDepthInfoAvailable(UCIEngine::DepthInfo depth_info);
+    void OnDepthInfoAvailable(const UCIEngine::DepthInfo& depth_info);
 
 private slots:
     void on_bEngineOn_toggled(bool checked);
@@ -59,11 +59,13 @@ private:
 
     uint8_t m_depth;
 
+    QStringList m_moves_list;
     uint32_t m_move_number;
     bool m_white_moves;
-    std::vector<UCIEngine::DepthInfo> m_depth_info;
+
+    std::vector<UCIEngine::DepthInfo> m_depth_infos;
+    uint32_t m_num_received_lines = 0;
     UCIEngine::BestMove m_best_move;
-    QStringList m_moves_list;
 
     void RestartSearch();
 

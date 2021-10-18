@@ -127,8 +127,8 @@ public slots:
     void OnReadyReadStdout();
 
 signals:
-    void BestMoveAvailable(BestMove best_move);
-    void DepthInfoAvailable(DepthInfo depth_info);
+    void BestMoveAvailable(const BestMove& best_move);
+    void DepthInfoAvailable(const DepthInfo& depth_info);
 
 private:
     QProcess m_engine_process;
@@ -136,9 +136,9 @@ private:
     void ConnectProcessSignals();
 
     void ParseText(const QString &text);
-    void ParseInfo(const QStringList& args);
-    void ParseDepthInfo(const QStringList& args);
-    void ParseBestMove(const QStringList& args);
+    bool ParseInfo(const QStringList& args);
+    bool ParseBestMove(const QStringList& args);
+    UCIEngine::DepthInfo ParseDepthInfo(const QStringList& args);
 };
 
 #endif  // _CHESS_INCLUDE_UCI_ENGINE_HPP_

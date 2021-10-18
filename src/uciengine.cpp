@@ -15,6 +15,9 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+#include <array>
+#include <functional>
+
 #include "uciengine.hpp"
 
 static const char* SEPARATOR = " ";
@@ -92,70 +95,97 @@ void UCIEngine::OnStart() {
 
 void UCIEngine::OnReadyReadStdout() {
     while (m_engine_process.canReadLine()) {
-        const QString text = m_engine_process.readLine();
-        ParseText(text);
+        const QString line = m_engine_process.readLine();
+        ParseText(line.trimmed());
     }
 }
 
 void UCIEngine::ParseText(const QString& text) {
-    QStringList args = text.trimmed().split(SEPARATOR, Qt::SkipEmptyParts);
+    static const std::array<std::function<bool(const QStringList&)>, 2> PARSE_FUNCTIONS = {
+        std::bind(&UCIEngine::ParseInfo, this, std::placeholders::_1),
+        std::bind(&UCIEngine::ParseBestMove, this, std::placeholders::_1),
+    };
 
+    if (text.isEmpty()) {
+        return;
+    }
+
+    const QStringList args = text.split(SEPARATOR);
     if (args.length() == 0) {
         return;
     }
 
-    QString& type = args[0];
-    if (type == "info") {
-        ParseInfo(args);
-    }
-    else if (type == "bestmove") {
-        ParseBestMove(args);
-    }
-}
-
-void UCIEngine::ParseInfo(const QStringList& args) {
-    if (args[1] == "depth") {
-        /* Ignore currmove messages.
-         * Upperbound and lowerbound messages are for engine debug and we ignore
-         * those messages.
-         */
-        const bool ignore_message = args.contains("currmove")   ||
-                                    args.contains("upperbound") ||
-                                    args.contains("lowerbound");
-
-        if (ignore_message) {
-            return;
+    for (auto parse_function : PARSE_FUNCTIONS) {
+        if (parse_function(args) == true) {
+            break;
         }
-
-        ParseDepthInfo(args);
     }
 }
 
-void UCIEngine::ParseDepthInfo(const QStringList& args) {
+bool UCIEngine::ParseInfo(const QStringList& args) {
+    if (args[0] != "info") {
+        return false;
+    }
+
+    /* Ignore currmove messages.
+     * Upperbound and lowerbound messages are for engine debug and we ignore
+     * those messages.
+     */
+    const bool ignore_message = args.contains("currmove")   ||
+                                args.contains("upperbound") ||
+                                args.contains("lowerbound");
+    if (ignore_message) {
+        return false;
+    }
+
+    if (args[1] != "depth") {
+        return false;
+    }
+
+    const DepthInfo info = ParseDepthInfo(args);
+    emit DepthInfoAvailable(info);
+
+    return true;
+}
+
+UCIEngine::DepthInfo UCIEngine::ParseDepthInfo(const QStringList& args) {
     DepthInfo depth_info;
+
     depth_info.depth = args[2].toUInt();
 
-    const auto line_id_ix = args.indexOf("multipv");
-    depth_info.line_id = args[line_id_ix + 1].toUInt();
+    if (args.contains("multipv")) {
+        const auto line_id_ix = args.indexOf("multipv");
+        depth_info.line_id = args[line_id_ix + 1].toUInt();
+    } else {
+        depth_info.line_id = 1;
+    }
 
     const auto score_ix = args.indexOf("score");
     depth_info.mate_counter = (args[score_ix+1] == "mate");
-    depth_info.score = args[score_ix+2].toInt();
+    depth_info.score = args[score_ix + 2].toInt();
 
-    const auto pv_ix = args.indexOf("pv");
-    for (int i = pv_ix+1; i < args.length(); ++i) {
-        depth_info.pv.push_back(args[i]);
+    if (args.contains("pv")) {
+        const auto pv_ix = args.indexOf("pv");
+        for (int i = pv_ix+1; i < args.length(); ++i) {
+            depth_info.pv.push_back(args[i]);
+        }
     }
 
-    emit DepthInfoAvailable(depth_info);
+    return depth_info;
 }
 
-void UCIEngine::ParseBestMove(const QStringList& args) {
-    if (args.length() != 4) {
-        return;
+bool UCIEngine::ParseBestMove(const QStringList& args) {
+    if (args[0] != "bestmove") {
+        return false;
     }
 
-    BestMove best_move = {args[1], args[3]};
-    qDebug() << "Best move " << best_move.bestmove << ", ponder " << best_move.ponder;
+    BestMove best_move;
+    best_move.bestmove = args[1];
+    if (args.contains("ponder")) {
+        const auto ponder_ix = args.indexOf("ponder") + 1;
+        best_move.ponder = args[ponder_ix];
+    }
+
     emit BestMoveAvailable(best_move);
+    return true;
 }
