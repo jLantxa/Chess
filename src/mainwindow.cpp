@@ -45,18 +45,12 @@ MainWindow::MainWindow(QWidget *parent)
     m_engine.SetNumThreads(initial_threads);
     ui->sbThreads->setValue(initial_threads);
 
-    connect(&m_engine, &UCIEngine::BestMoveAvailable, this, &MainWindow::OnBestMoveAvailable);
     connect(&m_engine, &UCIEngine::DepthInfoAvailable, this, &MainWindow::OnDepthInfoAvailable);
 }
 
 MainWindow::~MainWindow() {
     delete ui;
     m_engine.Close();
-}
-
-void MainWindow::OnBestMoveAvailable(UCIEngine::BestMove best_move) {
-    m_best_move = best_move;
-    UpdateLineInfo();
 }
 
 void MainWindow::OnDepthInfoAvailable(const UCIEngine::DepthInfo& info) {
@@ -109,11 +103,6 @@ void MainWindow::RestartSearch() {
 
 void MainWindow::UpdateLineInfo() {
     ui->teLines->clear();
-
-    if (!m_best_move.bestmove.isEmpty()) {
-        ui->teLines->append("<b>Best:</b> " + m_best_move.bestmove + "<br>");
-    }
-
     for (uint32_t i = 0; i < m_num_received_lines; ++i) {
         auto& info = m_depth_infos[i];
         QStringList move_str_chain;
@@ -197,7 +186,6 @@ void MainWindow::on_bSetPosition_clicked() {
     m_move_number = (m_moves_list.length() / 2) + 1;
     m_engine.SetPositionFromMoves(m_moves_list);
 
-    m_best_move.bestmove = "";
     UpdateMoveList();
     RestartSearch();
 }
@@ -207,7 +195,6 @@ void MainWindow::on_bPrevMove_clicked() {
     m_white_moves = ((m_moves_list.length() % 2) == 0);
     m_move_number = (m_moves_list.length() / 2) + 1;
 
-    m_best_move.bestmove = "";
     m_engine.SetPositionFromMoves(m_moves_list);
 
     UpdateMoveList();

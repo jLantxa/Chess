@@ -37,7 +37,6 @@ public:
     ~MainWindow();
 
 public slots:
-    void OnBestMoveAvailable(UCIEngine::BestMove best_move);
     void OnDepthInfoAvailable(const UCIEngine::DepthInfo& depth_info);
 
 private slots:
@@ -65,7 +64,6 @@ private:
 
     std::vector<UCIEngine::DepthInfo> m_depth_infos;
     uint32_t m_num_received_lines = 0;
-    UCIEngine::BestMove m_best_move;
 
     void RestartSearch();
 
