@@ -191,7 +191,10 @@ void MainWindow::on_bSetPosition_clicked() {
 }
 
 void MainWindow::on_bPrevMove_clicked() {
-    m_moves_list.pop_back();
+    if (!m_moves_list.isEmpty()) {
+        m_moves_list.pop_back();
+    }
+
     m_white_moves = ((m_moves_list.length() % 2) == 0);
     m_move_number = (m_moves_list.length() / 2) + 1;
 

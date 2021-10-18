@@ -115,7 +115,7 @@ void UCIEngine::ParseText(const QString& text) {
         return;
     }
 
-    for (auto parse_function : PARSE_FUNCTIONS) {
+    for (auto& parse_function : PARSE_FUNCTIONS) {
         if (parse_function(args) == true) {
             break;
         }
