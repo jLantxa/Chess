@@ -15,6 +15,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+#include <QInputDialog>
+#include <QMessageBox>
 #include <QThread>
 
 #include "mainwindow.hpp"
@@ -24,7 +26,7 @@ MainWindow::MainWindow(QWidget *parent)
 :   QMainWindow(parent),
     ui(new Ui::MainWindow),
     m_depth(18),
-    m_move_number(1),
+    m_start_move_number(1),
     m_white_moves(true)
 {
     m_engine.Init(DEFAULT_ENGINE_CMD);
@@ -82,6 +84,40 @@ void MainWindow::SetDepth(uint8_t depth) {
     RestartSearch();
 }
 
+bool MainWindow::SetPosition(const QString& fen_str){
+    if (fen_str.isEmpty()) {
+        return false;
+    }
+
+    const char* FEN_SEPARATOR = " ";
+    const QStringList args = fen_str.split(FEN_SEPARATOR);
+
+    if (args.length() != 6) {
+        return false;
+    }
+
+    // TODO: Parse board, castle, checks and half moves
+
+    const bool white_moves = (args[1] == 'w');
+    const uint32_t move_number = args[5].toUInt();
+
+    m_white_moves = white_moves;
+    m_moves_list.clear();
+    m_start_move_number = move_number;
+
+    m_engine.SetPosition(fen_str);
+    RestartSearch();
+
+    return true;
+}
+
+void MainWindow::ShowMsgBox(const QString &title, const QString &text) {
+    QMessageBox error_box(this);
+    error_box.setWindowTitle(title);
+    error_box.setText(text);
+    error_box.exec();
+}
+
 void MainWindow::on_bEngineOn_toggled(bool checked) {
     if (checked) {
         if (ui->chInfinite->isChecked()) {
@@ -114,12 +150,12 @@ void MainWindow::UpdateLineInfo() {
         uint8_t first_white_move = (m_white_moves)? 0 : 1;
         for (int i = 0; i < info.pv.length(); ++i) {
             if ((i % 2) == first_white_move) {
-                move_str_chain.push_back(QString::number(m_move_number + i) + ". " + info.pv[i]);
+                move_str_chain.push_back(QString::number(CurrentMoveNumber() + i) + ". " + info.pv[i]);
             } else {
                 if ((i != 0) || m_white_moves) {
                     move_str_chain.push_back(info.pv[i]);
                 } else {
-                    move_str_chain.push_back(QString::number(m_move_number + i) + "... " + info.pv[i]);
+                    move_str_chain.push_back(QString::number(CurrentMoveNumber() + i) + "... " + info.pv[i]);
                 }
 
             }
@@ -183,7 +219,6 @@ void MainWindow::on_bSetPosition_clicked() {
     m_moves_list.push_back(ui->lePosition->text().trimmed());
     ui->lePosition->clear();
     m_white_moves = ((m_moves_list.length() % 2) == 0);
-    m_move_number = (m_moves_list.length() / 2) + 1;
     m_engine.SetPositionFromMoves(m_moves_list);
 
     UpdateMoveList();
@@ -196,10 +231,27 @@ void MainWindow::on_bPrevMove_clicked() {
     }
 
     m_white_moves = ((m_moves_list.length() % 2) == 0);
-    m_move_number = (m_moves_list.length() / 2) + 1;
 
     m_engine.SetPositionFromMoves(m_moves_list);
 
     UpdateMoveList();
     RestartSearch();
 }
+
+void MainWindow::on_actionSet_FEN_position_triggered() {
+    bool dialog_ok;
+    QString fen_str = QInputDialog::getText(this, "Set position", "FEN position",
+                                            QLineEdit::Normal, "", &dialog_ok);
+
+    if (dialog_ok) {
+        const bool position_ok = SetPosition(fen_str.trimmed());
+        if (!position_ok) {
+            ShowMsgBox("Error", "Could not set position.");
+        }
+    }
+}
+
+uint32_t MainWindow::CurrentMoveNumber() const {
+    return m_start_move_number + (m_moves_list.size() / 2);
+}
+

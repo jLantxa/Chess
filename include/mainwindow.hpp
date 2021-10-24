@@ -48,6 +48,8 @@ private slots:
     void on_bSetPosition_clicked();
     void on_bPrevMove_clicked();
 
+    void on_actionSet_FEN_position_triggered();
+
 private:
     Ui::MainWindow *ui;
 
@@ -59,11 +61,13 @@ private:
     uint8_t m_depth;
 
     QStringList m_moves_list;
-    uint32_t m_move_number;
+    uint32_t m_start_move_number;
     bool m_white_moves;
 
     std::vector<UCIEngine::DepthInfo> m_depth_infos;
     uint32_t m_num_received_lines = 0;
+
+    uint32_t CurrentMoveNumber() const;
 
     void RestartSearch();
 
@@ -73,10 +77,13 @@ private:
     void SetNumLines(uint8_t num_lines);
     void SetDepth(uint8_t depth);
 
+    bool SetPosition(const QString& fen_str);
+
     QString GetSignedScore(int cp_score) const {
         QString sign = (cp_score > 0)? "+" : "";
         return sign + QString::number(static_cast<float>(cp_score) / 100, 'f', 2);
     }
 
+    void ShowMsgBox(const QString& title, const QString& text);
 };
 #endif  // _CHESS_INCLUDE_MAINWINDOW_HPP_
