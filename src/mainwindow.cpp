@@ -30,25 +30,8 @@ MainWindow::MainWindow(QWidget *parent)
     m_start_half_moves(0),
     m_white_moves(true)
 {
-    m_engine.Init(DEFAULT_ENGINE_CMD);
-
-    ui->setupUi(this);
-    ui->bEngineOn->setPalette(QColor(Qt::red));
-
-    setWindowTitle(WINDOW_TITLE);
-
-    ui->sbDepth->setValue(m_depth);
-    SetNumLines(1);
-    ui->sbLines->setValue(1);
-
-    const int max_num_threads = QThread::idealThreadCount();
-    const int initial_threads = max_num_threads / 4;
-    ui->sbThreads->setMaximum(max_num_threads);
-    ui->sbThreads->setToolTip(QString("Maximum number of threads: " +
-                                      QString::number(max_num_threads)));
-    m_engine.SetNumThreads(initial_threads);
-    ui->sbThreads->setValue(initial_threads);
-
+    ui->setupUi(this);  
+    Init();
     connect(&m_engine, &UCIEngine::DepthInfoAvailable, this, &MainWindow::OnDepthInfoAvailable);
 }
 
@@ -258,6 +241,32 @@ void MainWindow::on_actionSet_FEN_position_triggered() {
             ShowMsgBox("Error", "Could not set position.");
         }
     }
+}
+
+void MainWindow::Init() {
+    // GUI defaults
+    setWindowTitle(WINDOW_TITLE);
+    ui->bEngineOn->setPalette(QColor(Qt::red));
+    // TODO: Implement board and move generation
+    ui->lePosition->setEnabled(false);
+    ui->bSetPosition->setEnabled(false);
+    ui->bPrevMove->setEnabled(false);
+
+    // Engine defaults
+    m_engine.Init(DEFAULT_ENGINE_CMD);
+
+    ui->sbDepth->setValue(m_depth);
+    SetNumLines(1);
+
+    ui->sbLines->setValue(1);
+
+    const int max_num_threads = QThread::idealThreadCount();
+    const int initial_threads = max_num_threads / 4;
+    ui->sbThreads->setMaximum(max_num_threads);
+    ui->sbThreads->setToolTip(QString("Maximum number of threads: " +
+                                      QString::number(max_num_threads)));
+    m_engine.SetNumThreads(initial_threads);
+    ui->sbThreads->setValue(initial_threads);
 }
 
 uint32_t MainWindow::CurrentMoveNumber() const {

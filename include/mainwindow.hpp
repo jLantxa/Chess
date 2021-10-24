@@ -53,6 +53,8 @@ private slots:
 private:
     Ui::MainWindow *ui;
 
+    void Init();
+
     const char* WINDOW_TITLE = "Chess";
 
     UCIEngine m_engine;
