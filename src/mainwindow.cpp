@@ -26,7 +26,7 @@ MainWindow::MainWindow(QWidget *parent)
 :   QMainWindow(parent),
     ui(new Ui::MainWindow),
     m_depth(18),
-    m_start_move_number(1),
+    m_start_half_moves(0),
     m_white_moves(true)
 {
     m_engine.Init(DEFAULT_ENGINE_CMD);
@@ -101,9 +101,13 @@ bool MainWindow::SetPosition(const QString& fen_str){
     const bool white_moves = (args[1] == 'w');
     const uint32_t move_number = args[5].toUInt();
 
-    m_white_moves = white_moves;
     m_moves_list.clear();
-    m_start_move_number = move_number;
+    ui->teMoves->clear();
+    m_white_moves = white_moves;
+    m_start_half_moves = (move_number-1) * 2;
+    if (!white_moves) {
+        m_start_half_moves++;
+    }
 
     m_engine.SetPosition(fen_str);
     RestartSearch();
@@ -147,15 +151,15 @@ void MainWindow::UpdateLineInfo() {
          * we must omit white's move:
          * n... <black> instead of n. <white> <black>
          */
-        uint8_t first_white_move = (m_white_moves)? 0 : 1;
         for (int i = 0; i < info.pv.length(); ++i) {
-            if ((i % 2) == first_white_move) {
-                move_str_chain.push_back(QString::number(CurrentMoveNumber() + i) + ". " + info.pv[i]);
-            } else {
-                if ((i != 0) || m_white_moves) {
-                    move_str_chain.push_back(info.pv[i]);
+            const uint32_t half_moves = (m_start_half_moves + (i+1));
+            if ((half_moves % 2) != 0 ) {  // White move
+                move_str_chain.push_back(QString::number(1 + (half_moves/2)) + ". " + info.pv[i]);
+            } else {  // Black move
+                if (i == 0) {
+                    move_str_chain.push_back(QString::number(1 + (half_moves/2)) + "... " + info.pv[i]);
                 } else {
-                    move_str_chain.push_back(QString::number(CurrentMoveNumber() + i) + "... " + info.pv[i]);
+                    move_str_chain.push_back(info.pv[i]);
                 }
 
             }
@@ -178,8 +182,9 @@ void MainWindow::UpdateMoveList() {
     QString moves_str;
     for (int i = 0; i < length; ++i) {
         const QString&  move = m_moves_list[i];
-        if (i % 2 == 0) {
-            moves_str += QString::number(i/2 + 1) + ". " + "<b>" + move + "</b> ";
+        const uint32_t half_moves = (m_start_half_moves + (i+1));
+        if ((half_moves % 2) != 0) {
+            moves_str += QString::number(1 +( half_moves/2)) + ". " + "<b>" + move + "</b> ";
         } else {
             moves_str += "<b>" + move + "</b> ";
         }
@@ -252,6 +257,5 @@ void MainWindow::on_actionSet_FEN_position_triggered() {
 }
 
 uint32_t MainWindow::CurrentMoveNumber() const {
-    return m_start_move_number + (m_moves_list.size() / 2);
+    return 1 + ((m_start_half_moves + m_moves_list.size()) / 2);
 }
-

@@ -61,7 +61,7 @@ private:
     uint8_t m_depth;
 
     QStringList m_moves_list;
-    uint32_t m_start_move_number;
+    uint32_t m_start_half_moves;
     bool m_white_moves;
 
     std::vector<UCIEngine::DepthInfo> m_depth_infos;
