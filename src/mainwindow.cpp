@@ -30,7 +30,7 @@ MainWindow::MainWindow(QWidget *parent)
     m_start_half_moves(0),
     m_white_moves(true)
 {
-    ui->setupUi(this);  
+    ui->setupUi(this);
     Init();
     connect(&m_engine, &UCIEngine::DepthInfoAvailable, this, &MainWindow::OnDepthInfoAvailable);
 }
@@ -48,11 +48,6 @@ void MainWindow::OnDepthInfoAvailable(const UCIEngine::DepthInfo& info) {
 
     m_num_received_lines = line_id;
     m_depth_infos[line_id - 1] = info;  // Lines start counting at 1
-
-    // Black has negative score
-    if (!m_white_moves) {
-        m_depth_infos[line_id - 1].score *= -1;
-    }
 
     UpdateLineInfo();
 }
@@ -153,10 +148,15 @@ void MainWindow::UpdateLineInfo() {
         }
 
         QString score_str;
+        int score = info.score;
+        if (!m_white_moves) {
+            score *= -1;
+        }
         if (!info.mate_counter) {
-            score_str = "<b>[" + GetSignedScore(info.score) + "]</b>";
+            score_str = "<b>[" + GetSignedScore(score) + "]</b>";
         } else {
-            score_str = "<b>[M" + QString::number(info.score) + "]</b>";
+            QString signed_mate_str = (score >= 0)? "M" : "-M";
+            score_str = "<b>[" + signed_mate_str + QString::number(info.score) + "]</b>";
         }
 
         ui->teLines->append(score_str + " " + move_str_chain.join(" ") + "<br>");
