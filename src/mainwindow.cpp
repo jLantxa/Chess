@@ -15,6 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+#include <QColor>
 #include <QInputDialog>
 #include <QMessageBox>
 #include <QThread>
@@ -32,6 +33,7 @@ MainWindow::MainWindow(QWidget *parent)
     m_engine.Init(DEFAULT_ENGINE_CMD);
 
     ui->setupUi(this);
+    ui->bEngineOn->setPalette(QColor(Qt::red));
 
     setWindowTitle(WINDOW_TITLE);
 
@@ -124,12 +126,14 @@ void MainWindow::ShowMsgBox(const QString &title, const QString &text) {
 
 void MainWindow::on_bEngineOn_toggled(bool checked) {
     if (checked) {
+        ui->bEngineOn->setPalette(QColor(Qt::green));
         if (ui->chInfinite->isChecked()) {
             m_engine.SearchInfinite();
         } else {
             m_engine.SearchWithDepth(m_depth);
         }
     } else {
+        ui->bEngineOn->setPalette(QColor(Qt::red));
         m_engine.Stop();
     }
 }
