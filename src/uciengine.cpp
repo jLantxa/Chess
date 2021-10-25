@@ -69,12 +69,10 @@ void UCIEngine::Stop() {
 
 void UCIEngine::SetNumLines(uint8_t num_lines) {
     Write("setoption name MultiPV value " + QString::number(num_lines));
-    qDebug() << "Set MultiPV to " << QString::number(num_lines);
 }
 
 void UCIEngine::SetNumThreads(uint16_t num_threads) {
     Write("setoption name Threads value " + QString::number(num_threads));
-    qDebug() << "Set threads to " << QString::number(num_threads);
 }
 
 void UCIEngine::SearchWithDepth(uint8_t depth) {
@@ -90,7 +88,6 @@ void UCIEngine::SearchInfinite() {
 }
 
 void UCIEngine::OnStart() {
-    qInfo() << "Engine process started";
 }
 
 void UCIEngine::OnReadyReadStdout() {
