@@ -6,6 +6,9 @@ BUILD_RELEASE := $(BUILD)/release
 
 QMAKE := /opt/Qt/5.15.2/gcc_64/bin/qmake
 
+
+all: debug release
+
 debug:
 	$(QMAKE) \
 		Chess.pro -o $(BUILD_DEBUG)/ \

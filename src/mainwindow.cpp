@@ -25,10 +25,7 @@
 
 MainWindow::MainWindow(QWidget *parent)
 :   QMainWindow(parent),
-    ui(new Ui::MainWindow),
-    m_depth(18),
-    m_start_half_moves(0),
-    m_white_moves(true)
+    ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
     Init();
@@ -40,16 +37,39 @@ MainWindow::~MainWindow() {
     m_engine.Close();
 }
 
-void MainWindow::OnDepthInfoAvailable(const UCIEngine::DepthInfo& info) {
-    const uint32_t line_id = info.line_id;
-    if (line_id > m_depth_infos.size()) {
-        return;
-    }
+void MainWindow::Init() {
+    // GUI defaults
+    setWindowTitle(WINDOW_TITLE);
+    ui->bEngineOn->setPalette(QColor(Qt::red));
+    // TODO: Implement board and move generation
+    ui->lePosition->setEnabled(false);
+    ui->bSetPosition->setEnabled(false);
+    ui->bPrevMove->setEnabled(false);
 
-    m_num_received_lines = line_id;
-    m_depth_infos[line_id - 1] = info;  // Lines start counting at 1
+    m_start_half_moves = 0;
+    m_white_moves = true;
 
-    UpdateLineInfo();
+    // Engine defaults
+    m_engine.Init(DEFAULT_ENGINE_CMD);
+
+    SetDepth(20);
+
+    ui->sbDepth->setValue(m_depth);
+    SetNumLines(1);
+
+    ui->sbLines->setValue(1);
+
+    const int max_num_threads = QThread::idealThreadCount();
+    const int initial_threads = max_num_threads / 4;
+    ui->sbThreads->setMaximum(max_num_threads);
+    ui->sbThreads->setToolTip(QString("Maximum number of threads: " +
+                                      QString::number(max_num_threads)));
+    m_engine.SetNumThreads(initial_threads);
+    ui->sbThreads->setValue(initial_threads);
+}
+
+uint32_t MainWindow::CurrentMoveNumber() const {
+    return 1 + ((m_start_half_moves + m_moves_list.size()) / 2);
 }
 
 void MainWindow::SetNumLines(uint8_t num_lines) {
@@ -62,6 +82,13 @@ void MainWindow::SetNumLines(uint8_t num_lines) {
 void MainWindow::SetDepth(uint8_t depth) {
     m_depth = depth;
     RestartSearch();
+}
+
+void MainWindow::RestartSearch() {
+    if (ui->bEngineOn->isChecked()) {
+        m_engine.Stop();
+        m_engine.SearchWithDepth(m_depth);
+    }
 }
 
 bool MainWindow::SetPosition(const QString& fen_str){
@@ -102,25 +129,16 @@ void MainWindow::ShowMsgBox(const QString &title, const QString &text) {
     error_box.exec();
 }
 
-void MainWindow::on_bEngineOn_toggled(bool checked) {
-    if (checked) {
-        ui->bEngineOn->setPalette(QColor(Qt::green));
-        if (ui->chInfinite->isChecked()) {
-            m_engine.SearchInfinite();
-        } else {
-            m_engine.SearchWithDepth(m_depth);
-        }
-    } else {
-        ui->bEngineOn->setPalette(QColor(Qt::red));
-        m_engine.Stop();
+void MainWindow::OnDepthInfoAvailable(const UCIEngine::DepthInfo& info) {
+    const uint32_t line_id = info.line_id;
+    if (line_id > m_depth_infos.size()) {
+        return;
     }
-}
 
-void MainWindow::RestartSearch() {
-    if (ui->bEngineOn->isChecked()) {
-        m_engine.Stop();
-        m_engine.SearchWithDepth(m_depth);
-    }
+    m_num_received_lines = line_id;
+    m_depth_infos[line_id - 1] = info;  // Lines start counting at 1
+
+    UpdateLineInfo();
 }
 
 void MainWindow::UpdateLineInfo() {
@@ -178,6 +196,20 @@ void MainWindow::UpdateMoveList() {
     }
 
     ui->teMoves->setHtml(moves_str);
+}
+
+void MainWindow::on_bEngineOn_toggled(bool checked) {
+    if (checked) {
+        ui->bEngineOn->setPalette(QColor(Qt::green));
+        if (ui->chInfinite->isChecked()) {
+            m_engine.SearchInfinite();
+        } else {
+            m_engine.SearchWithDepth(m_depth);
+        }
+    } else {
+        ui->bEngineOn->setPalette(QColor(Qt::red));
+        m_engine.Stop();
+    }
 }
 
 void MainWindow::on_chInfinite_toggled(bool checked) {
@@ -241,34 +273,4 @@ void MainWindow::on_actionSet_FEN_position_triggered() {
             ShowMsgBox("Error", "Could not set position.");
         }
     }
-}
-
-void MainWindow::Init() {
-    // GUI defaults
-    setWindowTitle(WINDOW_TITLE);
-    ui->bEngineOn->setPalette(QColor(Qt::red));
-    // TODO: Implement board and move generation
-    ui->lePosition->setEnabled(false);
-    ui->bSetPosition->setEnabled(false);
-    ui->bPrevMove->setEnabled(false);
-
-    // Engine defaults
-    m_engine.Init(DEFAULT_ENGINE_CMD);
-
-    ui->sbDepth->setValue(m_depth);
-    SetNumLines(1);
-
-    ui->sbLines->setValue(1);
-
-    const int max_num_threads = QThread::idealThreadCount();
-    const int initial_threads = max_num_threads / 4;
-    ui->sbThreads->setMaximum(max_num_threads);
-    ui->sbThreads->setToolTip(QString("Maximum number of threads: " +
-                                      QString::number(max_num_threads)));
-    m_engine.SetNumThreads(initial_threads);
-    ui->sbThreads->setValue(initial_threads);
-}
-
-uint32_t MainWindow::CurrentMoveNumber() const {
-    return 1 + ((m_start_half_moves + m_moves_list.size()) / 2);
 }

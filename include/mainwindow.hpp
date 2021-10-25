@@ -37,6 +37,10 @@ public:
     ~MainWindow();
 
 public slots:
+    /**
+     * @brief Depth search info available from the engine
+     * @param depth_info
+     */
     void OnDepthInfoAvailable(const UCIEngine::DepthInfo& depth_info);
 
 private slots:
@@ -47,12 +51,14 @@ private slots:
     void on_sbDepth_editingFinished();
     void on_bSetPosition_clicked();
     void on_bPrevMove_clicked();
-
     void on_actionSet_FEN_position_triggered();
 
 private:
     Ui::MainWindow *ui;
 
+    /**
+     * @brief Initialise window.
+     */
     void Init();
 
     const char* WINDOW_TITLE = "Chess";
@@ -60,32 +66,62 @@ private:
     UCIEngine m_engine;
     const char* DEFAULT_ENGINE_CMD = "stockfish";
 
+    /** Engine search depth. */
     uint8_t m_depth;
 
+    /** List of moves from starting position. */
     QStringList m_moves_list;
+
+    /** Number of half moves from starting position. */
     uint32_t m_start_half_moves;
+
+    /** White's turn. */
     bool m_white_moves;
 
     std::vector<UCIEngine::DepthInfo> m_depth_infos;
     uint32_t m_num_received_lines = 0;
 
+    /** Current move number as in game. First move is 1. */
     uint32_t CurrentMoveNumber() const;
 
+    /**
+     * @brief Restart engine search.
+     */
     void RestartSearch();
 
     void UpdateLineInfo();
     void UpdateMoveList();
 
     void SetNumLines(uint8_t num_lines);
+
+    /**
+     * @brief Set engine search depth.
+     * @param depth Search depth.
+     */
     void SetDepth(uint8_t depth);
 
+    /**
+     * @brief Set position using a FEN string.
+     * @param fen_str FEN string.
+     * @return true if the position is valid.
+     */
     bool SetPosition(const QString& fen_str);
 
+    /**
+     * @brief Get a score string with a + or - sign.
+     * @param cp_score Score is centipawns.
+     * @return A score string with a + or - sign.
+     */
     QString GetSignedScore(int cp_score) const {
         QString sign = (cp_score > 0)? "+" : "";
         return sign + QString::number(static_cast<float>(cp_score) / 100, 'f', 2);
     }
 
+    /**
+     * @brief Display a message box.
+     * @param title Window title.
+     * @param text Message.
+     */
     void ShowMsgBox(const QString& title, const QString& text);
 };
 #endif  // _CHESS_INCLUDE_MAINWINDOW_HPP_
