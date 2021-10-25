@@ -23,6 +23,7 @@
 #include <QLabel>
 #include <QMainWindow>
 
+#include "chess.hpp"
 #include "uciengine.hpp"
 
 QT_BEGIN_NAMESPACE
@@ -75,8 +76,8 @@ private:
     /** Number of half moves from starting position. */
     uint32_t m_start_half_moves;
 
-    /** White's turn. */
-    bool m_white_moves;
+    /** Moving colour. */
+    chess::Colour m_colour;
 
     std::vector<UCIEngine::DepthInfo> m_depth_infos;
     uint32_t m_num_received_lines = 0;

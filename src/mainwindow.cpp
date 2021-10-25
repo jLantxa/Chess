@@ -47,7 +47,7 @@ void MainWindow::Init() {
     ui->bPrevMove->setEnabled(false);
 
     m_start_half_moves = 0;
-    m_white_moves = true;
+    m_colour = chess::Colour::WHITE;
 
     // Engine defaults
     m_engine.Init(DEFAULT_ENGINE_CMD);
@@ -104,15 +104,20 @@ bool MainWindow::SetPosition(const QString& fen_str){
     }
 
     // TODO: Parse board, castle, checks and half moves
+    if (args[1] == 'w') {
+        m_colour = chess::Colour::WHITE;
+    } else if (args[1] == 'b') {
+        m_colour = chess::Colour::BLACK;
+    } else {
+        return false;
+    }
 
-    const bool white_moves = (args[1] == 'w');
     const uint32_t move_number = args[5].toUInt();
 
     m_moves_list.clear();
     ui->teMoves->clear();
-    m_white_moves = white_moves;
     m_start_half_moves = (move_number-1) * 2;
-    if (!white_moves) {
+    if (m_colour == chess::Colour::BLACK) {
         m_start_half_moves++;
     }
 
@@ -167,7 +172,7 @@ void MainWindow::UpdateLineInfo() {
 
         QString score_str;
         int score = info.score;
-        if (!m_white_moves) {
+        if (m_colour == chess::Colour::BLACK) {
             score *= -1;
         }
         if (!info.mate_counter) {
@@ -242,7 +247,8 @@ void MainWindow::on_sbDepth_editingFinished() {
 void MainWindow::on_bSetPosition_clicked() {
     m_moves_list.push_back(ui->lePosition->text().trimmed());
     ui->lePosition->clear();
-    m_white_moves = ((m_moves_list.length() % 2) == 0);
+    m_colour = ((m_moves_list.length() % 2) == 0)?
+               chess::Colour::WHITE : chess::Colour::BLACK;
     m_engine.SetPositionFromMoves(m_moves_list);
 
     UpdateMoveList();
@@ -254,8 +260,8 @@ void MainWindow::on_bPrevMove_clicked() {
         m_moves_list.pop_back();
     }
 
-    m_white_moves = ((m_moves_list.length() % 2) == 0);
-
+    m_colour = ((m_moves_list.length() % 2) == 0)?
+               chess::Colour::WHITE : chess::Colour::BLACK;
     m_engine.SetPositionFromMoves(m_moves_list);
 
     UpdateMoveList();
