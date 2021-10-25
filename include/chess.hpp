@@ -18,12 +18,49 @@
 #ifndef _CHESS_INCLUDE_CHESS_HPP_
 #define _CHESS_INCLUDE_CHESS_HPP_
 
+#include <cstdint>
+
+#include <array>
+#include <string>
+
 namespace chess {
 
 enum class Colour {
     WHITE,
     BLACK
 };
+
+enum class PieceType {
+    PAWN,
+    KNIGHT,
+    BISHOP,
+    ROOK,
+    QUEEN,
+    KING
+};
+
+constexpr uint8_t PAWN_VALUE   = 1U;
+constexpr uint8_t KNIGHT_VALUE = 3U;
+constexpr uint8_t BISHOP_VALUE = 3U;
+constexpr uint8_t ROOK_VALUE   = 5U;
+constexpr uint8_t QUEEN_VALUE  = 9U;
+
+struct Square {
+    uint8_t file;
+    uint8_t rank;
+};
+
+struct Move {
+    Square src;
+    Square dst;
+};
+
+constexpr std::array<char, 8> FILES {'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'};
+
+[[nodiscard]] std::string SquareToString(const Square& square, bool* ok);
+[[nodiscard]] Square StringToSquare(const std::string& str, bool* ok);
+[[nodiscard]] std::string MoveToUCI(const Move& move, bool* ok);
+[[nodiscard]] Move UCIToMove(const std::string& uci, bool* ok);
 
 /**
  * @brief Toggle colour
