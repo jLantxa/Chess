@@ -1,34 +1,47 @@
-TARGET := Chess
+APP_TARGET := Chess
+TEST_TARGET := test
 
 BUILD := build
 BUILD_DEBUG := $(BUILD)/debug
 BUILD_RELEASE := $(BUILD)/release
+BUILD_TEST := $(BUILD)/test
 
 QMAKE := /opt/Qt/5.15.2/gcc_64/bin/qmake
 
 
-all: debug release
+all: debug release tests
 
 debug:
 	$(QMAKE) \
 		Chess.pro -o $(BUILD_DEBUG)/ \
-		-spec linux-g++ CONFIG+=debug CONFIG+=qml_debug
+		-spec linux-g++ \
+		CONFIG+=debug CONFIG+=qml_debug
 	cd $(BUILD_DEBUG) && make -j
 
 run-debug:
 	make debug
-	./$(BUILD_DEBUG)/$(TARGET)
+	./$(BUILD_DEBUG)/$(APP_TARGET)
 
 release:
 	$(QMAKE) \
 		Chess.pro \
 		-o $(BUILD_RELEASE)/ \
-		-spec linux-g++ CONFIG+=release CONFIG+=qml_release
+		-spec linux-g++ \
+		CONFIG+=release CONFIG+=qml_release
 	cd $(BUILD_RELEASE) && make -j
 
 run-release:
 	make release
-	./$(BUILD_RELEASE)/$(TARGET)
+	./$(BUILD_RELEASE)/$(APP_TARGET)
+
+tests:
+	$(QMAKE) \
+		test.pro \
+		-o $(BUILD_TEST)/ \
+		-spec linux-g++ \
+		CONFIG+=release CONFIG+=qml_release
+	cd $(BUILD_TEST) && make -j
+	./$(BUILD_TEST)/$(TEST_TARGET)
 
 clean:
 	rm -r $(BUILD)
