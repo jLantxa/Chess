@@ -1,7 +1,7 @@
-SRC_DIR = $$PWD
+APP_MAIN = $$PWD/main.cpp
 
 SOURCES += \
-    $$PWD/main.cpp \
+    $$APP_MAIN \
     $$PWD/chess.cpp \
     $$PWD/mainwindow.cpp \
     $$PWD/uciengine.cpp
