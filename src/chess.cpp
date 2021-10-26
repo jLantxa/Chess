@@ -19,6 +19,16 @@
 
 namespace chess {
 
+bool Square::operator==(const Square& other) const {
+    return (file == other.file) &&
+           (rank == other.rank);
+}
+
+bool Move::operator==(const Move& other) const {
+    return (src == other.src) &&
+           (dst == other.dst);
+}
+
 void ToggleColour(Colour* colour) {
      if (*colour == Colour::WHITE) {
         *colour = Colour::BLACK;
@@ -54,7 +64,7 @@ std::string SquareToString(const Square& square) {
 
 Square StringToSquare(const std::string& str) {
     uint8_t file = FileToNumber(str[0]);
-    uint8_t rank = str[1] - '0';
+    uint8_t rank = str[1] - '1';
     Square square {file, rank};
 
     return square;

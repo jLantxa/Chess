@@ -48,11 +48,15 @@ constexpr uint8_t QUEEN_VALUE  = 9U;
 struct Square {
     uint8_t file;
     uint8_t rank;
+
+    bool operator==(const Square& other) const;
 };
 
 struct Move {
     Square src;
     Square dst;
+
+    bool operator==(const Move& other) const;
 };
 
 constexpr std::array<char, 8> FILES {'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'};
