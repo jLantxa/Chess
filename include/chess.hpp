@@ -57,10 +57,10 @@ struct Move {
 
 constexpr std::array<char, 8> FILES {'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'};
 
-[[nodiscard]] std::string SquareToString(const Square& square, bool* ok);
-[[nodiscard]] Square StringToSquare(const std::string& str, bool* ok);
-[[nodiscard]] std::string MoveToUCI(const Move& move, bool* ok);
-[[nodiscard]] Move UCIToMove(const std::string& uci, bool* ok);
+[[nodiscard]] std::string SquareToString(const Square& square);
+[[nodiscard]] Square StringToSquare(const std::string& str);
+[[nodiscard]] std::string MoveToUCI(const Move& move);
+[[nodiscard]] Move UCIToMove(const std::string& uci);
 
 /**
  * @brief Toggle colour
