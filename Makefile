@@ -6,7 +6,7 @@ BUILD_DEBUG := $(BUILD)/debug
 BUILD_RELEASE := $(BUILD)/release
 BUILD_TEST := $(BUILD)/test
 
-QMAKE := /opt/Qt/5.15.2/gcc_64/bin/qmake
+QMAKE := qmake-qt5
 
 
 all: debug release tests
