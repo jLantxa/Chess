@@ -6,10 +6,9 @@ BUILD_DEBUG := $(BUILD)/debug
 BUILD_RELEASE := $(BUILD)/release
 BUILD_TEST := $(BUILD)/test
 
-QMAKE := qmake-qt5
-
-
 all: debug release tests
+
+binaries: debug release
 
 debug:
 	$(QMAKE) \

@@ -10,7 +10,8 @@ A chess game and analysis tool built with Qt. It supports chess engines compatib
 You can directly import the project into Qt Creator.
 
 ## Makefile
-If you prefer not to use Qt Creator, you can use the ``Makefile``. Just make sure to point to your **qmake** binary using the ``QMAKE`` variable.
+If you prefer not to use Qt Creator, you can use the ``Makefile``. Just make sure to point to your **qmake** binary using the ``QMAKE`` variable:
+```export QMAKE=<path to qmake>```
 
 # Integration with chess engines
 All communication with the chess engine occurrs via the ``QProcess`` class. ``QProcess`` provides a duplex communication channel with a child process using standard input/output. The UCI (Universal Chess Interface) establishes the commands and syntax to communicate with a chess engine. At the moment, this app only uses ``Stockfish``, as the process command is hardcoded. In the future it should be trivial to allow the user to specify path to any chess engine program, provided that this engine is compatible with the UCI protocol.
