@@ -75,7 +75,7 @@ private:
 
     chess::Board m_board;
 
-    bool m_rotated = false;
+    chess::Colour m_side = chess::Colour::WHITE;
     int m_board_size;
     int m_square_size;
 
@@ -86,7 +86,7 @@ private:
 
     static constexpr int MARGIN = 8;
 
-    void GetRotatedCoordinates(uint8_t ax, uint8_t ay, uint8_t& bx, uint8_t& by, bool rotated) const;
+    void GetRotatedCoordinates(uint8_t ax, uint8_t ay, uint8_t& bx, uint8_t& by, chess::Colour side) const;
     void GetGridCoordinates(int x, int y, uint8_t& u, uint8_t& v) const;
     chess::Square GetClickedSquare(int x, int y) const;
     bool IsOnBoard(int x, int y) const;

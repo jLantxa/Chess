@@ -47,13 +47,13 @@ void ChessBoardWidget::SetPalette(const ChessPalette& palette) {
     m_palette = palette;
 }
 
-void ChessBoardWidget::GetRotatedCoordinates(uint8_t ax, uint8_t ay, uint8_t& bx, uint8_t& by, bool rotated) const {
-    if (rotated) {
-        bx = 7-ax;
-        by = ay;
-    } else {
+void ChessBoardWidget::GetRotatedCoordinates(uint8_t ax, uint8_t ay, uint8_t& bx, uint8_t& by, chess::Colour side) const {
+    if (side == chess::Colour::WHITE) {
         bx = ax;
         by = 7-ay;
+    } else {
+        bx = 7-ax;
+        by = ay;
     }
 }
 
@@ -65,7 +65,7 @@ void ChessBoardWidget::GetGridCoordinates(int x, int y, uint8_t& u, uint8_t& v) 
 chess::Square ChessBoardWidget::GetClickedSquare(int x, int y) const {
     uint8_t i, j, u, v;
     GetGridCoordinates(x, y, u, v);
-    GetRotatedCoordinates(u, v, i, j, m_rotated);
+    GetRotatedCoordinates(u, v, i, j, m_side);
     return chess::Square{i, j};
 }
 
@@ -157,7 +157,7 @@ void ChessBoardWidget::DrawBoard() {
     uint8_t u, v;
     for (uint8_t i = 0; i < 8; ++i) {
         for (uint8_t j = 0; j < 8; ++j) {
-            GetRotatedCoordinates(i, j, u, v, m_rotated);
+            GetRotatedCoordinates(i, j, u, v, m_side);
             const int x = MARGIN + u*m_square_size;
             const int y = MARGIN + v*m_square_size;
             const QColor& square_colour = (((i+j) % 2) == 0)?

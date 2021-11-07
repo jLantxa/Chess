@@ -37,6 +37,11 @@ public:
 
 private:
     std::unique_ptr<Piece> m_board[8][8];
+
+    bool white_queen_side_castle = true;
+    bool white_king_side_castle  = true;
+    bool black_queen_side_castle = true;
+    bool black_king_side_castle  = true;
 };
 
 }  // namespace chess
