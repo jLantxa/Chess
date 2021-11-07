@@ -41,17 +41,94 @@ void ChessBoardWidget::SetPalette(const ChessPalette& palette) {
     m_palette = palette;
 }
 
+void ChessBoardWidget::GetRotatedCoordinates(uint8_t ax, uint8_t ay, uint8_t& bx, uint8_t& by, bool rotated) const {
+    if (rotated) {
+        bx = 7-ax;
+        by = ay;
+    } else {
+        bx = ax;
+        by = 7-ay;
+    }
+}
+
+void ChessBoardWidget::GetGridCoordinates(int x, int y, uint8_t& u, uint8_t& v) const {
+    u = (x-MARGIN) / m_square_size;
+    v = (y-MARGIN) / m_square_size;
+}
+
+chess::Square ChessBoardWidget::GetClickedSquare(int x, int y) const {
+    uint8_t i, j, u, v;
+    GetGridCoordinates(x, y, u, v);
+    GetRotatedCoordinates(u, v, i, j, m_rotated);
+    return chess::Square{i, j};
+}
+
+bool ChessBoardWidget::IsOnBoard(int x, int y) const {
+    const bool inside = (x > MARGIN) &&
+                        (y > MARGIN) &&
+                        (x < MARGIN + 8*m_square_size) &&
+                        (y < MARGIN + 8*m_square_size);
+
+    if (inside) {
+        return true;
+    }
+
+    return false;
+}
+
 void ChessBoardWidget::paintEvent(QPaintEvent*) {
     DrawBoard();
     DrawPieces();
 }
 
 void ChessBoardWidget::mousePressEvent(QMouseEvent* event) {
-    (void) event;
+    const QPoint position = event->pos();
+    const int x = position.x();
+    const int y = position.y();
+    if (!IsOnBoard(x, y)) {
+        return;
+    }
+
+    const Qt::MouseButton button = event->button();
+    const chess::Square square = GetClickedSquare(x, y);
+
+    (void) square;
+
+    switch (button) {
+        default:
+            return;
+
+        case Qt::LeftButton:
+            break;
+
+        case Qt::RightButton:
+            break;
+    }
 }
 
 void ChessBoardWidget::mouseReleaseEvent(QMouseEvent* event) {
-    (void) event;
+    const QPoint position = event->pos();
+    const int x = position.x();
+    const int y = position.y();
+    if (!IsOnBoard(x, y)) {
+        return;
+    }
+
+    const Qt::MouseButton button = event->button();
+    const chess::Square square = GetClickedSquare(position.x(), position.y());
+
+    (void) square;
+
+    switch (button) {
+        default:
+            return;
+
+        case Qt::LeftButton:
+            break;
+
+        case Qt::RightButton:
+            break;
+    }
 }
 
 void ChessBoardWidget::DrawBoard() {
@@ -59,42 +136,44 @@ void ChessBoardWidget::DrawBoard() {
     const QRect geometry = this->geometry();
     QFont font;
 
-    const int board_size = std::min(geometry.width(), geometry.height()) - 2*MARGIN;
-    const int sq_size = board_size/8;
+    m_board_size = std::min(geometry.width(), geometry.height()) - 2*MARGIN;
+    m_square_size = m_board_size/8;
 
     font.setWeight(QFont::Bold);
-    font.setPixelSize(sq_size/4);
+    font.setPixelSize(m_square_size/4);
     const int text_margin = 3;
     QFontMetrics font_metrics(font);
 
     painter.setFont(font);
 
-    for (int i = 0; i < 8; ++i) {
-        for (int j = 0; j < 8; ++j) {
-            const int x = MARGIN + i*sq_size;
-            const int y = MARGIN + j*sq_size;
+    /* i, j -> Coordinates of the board
+     * u, v -> Coordinates of the widget grid (accounting for rotation)
+     */
+    uint8_t u, v;
+    for (uint8_t i = 0; i < 8; ++i) {
+        for (uint8_t j = 0; j < 8; ++j) {
+            GetRotatedCoordinates(i, j, u, v, m_rotated);
+            const int x = MARGIN + u*m_square_size;
+            const int y = MARGIN + v*m_square_size;
             const QColor& square_colour = (((i+j) % 2) == 0)?
-                                  m_palette.white_square : m_palette.black_square;
+                                          m_palette.black_square : m_palette.white_square;
+            const QColor& text_colour = (((i+j) % 2) == 0)?
+                                        m_palette.white_square : m_palette.black_square;
 
-            painter.fillRect(x, y, sq_size, sq_size, square_colour);
+            painter.fillRect(x, y, m_square_size, m_square_size, square_colour);
 
-            if (j == 7) {
-                const QColor& text_colour = (((i+j) % 2) != 0)?
-                    m_palette.white_square : m_palette.black_square;
+            if (v == 7) {
 
                 painter.setPen(text_colour);
-                painter.drawText(x + sq_size - font_metrics.xHeight() - text_margin,
-                                 y + sq_size - text_margin,
+                painter.drawText(x + m_square_size - font_metrics.xHeight() - text_margin,
+                                 y + m_square_size - text_margin,
                                  QString(chess::NumberToFile(i)));
             }
-            if (i == 0) {
-                const QColor& text_colour = (((i+j) % 2) != 0)?
-                    m_palette.white_square : m_palette.black_square;
-
+            if (u == 0) {
                 painter.setPen(text_colour);
                 painter.drawText(x + text_margin,
                                  y + font_metrics.capHeight() + text_margin,
-                                 QString::number(8-j));
+                                 QString::number(j+1));
             }
         }
     }

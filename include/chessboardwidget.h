@@ -18,7 +18,13 @@
 #ifndef _CHESS_INCLUDE_CHESS_H_
 #define _CHESS_INCLUDE_CHESS_H_
 
+#include <cstdint>
+
+#include <set>
+
 #include <QWidget>
+
+#include "chess.hpp"
 
 struct ChessPalette {
     QColor white_square;
@@ -46,8 +52,20 @@ private:
     void SetPalette(const ChessPalette& palette);
 
     bool m_rotated = false;
+    int m_board_size;
+    int m_square_size;
+
+    chess::Square* m_cur_sel_sq = nullptr;
+    chess::Square* m_sel_src_sq = nullptr;
+    chess::Square* m_sel_dst_sq = nullptr;
+    std::set<chess::Square> m_hightlighted;
 
     static constexpr int MARGIN = 8;
+
+    void GetRotatedCoordinates(uint8_t ax, uint8_t ay, uint8_t& bx, uint8_t& by, bool rotated) const;
+    void GetGridCoordinates(int x, int y, uint8_t& u, uint8_t& v) const;
+    chess::Square GetClickedSquare(int x, int y) const;
+    bool IsOnBoard(int x, int y) const;
 
     void DrawBoard();
     void DrawPieces();
