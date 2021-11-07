@@ -59,7 +59,7 @@ void MainWindow::Init() {
     const int max_num_threads = QThread::idealThreadCount();
     const int initial_threads = max_num_threads / 4;
     ui->sbThreads->setMaximum(max_num_threads);
-    ui->sbThreads->setToolTip(QString("Maximum number of threads: " +
+    ui->sbThreads->setToolTip(QString("Number of CPU threads to use.\nMaximum number of threads: " +
                                       QString::number(max_num_threads)));
     m_engine.SetNumThreads(initial_threads);
     ui->sbThreads->setValue(initial_threads);

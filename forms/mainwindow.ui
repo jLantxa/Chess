@@ -76,6 +76,9 @@
             <verstretch>0</verstretch>
            </sizepolicy>
           </property>
+          <property name="toolTip">
+           <string/>
+          </property>
           <property name="text">
            <string>Depth</string>
           </property>
@@ -88,6 +91,9 @@
             <horstretch>0</horstretch>
             <verstretch>0</verstretch>
            </sizepolicy>
+          </property>
+          <property name="toolTip">
+           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Maximum engine search depth.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
           </property>
           <property name="minimum">
            <number>1</number>
@@ -105,6 +111,9 @@
             <verstretch>0</verstretch>
            </sizepolicy>
           </property>
+          <property name="toolTip">
+           <string>Scan for infinite depth</string>
+          </property>
           <property name="text">
            <string>∞</string>
           </property>
@@ -118,6 +127,9 @@
             <verstretch>0</verstretch>
            </sizepolicy>
           </property>
+          <property name="toolTip">
+           <string/>
+          </property>
           <property name="text">
            <string>Lines</string>
           </property>
@@ -130,6 +142,9 @@
             <horstretch>0</horstretch>
             <verstretch>0</verstretch>
            </sizepolicy>
+          </property>
+          <property name="toolTip">
+           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Number of variations to calculate.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
           </property>
           <property name="minimum">
            <number>1</number>
@@ -147,6 +162,9 @@
             <verstretch>0</verstretch>
            </sizepolicy>
           </property>
+          <property name="toolTip">
+           <string/>
+          </property>
           <property name="text">
            <string>Threads</string>
           </property>
@@ -159,6 +177,9 @@
             <horstretch>0</horstretch>
             <verstretch>0</verstretch>
            </sizepolicy>
+          </property>
+          <property name="toolTip">
+           <string/>
           </property>
           <property name="minimum">
            <number>1</number>
@@ -175,6 +196,9 @@
             <horstretch>0</horstretch>
             <verstretch>0</verstretch>
            </sizepolicy>
+          </property>
+          <property name="toolTip">
+           <string>Toggle engine</string>
           </property>
           <property name="text">
            <string>Engine</string>
