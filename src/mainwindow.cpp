@@ -41,11 +41,6 @@ void MainWindow::Init() {
     // GUI defaults
     setWindowTitle(WINDOW_TITLE);
     ui->bEngineOn->setPalette(QColor(Qt::red));
-    // TODO: Implement board and move generation
-    ui->lePosition->setEnabled(false);
-    ui->bSetPosition->setEnabled(false);
-    ui->bPrevMove->setEnabled(false);
-
     m_start_half_moves = 0;
     m_colour = chess::Colour::WHITE;
 
@@ -249,31 +244,6 @@ void MainWindow::on_sbLines_editingFinished() {
 void MainWindow::on_sbDepth_editingFinished() {
     const int depth = ui->sbDepth->value();
     SetDepth(depth);
-}
-
-
-void MainWindow::on_bSetPosition_clicked() {
-    m_moves_list.push_back(ui->lePosition->text().trimmed());
-    ui->lePosition->clear();
-    m_colour = ((m_moves_list.length() % 2) == 0)?
-               chess::Colour::WHITE : chess::Colour::BLACK;
-    m_engine.SetPositionFromMoves(m_moves_list);
-
-    UpdateMoveList();
-    RestartSearch();
-}
-
-void MainWindow::on_bPrevMove_clicked() {
-    if (!m_moves_list.isEmpty()) {
-        m_moves_list.pop_back();
-    }
-
-    m_colour = ((m_moves_list.length() % 2) == 0)?
-               chess::Colour::WHITE : chess::Colour::BLACK;
-    m_engine.SetPositionFromMoves(m_moves_list);
-
-    UpdateMoveList();
-    RestartSearch();
 }
 
 void MainWindow::on_actionSet_FEN_position_triggered() {

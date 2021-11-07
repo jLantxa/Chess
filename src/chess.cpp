@@ -37,7 +37,7 @@ void ToggleColour(Colour* colour) {
     }
 }
 
-static uint8_t FileToNumber(char file) {
+uint8_t FileToNumber(char file) {
     file = tolower(file);
     const bool invalid_file = (file < 'a') || (file > 'h');
     if (invalid_file) {
@@ -47,7 +47,7 @@ static uint8_t FileToNumber(char file) {
     return (file - 'a');
 }
 
-static char NumberToFile(uint8_t number) {
+char NumberToFile(uint8_t number) {
     if (number > 7) {
         return '-';
     }

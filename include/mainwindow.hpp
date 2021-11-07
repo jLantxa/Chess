@@ -50,8 +50,6 @@ private slots:
     void on_sbThreads_editingFinished();
     void on_sbLines_editingFinished();
     void on_sbDepth_editingFinished();
-    void on_bSetPosition_clicked();
-    void on_bPrevMove_clicked();
     void on_actionSet_FEN_position_triggered();
     void on_actionNew_game_triggered();
 

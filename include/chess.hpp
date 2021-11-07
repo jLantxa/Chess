@@ -61,6 +61,9 @@ struct Move {
 
 constexpr std::array<char, 8> FILES {'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'};
 
+uint8_t FileToNumber(char file);
+char NumberToFile(uint8_t number);
+
 [[nodiscard]] std::string SquareToString(const Square& square);
 [[nodiscard]] Square StringToSquare(const std::string& str);
 [[nodiscard]] std::string MoveToUCI(const Move& move);
