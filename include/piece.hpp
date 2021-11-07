@@ -47,7 +47,36 @@ protected:
 class Pawn : public Piece {
 public:
     Pawn(Colour colour);
+    [[nodiscard]] std::vector<Move> GetMoves(const Board&) const override;
+};
 
+class Knight : public Piece {
+public:
+    Knight(Colour colour);
+    [[nodiscard]] std::vector<Move> GetMoves(const Board&) const override;
+};
+
+class Bishop : public Piece {
+public:
+    Bishop(Colour colour);
+    [[nodiscard]] std::vector<Move> GetMoves(const Board&) const override;
+};
+
+class Rook : public Piece {
+public:
+    Rook(Colour colour);
+    [[nodiscard]] std::vector<Move> GetMoves(const Board&) const override;
+};
+
+class Queen : public Piece {
+public:
+    Queen(Colour colour);
+    [[nodiscard]] std::vector<Move> GetMoves(const Board&) const override;
+};
+
+class King : public Piece {
+public:
+    King(Colour colour);
     [[nodiscard]] std::vector<Move> GetMoves(const Board&) const override;
 };
 

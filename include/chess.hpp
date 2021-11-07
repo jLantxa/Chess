@@ -44,6 +44,7 @@ constexpr uint8_t KNIGHT_VALUE = 3U;
 constexpr uint8_t BISHOP_VALUE = 3U;
 constexpr uint8_t ROOK_VALUE   = 5U;
 constexpr uint8_t QUEEN_VALUE  = 9U;
+constexpr uint8_t KING_VALUE = UINT8_MAX;
 
 struct Square {
     uint8_t file;
