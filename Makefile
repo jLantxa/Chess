@@ -15,7 +15,7 @@ debug:
 		Chess.pro -o $(BUILD_DEBUG)/ \
 		-spec linux-g++ \
 		CONFIG+=debug CONFIG+=qml_debug
-	cd $(BUILD_DEBUG) && make -j
+	cd $(BUILD_DEBUG) && make -j$(nproc)
 
 run-debug:
 	make debug
@@ -27,7 +27,7 @@ release:
 		-o $(BUILD_RELEASE)/ \
 		-spec linux-g++ \
 		CONFIG+=release CONFIG+=qml_release
-	cd $(BUILD_RELEASE) && make -j
+	cd $(BUILD_RELEASE) && make -j$(nproc)
 
 run-release:
 	make release
@@ -39,7 +39,7 @@ tests:
 		-o $(BUILD_TEST)/ \
 		-spec linux-g++ \
 		CONFIG+=release CONFIG+=qml_release
-	cd $(BUILD_TEST) && make -j
+	cd $(BUILD_TEST) && make -j$(nproc)
 	./$(BUILD_TEST)/$(TEST_TARGET)
 
 clean:
