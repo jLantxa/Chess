@@ -23,7 +23,9 @@
 #include <QLabel>
 #include <QMainWindow>
 
+#include "board.hpp"
 #include "chess.hpp"
+#include "chessboardwidget.h"
 #include "uciengine.hpp"
 
 QT_BEGIN_NAMESPACE
@@ -80,6 +82,8 @@ private:
 
     std::vector<UCIEngine::DepthInfo> m_depth_infos;
     uint32_t m_num_received_lines = 0;
+
+    ChessBoardWidget* m_board_widget;
 
     /** Current move number as in game. First move is 1. */
     uint32_t CurrentMoveNumber() const;

@@ -15,42 +15,30 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-#ifndef _CHESS_INCLUDE_PIECE_HPP_
-#define _CHESS_INCLUDE_PIECE_HPP_
+#ifndef _CHESS_INCLUDE_BOARD_H_
+#define _CHESS_INCLUDE_BOARD_H_
 
-#include <vector>
+#include <memory>
+#include <optional>
+#include <string>
 
 #include "chess.hpp"
+#include "piece.hpp"
 
 namespace chess {
 
-class Board;
-
-class Piece {
+class Board {
 public:
-    Piece(Colour colour, PieceType type, uint8_t value);
+    const Piece* PieceAt(uint8_t i, uint8_t j) const;
+    void ClearPieceAt(uint8_t i, uint8_t j);
+    void Clear();
+    void SetPiece(std::unique_ptr<Piece> piece, uint8_t i, uint8_t j);
+    void DoMove(const Move& move);
 
-    [[nodiscard]] Colour GetColour() const;
-    [[nodiscard]] PieceType GetType() const;
-    [[nodiscard]] uint8_t GetValue() const;
-    [[nodiscard]] bool IsCaptured() const;
-    void SetCaptured(bool captured);;
-    [[nodiscard]] virtual std::vector<Move> GetMoves(const Board& board) const = 0;
-
-protected:
-    const Colour m_colour;
-    const PieceType m_type;
-    const uint8_t m_value;
-    bool m_is_captured = false;
-};
-
-class Pawn : public Piece {
-public:
-    Pawn(Colour colour);
-
-    [[nodiscard]] std::vector<Move> GetMoves(const Board&) const override;
+private:
+    std::unique_ptr<Piece> m_board[8][8];
 };
 
 }  // namespace chess
 
-#endif  // _CHESS_INCLUDE_PIECE_HPP_
+#endif  // _CHESS_INCLUDE_BOARD_H_

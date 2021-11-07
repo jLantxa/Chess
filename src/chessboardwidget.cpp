@@ -16,6 +16,7 @@
 */
 
 #include <algorithm>
+#include <functional>
 
 #include <QMouseEvent>
 #include <QPainter>
@@ -35,6 +36,11 @@ ChessBoardWidget::ChessBoardWidget(QWidget* parent) : QWidget(parent) {
     };
 
     SetPalette(GREEN_PALETTE);
+}
+
+void ChessBoardWidget::Set(const QString& fen_str) {
+    // TODO
+    (void) fen_str;
 }
 
 void ChessBoardWidget::SetPalette(const ChessPalette& palette) {
@@ -159,8 +165,10 @@ void ChessBoardWidget::DrawBoard() {
             const QColor& text_colour = (((i+j) % 2) == 0)?
                                         m_palette.white_square : m_palette.black_square;
 
+            // Square
             painter.fillRect(x, y, m_square_size, m_square_size, square_colour);
 
+            // Coordinate
             if (v == 7) {
 
                 painter.setPen(text_colour);
@@ -173,6 +181,18 @@ void ChessBoardWidget::DrawBoard() {
                 painter.drawText(x + text_margin,
                                  y + font_metrics.capHeight() + text_margin,
                                  QString::number(j+1));
+            }
+
+            // Piece
+            const chess::Piece* piece = m_board.PieceAt(i, j);
+            if (piece != nullptr) {
+                const uint8_t type_index = static_cast<uint8_t>(piece->GetType());
+                const std::array<QIcon, 6>& icon_array = (piece->GetColour() == chess::Colour::WHITE)?
+                                          WHITE_ICONS : BLACK_ICONS;
+                const QIcon icon = icon_array[type_index];
+                painter.drawPixmap(x, y,
+                                   m_square_size, m_square_size,
+                                   icon.pixmap(QSize(m_square_size, m_square_size)));
             }
         }
     }

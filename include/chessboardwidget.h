@@ -25,6 +25,7 @@
 #include <QIcon>
 #include <QWidget>
 
+#include "board.hpp"
 #include "chess.hpp"
 
 struct ChessPalette {
@@ -41,6 +42,8 @@ class ChessBoardWidget : public QWidget
 public:
     explicit ChessBoardWidget(QWidget *parent = nullptr);
 
+    void Set(const QString& fen_str);
+
     void paintEvent(QPaintEvent*);
     void mousePressEvent(QMouseEvent* event);
     void mouseReleaseEvent(QMouseEvent *event);
@@ -49,21 +52,28 @@ signals:
 
 
 private:
-    const QIcon WHITE_PAWN   = QIcon("res/icon/wp.svg");
-    const QIcon WHITE_KNIGHT = QIcon("res/icon/wn.svg");
-    const QIcon WHITE_BISHOP = QIcon("res/icon/wb.svg");
-    const QIcon WHITE_ROOK   = QIcon("res/icon/wr.svg");
-    const QIcon WHITE_QUEEN  = QIcon("res/icon/wq.svg");
-    const QIcon WHITE_KING   = QIcon("res/icon/wk.svg");
-    const QIcon BLACK_PAWN   = QIcon("res/icon/bp.svg");
-    const QIcon BLACK_KNIGHT = QIcon("res/icon/bn.svg");
-    const QIcon BLACK_BISHOP = QIcon("res/icon/bb.svg");
-    const QIcon BLACK_ROOK   = QIcon("res/icon/br.svg");
-    const QIcon BLACK_QUEEN  = QIcon("res/icon/bq.svg");
-    const QIcon BLACK_KING   = QIcon("res/icon/bk.svg");
+    const std::array<QIcon, 6> WHITE_ICONS {
+        QIcon("res/icon/wp.svg"),
+        QIcon("res/icon/wn.svg"),
+        QIcon("res/icon/wb.svg"),
+        QIcon("res/icon/wr.svg"),
+        QIcon("res/icon/wq.svg"),
+        QIcon("res/icon/wk.svg")
+    };
+
+    const std::array<QIcon, 6> BLACK_ICONS {
+        QIcon("res/icon/bp.svg"),
+        QIcon("res/icon/bn.svg"),
+        QIcon("res/icon/bb.svg"),
+        QIcon("res/icon/br.svg"),
+        QIcon("res/icon/bq.svg"),
+        QIcon("res/icon/bk.svg")
+    };
 
     ChessPalette m_palette;
     void SetPalette(const ChessPalette& palette);
+
+    chess::Board m_board;
 
     bool m_rotated = false;
     int m_board_size;

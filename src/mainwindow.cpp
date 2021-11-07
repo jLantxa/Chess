@@ -28,6 +28,8 @@ MainWindow::MainWindow(QWidget *parent)
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
+    m_board_widget = ui->boardWidget;
+
     Init();
     connect(&m_engine, &UCIEngine::DepthInfoAvailable, this, &MainWindow::OnDepthInfoAvailable);
 }
@@ -107,6 +109,9 @@ bool MainWindow::SetPosition(const QString& fen_str){
     }
 
     // TODO: Parse board, castle, checks and half moves
+    const QStringList fen_pieces = args[0].trimmed().split("/");
+    m_board_widget->Set(fen_str);
+
     if (args[1] == 'w') {
         m_colour = chess::Colour::WHITE;
     } else if (args[1] == 'b') {
@@ -262,4 +267,3 @@ void MainWindow::on_actionSet_FEN_position_triggered() {
 void MainWindow::on_actionNew_game_triggered() {
     NewGame();
 }
-
