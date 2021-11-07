@@ -53,6 +53,7 @@ void UCIEngine::Write(const QString& str) {
 
 void UCIEngine::NewGame() {
     Write("ucinewgame");
+    Write("position startpos");
 }
 
 void UCIEngine::SetPosition(const QString &fen) {

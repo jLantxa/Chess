@@ -147,13 +147,14 @@
      <x>0</x>
      <y>0</y>
      <width>800</width>
-     <height>24</height>
+     <height>22</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuGame">
     <property name="title">
      <string>Game</string>
     </property>
+    <addaction name="actionNew_game"/>
     <addaction name="actionSet_FEN_position"/>
    </widget>
    <addaction name="menuGame"/>
@@ -167,6 +168,11 @@
   <action name="actionLoad_PGN">
    <property name="text">
     <string>Load PGN</string>
+   </property>
+  </action>
+  <action name="actionNew_game">
+   <property name="text">
+    <string>New game</string>
    </property>
   </action>
  </widget>

@@ -53,6 +53,7 @@ private slots:
     void on_bSetPosition_clicked();
     void on_bPrevMove_clicked();
     void on_actionSet_FEN_position_triggered();
+    void on_actionNew_game_triggered();
 
 private:
     Ui::MainWindow *ui;
@@ -84,6 +85,8 @@ private:
 
     /** Current move number as in game. First move is 1. */
     uint32_t CurrentMoveNumber() const;
+
+    void NewGame();
 
     /**
      * @brief Restart engine search.

@@ -72,6 +72,14 @@ uint32_t MainWindow::CurrentMoveNumber() const {
     return 1 + ((m_start_half_moves + m_moves_list.size()) / 2);
 }
 
+void MainWindow::NewGame() {
+    m_start_half_moves = 0;
+    m_colour = chess::Colour::WHITE;
+    m_moves_list.clear();
+    m_engine.NewGame();
+    RestartSearch();
+}
+
 void MainWindow::SetNumLines(uint8_t num_lines) {
     m_depth_infos.clear();
     m_depth_infos.resize(num_lines);
@@ -280,3 +288,8 @@ void MainWindow::on_actionSet_FEN_position_triggered() {
         }
     }
 }
+
+void MainWindow::on_actionNew_game_triggered() {
+    NewGame();
+}
+
