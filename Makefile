@@ -6,6 +6,8 @@ BUILD_DEBUG := $(BUILD)/debug
 BUILD_RELEASE := $(BUILD)/release
 BUILD_TEST := $(BUILD)/test
 
+RES := res
+
 all: debug release tests
 
 binaries: debug release
@@ -16,6 +18,7 @@ debug:
 		-spec linux-g++ \
 		CONFIG+=debug CONFIG+=qml_debug
 	cd $(BUILD_DEBUG) && make -j$(nproc)
+	cp -r $(RES) $(BUILD_DEBUG)/
 
 run-debug:
 	make debug
@@ -28,6 +31,7 @@ release:
 		-spec linux-g++ \
 		CONFIG+=release CONFIG+=qml_release
 	cd $(BUILD_RELEASE) && make -j$(nproc)
+	cp -r $(RES) $(BUILD_RELEASE)/
 
 run-release:
 	make release

@@ -78,7 +78,6 @@ bool ChessBoardWidget::IsOnBoard(int x, int y) const {
 
 void ChessBoardWidget::paintEvent(QPaintEvent*) {
     DrawBoard();
-    DrawPieces();
 }
 
 void ChessBoardWidget::mousePressEvent(QMouseEvent* event) {
@@ -177,8 +176,4 @@ void ChessBoardWidget::DrawBoard() {
             }
         }
     }
-}
-
-void ChessBoardWidget::DrawPieces() {
-
 }

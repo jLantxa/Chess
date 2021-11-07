@@ -22,6 +22,7 @@
 
 #include <set>
 
+#include <QIcon>
 #include <QWidget>
 
 #include "chess.hpp"
@@ -48,6 +49,19 @@ signals:
 
 
 private:
+    const QIcon WHITE_PAWN   = QIcon("res/icon/wp.svg");
+    const QIcon WHITE_KNIGHT = QIcon("res/icon/wn.svg");
+    const QIcon WHITE_BISHOP = QIcon("res/icon/wb.svg");
+    const QIcon WHITE_ROOK   = QIcon("res/icon/wr.svg");
+    const QIcon WHITE_QUEEN  = QIcon("res/icon/wq.svg");
+    const QIcon WHITE_KING   = QIcon("res/icon/wk.svg");
+    const QIcon BLACK_PAWN   = QIcon("res/icon/bp.svg");
+    const QIcon BLACK_KNIGHT = QIcon("res/icon/bn.svg");
+    const QIcon BLACK_BISHOP = QIcon("res/icon/bb.svg");
+    const QIcon BLACK_ROOK   = QIcon("res/icon/br.svg");
+    const QIcon BLACK_QUEEN  = QIcon("res/icon/bq.svg");
+    const QIcon BLACK_KING   = QIcon("res/icon/bk.svg");
+
     ChessPalette m_palette;
     void SetPalette(const ChessPalette& palette);
 
@@ -68,7 +82,6 @@ private:
     bool IsOnBoard(int x, int y) const;
 
     void DrawBoard();
-    void DrawPieces();
 };
 
 #endif  // _CHESS_INCLUDE_CHESS_H_
