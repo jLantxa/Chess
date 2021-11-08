@@ -26,7 +26,7 @@
 #include "board.hpp"
 #include "chess.hpp"
 #include "chessboardwidget.h"
-#include "scorebar.h"
+#include "settingsdialog.h"
 #include "uciengine.hpp"
 
 QT_BEGIN_NAMESPACE
@@ -48,6 +48,8 @@ public slots:
     void OnDepthInfoAvailable(const UCIEngine::DepthInfo& depth_info);
 
 private slots:
+    void SetBoardPalette(const ChessBoardWidget::ChessPalette& palette);
+
     void on_bEngineOn_toggled(bool checked);
     void on_chInfinite_toggled(bool checked);
     void on_sbThreads_editingFinished();
@@ -57,6 +59,8 @@ private slots:
     void on_actionNew_game_triggered();
     void on_actionExit_triggered();
     void on_bRotateBoard_clicked();
+    void on_actionSettings_triggered();
+    void on_bSettings_clicked();
 
 private:
     Ui::MainWindow *ui;
@@ -84,7 +88,8 @@ private:
     uint32_t m_num_received_lines = 0;
 
     ChessBoardWidget* m_board;
-    ScoreBar* m_score_bar;
+
+    SettingsDialog* m_settings_dialog;
 
     /** Current move number as in game. First move is 1. */
     uint32_t CurrentMoveNumber() const;

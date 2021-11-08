@@ -23,7 +23,10 @@
 #include "mainwindow.hpp"
 #include "ui_mainwindow.h"
 
+#include "settingsdialog.h"
+
 static const QIcon ROTATE_ICON = QIcon("res/icon/rotate.svg");
+static const QIcon SETTINGS_ICON = QIcon("res/icon/settings.svg");
 
 MainWindow::MainWindow(QWidget *parent)
 :   QMainWindow(parent),
@@ -31,6 +34,8 @@ MainWindow::MainWindow(QWidget *parent)
 {
     ui->setupUi(this);
     m_board = ui->boardWidget;
+    m_settings_dialog = new SettingsDialog;
+    connect(m_settings_dialog, &SettingsDialog::PaletteChanged, this, &MainWindow::SetBoardPalette);
 
     Init();
     connect(&m_engine, &UCIEngine::DepthInfoAvailable, this, &MainWindow::OnDepthInfoAvailable);
@@ -49,6 +54,7 @@ void MainWindow::Init() {
     m_board->SetPlayingColour(chess::Colour::WHITE);
 
     ui->bRotateBoard->setIcon(ROTATE_ICON);
+    ui->bSettings->setIcon(SETTINGS_ICON);
 
     // Engine defaults
     m_engine.Init(DEFAULT_ENGINE_CMD);
@@ -274,5 +280,19 @@ void MainWindow::on_actionExit_triggered() {
 
 void MainWindow::on_bRotateBoard_clicked() {
     m_board->Rotate();
+}
+
+
+void MainWindow::on_actionSettings_triggered() {
+    m_settings_dialog->exec();
+}
+
+void MainWindow::SetBoardPalette(const ChessBoardWidget::ChessPalette& palette) {
+    m_board->SetColourPalette(palette);
+}
+
+
+void MainWindow::on_bSettings_clicked() {
+    m_settings_dialog->exec();
 }
 

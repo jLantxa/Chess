@@ -6,5 +6,6 @@ SOURCES += \
     $$PWD/piece.cpp \
     $$PWD/board.cpp \
     $$PWD/mainwindow.cpp \
+    $$PWD/settingsdialog.cpp \
     $$PWD/uciengine.cpp \
     $$PWD/chessboardwidget.cpp

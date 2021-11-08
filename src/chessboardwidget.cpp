@@ -15,6 +15,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+#include <cmath>
+
 #include <algorithm>
 #include <functional>
 
@@ -46,7 +48,7 @@ const std::array<QIcon, 6> ChessBoardWidget::BLACK_ICONS {
 };
 
 ChessBoardWidget::ChessBoardWidget(QWidget* parent) : QWidget(parent) {
-    SetPalette(GREEN_PALETTE);
+    SetColourPalette(GREEN_PALETTE);
 
     Reset();
 }
@@ -161,8 +163,9 @@ chess::Colour ChessBoardWidget::GetPlayingColour() const {
     return m_playing_colour;
 }
 
-void ChessBoardWidget::SetPalette(const ChessPalette& palette) {
+void ChessBoardWidget::SetColourPalette(const ChessPalette& palette) {
     m_palette = palette;
+    repaint();
 }
 
 void ChessBoardWidget::GetRotatedCoordinates(uint8_t ax, uint8_t ay, uint8_t& bx, uint8_t& by, chess::Colour side) const {
@@ -254,23 +257,22 @@ void ChessBoardWidget::paintEvent(QPaintEvent*) {
     QPainter painter(this);
     painter.setRenderHints(QPainter::TextAntialiasing);
     const QRect geometry = this->geometry();
-    QFont font;
+    QFont coordinates_font;
 
     constexpr int SCORE_BAR_WIDTH = 20;
-    constexpr int SCORE_BAR_SPACING = 15;
-    const int board_x_off = m_score_enabled?
-                            (SCORE_BAR_WIDTH + SCORE_BAR_SPACING) : 0;
+    constexpr int SCORE_BAR_SPACING = 10;
+    const int board_x_off = SCORE_BAR_WIDTH + SCORE_BAR_SPACING;
     const int board_available_width = geometry.width() - board_x_off;
 
     m_board_size = std::min(board_available_width, geometry.height()) - 2*MARGIN;
-    m_square_size = m_board_size/8;
+    m_square_size = m_board_size / 8;
 
-    font.setWeight(QFont::Bold);
-    font.setPixelSize(m_square_size/4);
+    coordinates_font.setWeight(QFont::Bold);
+    coordinates_font.setPixelSize(m_square_size/4);
     const int text_margin = 0.075f * m_square_size;
-    QFontMetrics font_metrics(font);
+    QFontMetrics font_metrics(coordinates_font);
 
-    painter.setFont(font);
+    painter.setFont(coordinates_font);
 
     /* i, j -> Coordinates of the board
      * u, v -> Coordinates of the widget grid (accounting for rotation)
@@ -279,8 +281,8 @@ void ChessBoardWidget::paintEvent(QPaintEvent*) {
     for (uint8_t i = 0; i < 8; ++i) {
         for (uint8_t j = 0; j < 8; ++j) {
             GetRotatedCoordinates(i, j, u, v, m_side);
-            const int x = MARGIN + u*m_square_size + board_x_off;
-            const int y = MARGIN + v*m_square_size;
+            const float x = MARGIN + board_x_off + u*m_square_size;
+            const float y = MARGIN + v*m_square_size;
             const QColor& square_colour = (((i+j) % 2) == 0)?
                                           m_palette.black_square : m_palette.white_square;
             const QColor& text_colour = (((i+j) % 2) == 0)?

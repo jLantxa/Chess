@@ -28,14 +28,6 @@
 #include "board.hpp"
 #include "chess.hpp"
 
-struct ChessPalette {
-    QColor white_square;
-    QColor black_square;
-    QColor white_highlight;
-    QColor black_highlight;
-    QColor highlight_important;
-};
-
 class ChessBoardWidget : public QWidget
 {
     Q_OBJECT
@@ -57,6 +49,15 @@ public:
     void mousePressEvent(QMouseEvent* event);
     void mouseReleaseEvent(QMouseEvent *event);
 
+    struct ChessPalette {
+        QColor white_square;
+        QColor black_square;
+        QColor white_highlight;
+        QColor black_highlight;
+        QColor highlight_important;
+    };
+
+
     static constexpr ChessPalette GREEN_PALETTE {
         .white_square = QColor(238,238,210),
         .black_square = QColor(118,150,86),
@@ -65,8 +66,42 @@ public:
         .highlight_important = QColor(255, 113, 74),
     };
 
+    static constexpr ChessPalette RED_PALETTE {
+        .white_square = QColor(255, 191, 191),
+        .black_square = QColor(125, 26, 26),
+        .white_highlight = QColor(),
+        .black_highlight = QColor(),
+        .highlight_important = QColor(255, 113, 74),
+    };
+
+    static constexpr ChessPalette PURPLE_PALETTE {
+        .white_square = QColor(246, 217, 255),
+        .black_square = QColor(170, 84, 255),
+        .white_highlight = QColor(),
+        .black_highlight = QColor(),
+        .highlight_important = QColor(255, 113, 74),
+    };
+
+    static constexpr ChessPalette BLUE_PALETTE {
+        .white_square = QColor(217, 232, 255),
+        .black_square = QColor(76, 149, 252),
+        .white_highlight = QColor(),
+        .black_highlight = QColor(),
+        .highlight_important = QColor(255, 113, 74),
+    };
+
+    static constexpr ChessPalette YELLOW_PALETTE {
+        .white_square = QColor(255, 232, 168),
+        .black_square = QColor(230, 179, 41),
+        .white_highlight = QColor(),
+        .black_highlight = QColor(),
+        .highlight_important = QColor(255, 113, 74),
+    };
+
     void SetScoreEnabled(bool enabled);
     void SetScore(int score, bool mate);
+
+    void SetColourPalette(const ChessPalette& palette);
 
 signals:
 
@@ -77,14 +112,14 @@ private:
     static const std::array<QIcon, 6> BLACK_ICONS;
 
     ChessPalette m_palette;
-    void SetPalette(const ChessPalette& palette);
+
 
     chess::Board m_board;
 
     chess::Colour m_playing_colour = chess::Colour::WHITE;
     chess::Colour m_side = chess::Colour::WHITE;
-    float m_board_size;
-    float m_square_size;
+    int m_board_size;
+    int m_square_size;
 
     chess::Square* m_cur_sel_sq = nullptr;
     chess::Square* m_sel_src_sq = nullptr;
@@ -95,7 +130,7 @@ private:
     bool m_is_mate = false;
     bool m_score_enabled = false;
 
-    static constexpr int MARGIN = 10;
+    static constexpr int MARGIN = 5;
 
     void GetRotatedCoordinates(uint8_t ax, uint8_t ay, uint8_t& bx, uint8_t& by, chess::Colour side) const;
     void GetGridCoordinates(int x, int y, uint8_t& u, uint8_t& v) const;
