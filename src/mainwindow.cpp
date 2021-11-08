@@ -211,6 +211,7 @@ void MainWindow::on_bEngineOn_toggled(bool checked) {
     } else {
         ui->bEngineOn->setPalette(QColor(Qt::red));
         m_engine.Stop();
+        ui->teLines->clear();
     }
 }
 
