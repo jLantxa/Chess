@@ -49,7 +49,6 @@ const std::array<QIcon, 6> ChessBoardWidget::BLACK_ICONS {
 
 ChessBoardWidget::ChessBoardWidget(QWidget* parent) : QWidget(parent) {
     SetColourPalette(GREEN_PALETTE);
-
     Reset();
 }
 
@@ -259,8 +258,6 @@ void ChessBoardWidget::paintEvent(QPaintEvent*) {
     const QRect geometry = this->geometry();
     QFont coordinates_font;
 
-    constexpr int SCORE_BAR_WIDTH = 20;
-    constexpr int SCORE_BAR_SPACING = 10;
     const int board_x_off = SCORE_BAR_WIDTH + SCORE_BAR_SPACING;
     const int board_available_width = geometry.width() - board_x_off;
 

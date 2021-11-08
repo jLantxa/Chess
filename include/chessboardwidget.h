@@ -111,6 +111,9 @@ private:
     static const std::array<QIcon, 6> WHITE_ICONS;
     static const std::array<QIcon, 6> BLACK_ICONS;
 
+    static constexpr int SCORE_BAR_WIDTH = 20;
+    static constexpr int SCORE_BAR_SPACING = 10;
+
     ChessPalette m_palette;
 
 
@@ -118,8 +121,8 @@ private:
 
     chess::Colour m_playing_colour = chess::Colour::WHITE;
     chess::Colour m_side = chess::Colour::WHITE;
-    int m_board_size;
-    int m_square_size;
+    int m_board_size = 50;
+    int m_square_size = m_board_size/8;
 
     chess::Square* m_cur_sel_sq = nullptr;
     chess::Square* m_sel_src_sq = nullptr;
