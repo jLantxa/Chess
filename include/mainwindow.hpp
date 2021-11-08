@@ -26,6 +26,7 @@
 #include "board.hpp"
 #include "chess.hpp"
 #include "chessboardwidget.h"
+#include "scorebar.h"
 #include "uciengine.hpp"
 
 QT_BEGIN_NAMESPACE
@@ -83,6 +84,7 @@ private:
     uint32_t m_num_received_lines = 0;
 
     ChessBoardWidget* m_board;
+    ScoreBar* m_score_bar;
 
     /** Current move number as in game. First move is 1. */
     uint32_t CurrentMoveNumber() const;

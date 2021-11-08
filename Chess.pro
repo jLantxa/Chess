@@ -10,3 +10,7 @@ CONFIG += lrelease
 include (include/include.pri)
 include (src/src.pri)
 include (forms/forms.pri)
+
+HEADERS +=
+
+SOURCES +=

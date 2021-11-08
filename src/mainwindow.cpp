@@ -151,7 +151,7 @@ void MainWindow::UpdateLineInfo() {
     ui->teLines->clear();
     for (uint32_t i = 0; i < m_num_received_lines; ++i) {
         auto& info = m_depth_infos[i];
-        QVector<QString> move_str_chain;
+        QStringList move_str_chain;
 
         /* If black plays, the first move in the sequence belongs to black, and
          * we must omit white's move:
@@ -184,6 +184,10 @@ void MainWindow::UpdateLineInfo() {
         }
 
         ui->teLines->append(score_str + " " + move_str_chain.join(" ") + "<br>");
+
+        if (i == 0) {
+            m_board->SetScore(score, info.mate_counter);
+        }
     }
 }
 
@@ -217,6 +221,8 @@ void MainWindow::on_bEngineOn_toggled(bool checked) {
         m_engine.Stop();
         ui->teLines->clear();
     }
+
+    m_board->SetScoreEnabled(checked);
 }
 
 void MainWindow::on_chInfinite_toggled(bool checked) {

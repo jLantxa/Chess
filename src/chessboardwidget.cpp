@@ -20,7 +20,6 @@
 
 #include <QMouseEvent>
 #include <QPainter>
-#include <QPainterPath>
 #include <QRect>
 
 #include "chess.hpp"
@@ -54,6 +53,7 @@ ChessBoardWidget::ChessBoardWidget(QWidget* parent) : QWidget(parent) {
 
 void ChessBoardWidget::Reset() {
     SetPosition(STARTPOS_FEN);
+    m_score = 0;
 }
 
 static bool IsUpperCase(char ch) {
@@ -200,10 +200,6 @@ bool ChessBoardWidget::IsOnBoard(int x, int y) const {
     return false;
 }
 
-void ChessBoardWidget::paintEvent(QPaintEvent*) {
-    DrawBoard();
-}
-
 void ChessBoardWidget::mousePressEvent(QMouseEvent* event) {
     const QPoint position = event->pos();
     const int x = position.x();
@@ -254,12 +250,19 @@ void ChessBoardWidget::mouseReleaseEvent(QMouseEvent* event) {
     }
 }
 
-void ChessBoardWidget::DrawBoard() {
+void ChessBoardWidget::paintEvent(QPaintEvent*) {
     QPainter painter(this);
+    painter.setRenderHints(QPainter::TextAntialiasing);
     const QRect geometry = this->geometry();
     QFont font;
 
-    m_board_size = std::min(geometry.width(), geometry.height()) - 2*MARGIN;
+    constexpr int SCORE_BAR_WIDTH = 20;
+    constexpr int SCORE_BAR_SPACING = 15;
+    const int board_x_off = m_score_enabled?
+                            (SCORE_BAR_WIDTH + SCORE_BAR_SPACING) : 0;
+    const int board_available_width = geometry.width() - board_x_off;
+
+    m_board_size = std::min(board_available_width, geometry.height()) - 2*MARGIN;
     m_square_size = m_board_size/8;
 
     font.setWeight(QFont::Bold);
@@ -276,7 +279,7 @@ void ChessBoardWidget::DrawBoard() {
     for (uint8_t i = 0; i < 8; ++i) {
         for (uint8_t j = 0; j < 8; ++j) {
             GetRotatedCoordinates(i, j, u, v, m_side);
-            const int x = MARGIN + u*m_square_size;
+            const int x = MARGIN + u*m_square_size + board_x_off;
             const int y = MARGIN + v*m_square_size;
             const QColor& square_colour = (((i+j) % 2) == 0)?
                                           m_palette.black_square : m_palette.white_square;
@@ -316,4 +319,61 @@ void ChessBoardWidget::DrawBoard() {
             }
         }
     }
+
+    if (m_score_enabled) {
+        const float balance = GetBalance();
+        const int white_height = m_board_size * balance;
+        const int black_height = m_board_size - white_height;
+
+        if (m_side == chess::Colour::WHITE) {
+            painter.fillRect(MARGIN, MARGIN,
+                             SCORE_BAR_WIDTH, black_height,
+                             m_palette.black_square);
+            painter.fillRect(MARGIN, black_height + MARGIN,
+                             SCORE_BAR_WIDTH, white_height,
+                             m_palette.white_square);
+        } else {
+            painter.fillRect(MARGIN, MARGIN,
+                             SCORE_BAR_WIDTH, white_height,
+                             m_palette.white_square);
+            painter.fillRect(MARGIN, white_height + MARGIN,
+                             SCORE_BAR_WIDTH, black_height,
+                             m_palette.black_square);
+        }
+
+        painter.setPen(QPen(m_palette.highlight_important, 3));
+        painter.drawLine(MARGIN, MARGIN + m_board_size/2, SCORE_BAR_WIDTH + MARGIN, m_board_size/2 + MARGIN);
+        painter.setPen(Qt::black);
+        painter.drawRect(MARGIN, MARGIN, SCORE_BAR_WIDTH, m_board_size);
+    }
+}
+
+float ChessBoardWidget::GetBalance() const {
+    if (m_is_mate) {
+        if (m_score > 0) {
+            return 1.0f;
+        } else {
+            return 0.0f;
+        }
+    } else {
+        return Transform(m_score);
+    }
+}
+
+float ChessBoardWidget::Transform(float x) const {
+    x /= 100.0f;  // Convert from centipawns
+
+    constexpr float k = 2.0f;
+    return 1.0f / (1.0f + exp(-x/k));
+}
+
+void ChessBoardWidget::SetScore(int score, bool mate) {
+    m_score = score;
+    m_is_mate = mate;
+    repaint();
+}
+
+void ChessBoardWidget::SetScoreEnabled(bool enabled) {
+    m_score_enabled = enabled;
+    repaint();
 }

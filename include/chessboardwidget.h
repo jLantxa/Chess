@@ -65,6 +65,9 @@ public:
         .highlight_important = QColor(255, 113, 74),
     };
 
+    void SetScoreEnabled(bool enabled);
+    void SetScore(int score, bool mate);
+
 signals:
 
 
@@ -80,22 +83,27 @@ private:
 
     chess::Colour m_playing_colour = chess::Colour::WHITE;
     chess::Colour m_side = chess::Colour::WHITE;
-    int m_board_size;
-    int m_square_size;
+    float m_board_size;
+    float m_square_size;
 
     chess::Square* m_cur_sel_sq = nullptr;
     chess::Square* m_sel_src_sq = nullptr;
     chess::Square* m_sel_dst_sq = nullptr;
     std::set<chess::Square> m_hightlighted;
 
-    static constexpr int MARGIN = 8;
+    int m_score = 0;
+    bool m_is_mate = false;
+    bool m_score_enabled = false;
+
+    static constexpr int MARGIN = 10;
 
     void GetRotatedCoordinates(uint8_t ax, uint8_t ay, uint8_t& bx, uint8_t& by, chess::Colour side) const;
     void GetGridCoordinates(int x, int y, uint8_t& u, uint8_t& v) const;
     chess::Square GetClickedSquare(int x, int y) const;
     bool IsOnBoard(int x, int y) const;
 
-    void DrawBoard();
+    float GetBalance() const;
+    float Transform(float x) const;
 };
 
 #endif  // _CHESS_INCLUDE_CHESS_H_
