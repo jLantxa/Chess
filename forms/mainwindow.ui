@@ -27,34 +27,7 @@
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QGridLayout" name="gridLayout">
-    <item row="0" column="1">
-     <layout class="QVBoxLayout" name="gameControlsLayout">
-      <item>
-       <widget class="QPushButton" name="bRotateBoard">
-        <property name="toolTip">
-         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Rotate board.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-        </property>
-        <property name="text">
-         <string/>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <spacer name="verticalSpacer">
-        <property name="orientation">
-         <enum>Qt::Vertical</enum>
-        </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>20</width>
-          <height>40</height>
-         </size>
-        </property>
-       </spacer>
-      </item>
-     </layout>
-    </item>
-    <item row="0" column="2">
+    <item row="0" column="3">
      <layout class="QVBoxLayout" name="verticalLayout">
       <property name="sizeConstraint">
        <enum>QLayout::SetFixedSize</enum>
@@ -234,7 +207,7 @@
       </item>
      </layout>
     </item>
-    <item row="0" column="0">
+    <item row="0" column="1">
      <widget class="ChessBoardWidget" name="boardWidget" native="true">
       <property name="sizePolicy">
        <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
@@ -264,6 +237,33 @@
        <bool>true</bool>
       </property>
      </widget>
+    </item>
+    <item row="0" column="0">
+     <layout class="QVBoxLayout" name="gameControlsLayout">
+      <item>
+       <widget class="QPushButton" name="bRotateBoard">
+        <property name="toolTip">
+         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Rotate board.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <spacer name="verticalSpacer">
+        <property name="orientation">
+         <enum>Qt::Vertical</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>20</width>
+          <height>40</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+     </layout>
     </item>
    </layout>
   </widget>
