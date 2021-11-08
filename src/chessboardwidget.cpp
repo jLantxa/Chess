@@ -366,7 +366,13 @@ float ChessBoardWidget::Transform(float x) const {
     x /= 100.0f;  // Convert from centipawns
 
     constexpr float k = 2.0f;
-    return 1.0f / (1.0f + exp(-x/k));
+    float value = 1.0f / (1.0f + exp(-x/k));
+
+    // Limit the value
+    constexpr float MAX = 0.95f;
+    value = std::min(MAX, value);
+    value = std::max(1 - MAX, value);
+    return value;
 }
 
 void ChessBoardWidget::SetScore(int score, bool mate) {

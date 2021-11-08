@@ -27,6 +27,7 @@
 
 static const QIcon ROTATE_ICON = QIcon("res/icon/rotate.svg");
 static const QIcon SETTINGS_ICON = QIcon("res/icon/settings.svg");
+static const QIcon ENGINE_ICON = QIcon("res/icon/power.svg");
 
 MainWindow::MainWindow(QWidget *parent)
 :   QMainWindow(parent),
@@ -55,9 +56,11 @@ void MainWindow::Init() {
 
     ui->bRotateBoard->setIcon(ROTATE_ICON);
     ui->bSettings->setIcon(SETTINGS_ICON);
+    ui->bEngineOn->setIcon(ENGINE_ICON);
 
     // Engine defaults
     m_engine.Init(DEFAULT_ENGINE_CMD);
+    SetEngineEnabled(false);
 
     SetDepth(20);
 
@@ -214,8 +217,8 @@ void MainWindow::UpdateMoveList() {
     ui->teMoves->setHtml(moves_str);
 }
 
-void MainWindow::on_bEngineOn_toggled(bool checked) {
-    if (checked) {
+void MainWindow::SetEngineEnabled(bool enabled) {
+    if (enabled) {
         ui->bEngineOn->setPalette(QColor(Qt::green));
         if (ui->chInfinite->isChecked()) {
             m_engine.SearchInfinite();
@@ -228,7 +231,24 @@ void MainWindow::on_bEngineOn_toggled(bool checked) {
         ui->teLines->clear();
     }
 
-    m_board->SetScoreEnabled(checked);
+    m_board->SetScoreEnabled(enabled);
+    SetEngineControlsEnabled(enabled);
+}
+
+void MainWindow::SetEngineControlsEnabled(bool enabled) {
+    ui->lDepth->setVisible(enabled);
+    ui->sbDepth->setVisible(enabled);
+    ui->chInfinite->setVisible(enabled);
+    ui->lLines->setVisible(enabled);
+    ui->sbLines->setVisible(enabled);
+    ui->lThreads->setVisible(enabled);
+    ui->sbThreads->setVisible(enabled);
+    ui->sbDepth->setVisible(enabled);
+    ui->teLines->setVisible(enabled);
+}
+
+void MainWindow::on_bEngineOn_toggled(bool checked) {
+    SetEngineEnabled(checked);
 }
 
 void MainWindow::on_chInfinite_toggled(bool checked) {

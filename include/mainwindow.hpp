@@ -104,6 +104,8 @@ private:
     void UpdateLineInfo();
     void UpdateMoveList();
 
+    void SetEngineEnabled(bool enabled);
+
     void SetNumLines(uint8_t num_lines);
 
     /**
@@ -135,5 +137,6 @@ private:
      * @param text Message.
      */
     void ShowMsgBox(const QString& title, const QString& text);
+    void SetEngineControlsEnabled(bool enabled);
 };
 #endif  // _CHESS_INCLUDE_MAINWINDOW_HPP_
