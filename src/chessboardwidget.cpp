@@ -319,7 +319,8 @@ void ChessBoardWidget::paintEvent(QPaintEvent*) {
         }
     }
 
-    if (m_score_enabled) {
+    const bool in_mate = m_is_mate && (m_score == 0);
+    if (m_score_enabled && !in_mate) {
         const float balance = GetBalance();
         const int white_height = m_board_size * balance;
         const int black_height = m_board_size - white_height;
