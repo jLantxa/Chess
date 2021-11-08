@@ -46,6 +46,10 @@ public:
 
     void SetPosition(const QString& fen_str);
 
+    void Rotate();
+    void SetSide(chess::Colour side);
+    chess::Colour GetSide();
+
     void SetPlayingColour(chess::Colour colour);
     chess::Colour GetPlayingColour() const;
 

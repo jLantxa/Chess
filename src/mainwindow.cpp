@@ -23,6 +23,8 @@
 #include "mainwindow.hpp"
 #include "ui_mainwindow.h"
 
+static const QIcon ROTATE_ICON = QIcon("res/icon/rotate.svg");
+
 MainWindow::MainWindow(QWidget *parent)
 :   QMainWindow(parent),
     ui(new Ui::MainWindow)
@@ -45,6 +47,8 @@ void MainWindow::Init() {
     ui->bEngineOn->setPalette(QColor(Qt::red));
     m_start_half_moves = 0;
     m_board->SetPlayingColour(chess::Colour::WHITE);
+
+    ui->bRotateBoard->setIcon(ROTATE_ICON);
 
     // Engine defaults
     m_engine.Init(DEFAULT_ENGINE_CMD);
@@ -261,3 +265,8 @@ void MainWindow::on_actionNew_game_triggered() {
 void MainWindow::on_actionExit_triggered() {
     QCoreApplication::quit();
 }
+
+void MainWindow::on_bRotateBoard_clicked() {
+    m_board->Rotate();
+}
+

@@ -136,6 +136,23 @@ void ChessBoardWidget::SetPosition(const QString& fen_str) {
     repaint();
 }
 
+void ChessBoardWidget::Rotate() {
+    if (m_side == chess::Colour::WHITE) {
+        SetSide(chess::Colour::BLACK);
+    } else {
+        SetSide(chess::Colour::WHITE);
+    }
+}
+
+void ChessBoardWidget::SetSide(chess::Colour side) {
+    m_side = side;
+    repaint();
+}
+
+chess::Colour ChessBoardWidget::GetSide() {
+    return m_side;
+}
+
 void ChessBoardWidget::SetPlayingColour(chess::Colour colour) {
     m_playing_colour = colour;
 }
