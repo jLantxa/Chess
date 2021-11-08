@@ -18,7 +18,7 @@ debug:
 		-spec linux-g++ \
 		CONFIG+=debug CONFIG+=qml_debug
 	cd $(BUILD_DEBUG) && make -j$(nproc)
-	cp -r $(RES) $(BUILD_DEBUG)/
+	cp -nr $(RES) $(BUILD_DEBUG)/
 
 run-debug:
 	make debug
@@ -31,7 +31,7 @@ release:
 		-spec linux-g++ \
 		CONFIG+=release CONFIG+=qml_release
 	cd $(BUILD_RELEASE) && make -j$(nproc)
-	cp -r $(RES) $(BUILD_RELEASE)/
+	cp -nr $(RES) $(BUILD_RELEASE)/
 
 run-release:
 	make release
