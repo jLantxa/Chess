@@ -147,15 +147,15 @@ void MainWindow::UpdateLineInfo() {
     ui->teLines->clear();
     for (uint32_t i = 0; i < m_num_received_lines; ++i) {
         auto& info = m_depth_infos[i];
-        QStringList move_str_chain;
+        QVector<QString> move_str_chain;
 
         /* If black plays, the first move in the sequence belongs to black, and
          * we must omit white's move:
          * n... <black> instead of n. <white> <black>
          */
         for (int i = 0; i < info.pv.length(); ++i) {
-            const uint32_t half_moves = (m_start_half_moves + (i+1));
-            if ((half_moves % 2) != 0 ) {  // White move
+            const uint32_t half_moves = (m_start_half_moves + i);
+            if ((half_moves % 2) == 0 ) {  // White move
                 move_str_chain.push_back(QString::number(1 + (half_moves/2)) + ". " + info.pv[i]);
             } else {  // Black move
                 if (i == 0) {
