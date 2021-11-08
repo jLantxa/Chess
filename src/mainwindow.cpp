@@ -28,7 +28,7 @@ MainWindow::MainWindow(QWidget *parent)
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
-    m_board_widget = ui->boardWidget;
+    m_board = ui->boardWidget;
 
     Init();
     connect(&m_engine, &UCIEngine::DepthInfoAvailable, this, &MainWindow::OnDepthInfoAvailable);
@@ -44,7 +44,7 @@ void MainWindow::Init() {
     setWindowTitle(WINDOW_TITLE);
     ui->bEngineOn->setPalette(QColor(Qt::red));
     m_start_half_moves = 0;
-    m_colour = chess::Colour::WHITE;
+    m_board->SetPlayingColour(chess::Colour::WHITE);
 
     // Engine defaults
     m_engine.Init(DEFAULT_ENGINE_CMD);
@@ -71,7 +71,7 @@ uint32_t MainWindow::CurrentMoveNumber() const {
 
 void MainWindow::NewGame() {
     m_start_half_moves = 0;
-    m_colour = chess::Colour::WHITE;
+    m_board->Reset();
     m_moves_list.clear();
     m_engine.NewGame();
     RestartSearch();
@@ -108,24 +108,13 @@ bool MainWindow::SetPosition(const QString& fen_str){
         return false;
     }
 
-    // TODO: Parse board, castle, checks and half moves
-    const QStringList fen_pieces = args[0].trimmed().split("/");
-    m_board_widget->Set(fen_str);
-
-    if (args[1] == 'w') {
-        m_colour = chess::Colour::WHITE;
-    } else if (args[1] == 'b') {
-        m_colour = chess::Colour::BLACK;
-    } else {
-        return false;
-    }
+    m_board->SetPosition(fen_str);
 
     const uint32_t move_number = args[5].toUInt();
-
     m_moves_list.clear();
     ui->teMoves->clear();
-    m_start_half_moves = (move_number-1) * 2;
-    if (m_colour == chess::Colour::BLACK) {
+    m_start_half_moves = 2 * (move_number - 1);
+    if (m_board->GetPlayingColour() == chess::Colour::BLACK) {
         m_start_half_moves++;
     }
 
@@ -180,7 +169,7 @@ void MainWindow::UpdateLineInfo() {
 
         QString score_str;
         int score = info.score;
-        if (m_colour == chess::Colour::BLACK) {
+        if (m_board->GetPlayingColour() == chess::Colour::BLACK) {
             score *= -1;
         }
         if (!info.mate_counter) {
@@ -271,4 +260,3 @@ void MainWindow::on_actionNew_game_triggered() {
 void MainWindow::on_actionExit_triggered() {
     QCoreApplication::quit();
 }
-

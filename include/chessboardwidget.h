@@ -42,39 +42,39 @@ class ChessBoardWidget : public QWidget
 public:
     explicit ChessBoardWidget(QWidget *parent = nullptr);
 
-    void Set(const QString& fen_str);
+    void Reset();
+
+    void SetPosition(const QString& fen_str);
+
+    void SetPlayingColour(chess::Colour colour);
+    chess::Colour GetPlayingColour() const;
 
     void paintEvent(QPaintEvent*);
     void mousePressEvent(QMouseEvent* event);
     void mouseReleaseEvent(QMouseEvent *event);
 
+    static constexpr ChessPalette GREEN_PALETTE {
+        .white_square = QColor(238,238,210),
+        .black_square = QColor(118,150,86),
+        .white_highlight = QColor(),
+        .black_highlight = QColor(),
+        .highlight_important = QColor(255, 113, 74),
+    };
+
 signals:
 
 
 private:
-    const std::array<QIcon, 6> WHITE_ICONS {
-        QIcon("res/icon/wp.svg"),
-        QIcon("res/icon/wn.svg"),
-        QIcon("res/icon/wb.svg"),
-        QIcon("res/icon/wr.svg"),
-        QIcon("res/icon/wq.svg"),
-        QIcon("res/icon/wk.svg")
-    };
-
-    const std::array<QIcon, 6> BLACK_ICONS {
-        QIcon("res/icon/bp.svg"),
-        QIcon("res/icon/bn.svg"),
-        QIcon("res/icon/bb.svg"),
-        QIcon("res/icon/br.svg"),
-        QIcon("res/icon/bq.svg"),
-        QIcon("res/icon/bk.svg")
-    };
+    static const QString STARTPOS_FEN;
+    static const std::array<QIcon, 6> WHITE_ICONS;
+    static const std::array<QIcon, 6> BLACK_ICONS;
 
     ChessPalette m_palette;
     void SetPalette(const ChessPalette& palette);
 
     chess::Board m_board;
 
+    chess::Colour m_playing_colour = chess::Colour::WHITE;
     chess::Colour m_side = chess::Colour::WHITE;
     int m_board_size;
     int m_square_size;

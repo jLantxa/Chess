@@ -26,21 +26,122 @@
 #include "chess.hpp"
 #include "chessboardwidget.h"
 
-ChessBoardWidget::ChessBoardWidget(QWidget* parent) : QWidget(parent) {
-    static constexpr ChessPalette GREEN_PALETTE {
-        .white_square = QColor(238,238,210),
-        .black_square = QColor(118,150,86),
-        .white_highlight = QColor(),
-        .black_highlight = QColor(),
-        .highlight_important = QColor(255, 113, 74),
-    };
+const QString ChessBoardWidget::STARTPOS_FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
 
+const std::array<QIcon, 6> ChessBoardWidget::WHITE_ICONS {
+    QIcon("res/icon/wp.svg"),
+    QIcon("res/icon/wn.svg"),
+    QIcon("res/icon/wb.svg"),
+    QIcon("res/icon/wr.svg"),
+    QIcon("res/icon/wq.svg"),
+    QIcon("res/icon/wk.svg")
+};
+
+const std::array<QIcon, 6> ChessBoardWidget::BLACK_ICONS {
+    QIcon("res/icon/bp.svg"),
+    QIcon("res/icon/bn.svg"),
+    QIcon("res/icon/bb.svg"),
+    QIcon("res/icon/br.svg"),
+    QIcon("res/icon/bq.svg"),
+    QIcon("res/icon/bk.svg")
+};
+
+ChessBoardWidget::ChessBoardWidget(QWidget* parent) : QWidget(parent) {
     SetPalette(GREEN_PALETTE);
+
+    Reset();
 }
 
-void ChessBoardWidget::Set(const QString& fen_str) {
-    // TODO
-    (void) fen_str;
+void ChessBoardWidget::Reset() {
+    SetPosition(STARTPOS_FEN);
+}
+
+static bool IsUpperCase(char ch) {
+    if ((ch >= 'A') && (ch <= 'Z')) {
+        return true;
+    }
+    return false;
+}
+
+static bool IsNumber(char ch) {
+    if ((ch >= '0') && (ch <= '9')) {
+        return true;
+    }
+    return false;
+}
+
+void ChessBoardWidget::SetPosition(const QString& fen_str) {
+    const QStringList& args = fen_str.trimmed().split(" ");
+
+    if (args[1] == 'w') {
+        m_playing_colour = chess::Colour::WHITE;
+    } else if (args[1] == 'b') {
+        m_playing_colour = chess::Colour::BLACK;
+    }
+
+    m_board.Clear();
+
+    const QStringList& lines = args[0].trimmed().split("/");
+    uint8_t i, j;
+    for (j = 0; j < 8; ++j) {
+        i = 0;
+        const QString& line = lines[7-j];
+
+        for (auto& qch : line) {
+            char ch = qch.toLatin1();
+            if (IsNumber(ch)) {
+                const uint8_t num = ch - '0';
+                i += num;
+            } else {
+                const chess::Colour colour = IsUpperCase(ch)? chess::Colour::WHITE : chess::Colour::BLACK;
+                switch (qch.toLower().toLatin1()) {
+                case 'p':
+                    m_board.SetPiece(std::make_unique<chess::Pawn>(colour), i, j);
+                    i++;
+                    break;
+
+                case 'n':
+                    m_board.SetPiece(std::make_unique<chess::Knight>(colour), i, j);
+                    i++;
+                    break;
+
+                case 'b':
+                    m_board.SetPiece(std::make_unique<chess::Bishop>(colour), i, j);
+                    i++;
+                    break;
+
+                case 'r':
+                    m_board.SetPiece(std::make_unique<chess::Rook>(colour), i, j);
+                    i++;
+                    break;
+
+                case 'q':
+                    m_board.SetPiece(std::make_unique<chess::Queen>(colour), i, j);
+                    i++;
+                    break;
+
+                case 'k':
+                    m_board.SetPiece(std::make_unique<chess::King>(colour), i, j);
+                    i++;
+                    break;
+
+                default:
+                    i++;
+                    break;
+                }
+            }
+        }
+    }
+
+    repaint();
+}
+
+void ChessBoardWidget::SetPlayingColour(chess::Colour colour) {
+    m_playing_colour = colour;
+}
+
+chess::Colour ChessBoardWidget::GetPlayingColour() const {
+    return m_playing_colour;
 }
 
 void ChessBoardWidget::SetPalette(const ChessPalette& palette) {

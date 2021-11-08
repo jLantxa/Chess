@@ -78,13 +78,10 @@ private:
     /** Number of half moves from starting position. */
     uint32_t m_start_half_moves;
 
-    /** Moving colour. */
-    chess::Colour m_colour;
-
     std::vector<UCIEngine::DepthInfo> m_depth_infos;
     uint32_t m_num_received_lines = 0;
 
-    ChessBoardWidget* m_board_widget;
+    ChessBoardWidget* m_board;
 
     /** Current move number as in game. First move is 1. */
     uint32_t CurrentMoveNumber() const;
