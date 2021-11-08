@@ -264,7 +264,7 @@ void ChessBoardWidget::DrawBoard() {
 
     font.setWeight(QFont::Bold);
     font.setPixelSize(m_square_size/4);
-    const int text_margin = 3;
+    const int text_margin = 0.075f * m_square_size;
     QFontMetrics font_metrics(font);
 
     painter.setFont(font);
@@ -307,10 +307,12 @@ void ChessBoardWidget::DrawBoard() {
                 const uint8_t type_index = static_cast<uint8_t>(piece->GetType());
                 const std::array<QIcon, 6>& icon_array = (piece->GetColour() == chess::Colour::WHITE)?
                                           WHITE_ICONS : BLACK_ICONS;
-                const QIcon icon = icon_array[type_index];
-                painter.drawPixmap(x, y,
-                                   m_square_size, m_square_size,
-                                   icon.pixmap(QSize(m_square_size, m_square_size)));
+                const QIcon piece_icon = icon_array[type_index];
+                const int piece_icon_size = m_square_size;
+                painter.drawPixmap(x,
+                                   y,
+                                   piece_icon_size, piece_icon_size,
+                                   piece_icon.pixmap(QSize(piece_icon_size, piece_icon_size)));
             }
         }
     }
