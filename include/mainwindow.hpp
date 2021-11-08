@@ -54,6 +54,7 @@ private slots:
     void on_sbDepth_editingFinished();
     void on_actionSet_FEN_position_triggered();
     void on_actionNew_game_triggered();
+    void on_actionExit_triggered();
 
 private:
     Ui::MainWindow *ui;

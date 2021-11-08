@@ -267,3 +267,8 @@ void MainWindow::on_actionSet_FEN_position_triggered() {
 void MainWindow::on_actionNew_game_triggered() {
     NewGame();
 }
+
+void MainWindow::on_actionExit_triggered() {
+    QCoreApplication::quit();
+}
+

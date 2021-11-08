@@ -255,6 +255,8 @@
     </property>
     <addaction name="actionNew_game"/>
     <addaction name="actionSet_FEN_position"/>
+    <addaction name="separator"/>
+    <addaction name="actionExit"/>
    </widget>
    <addaction name="menuGame"/>
   </widget>
@@ -272,6 +274,11 @@
   <action name="actionNew_game">
    <property name="text">
     <string>New game</string>
+   </property>
+  </action>
+  <action name="actionExit">
+   <property name="text">
+    <string>Exit</string>
    </property>
   </action>
  </widget>
