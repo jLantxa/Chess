@@ -138,10 +138,10 @@ bool MainWindow::SetPosition(const QString& fen_str){
 }
 
 void MainWindow::ShowMsgBox(const QString &title, const QString &text) {
-    QMessageBox error_box(this);
-    error_box.setWindowTitle(title);
-    error_box.setText(text);
-    error_box.exec();
+    QMessageBox msg_box(this);
+    msg_box.setWindowTitle(title);
+    msg_box.setText(text);
+    msg_box.exec();
 }
 
 void MainWindow::OnDepthInfoAvailable(const UCIEngine::DepthInfo& info) {
@@ -278,15 +278,16 @@ void MainWindow::on_sbDepth_editingFinished() {
 }
 
 void MainWindow::on_actionSet_FEN_position_triggered() {
-    bool dialog_ok;
-    QString fen_str = QInputDialog::getText(this, "Set position", "FEN position",
-                                            QLineEdit::Normal, "", &dialog_ok);
+    QInputDialog* dialog = new QInputDialog(this);
+    dialog->setWindowTitle("Set position");
+    dialog->setLabelText("FEN position:");
+    dialog->resize(450, 300);
+    dialog->exec();
 
-    if (dialog_ok) {
-        const bool position_ok = SetPosition(fen_str.trimmed());
-        if (!position_ok) {
-            ShowMsgBox("Error", "Could not set position.");
-        }
+    QString fen_str = dialog->textValue();
+    const bool position_ok = SetPosition(fen_str.trimmed());
+    if (!position_ok) {
+        ShowMsgBox("Error", "Could not set position.");
     }
 }
 
