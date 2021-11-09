@@ -11,7 +11,8 @@ SRC:= src
 FORMS := forms
 RES := res
 
-all: debug release tests cloc
+all: debug release tests
+	@make cloc
 
 binaries: debug release
 
