@@ -6,9 +6,12 @@ BUILD_DEBUG := $(BUILD)/debug
 BUILD_RELEASE := $(BUILD)/release
 BUILD_TEST := $(BUILD)/test
 
+INCLUDE := include
+SRC:= src
+FORMS := forms
 RES := res
 
-all: debug release tests
+all: debug release tests cloc
 
 binaries: debug release
 
@@ -45,6 +48,9 @@ tests:
 		CONFIG+=release CONFIG+=qml_release
 	cd $(BUILD_TEST) && make -j$(nproc)
 	./$(BUILD_TEST)/$(TEST_TARGET)
+
+cloc:
+	cloc $(SRC) $(INCLUDE) $(FORMS)
 
 clean:
 	rm -r $(BUILD)
