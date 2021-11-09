@@ -51,7 +51,6 @@ void MainWindow::Init() {
     // GUI defaults
     setWindowTitle(WINDOW_TITLE);
     ui->bEngineOn->setPalette(QColor(Qt::red));
-    m_start_half_moves = 0;
     m_board->SetPlayingColour(chess::Colour::WHITE);
 
     ui->bRotateBoard->setIcon(ROTATE_ICON);
@@ -79,11 +78,11 @@ void MainWindow::Init() {
 }
 
 uint32_t MainWindow::CurrentMoveNumber() const {
-    return 1 + ((m_start_half_moves + m_moves_list.size()) / 2);
+    const uint32_t half_moves = m_board->GetNumHalfMoves();
+    return 1 + ((half_moves + m_moves_list.size()) / 2);
 }
 
 void MainWindow::NewGame() {
-    m_start_half_moves = 0;
     m_board->Reset();
     m_moves_list.clear();
     m_engine.NewGame();
@@ -123,13 +122,8 @@ bool MainWindow::SetPosition(const QString& fen_str){
 
     m_board->SetPosition(fen_str);
 
-    const uint32_t move_number = args[5].toUInt();
     m_moves_list.clear();
     ui->teMoves->clear();
-    m_start_half_moves = 2 * (move_number - 1);
-    if (m_board->GetPlayingColour() == chess::Colour::BLACK) {
-        m_start_half_moves++;
-    }
 
     m_engine.SetPosition(fen_str);
     RestartSearch();
@@ -166,13 +160,14 @@ void MainWindow::UpdateLineInfo() {
          * we must omit white's move:
          * n... <black> instead of n. <white> <black>
          */
+        const uint32_t starting_half_move_num = m_board->GetNumHalfMoves();
         for (int i = 0; i < info.pv.length(); ++i) {
-            const uint32_t half_moves = (m_start_half_moves + i);
-            if ((half_moves % 2) == 0 ) {  // White move
-                move_str_chain.push_back(QString::number(1 + (half_moves/2)) + ". " + info.pv[i]);
+            const uint32_t half_move_number = (starting_half_move_num + i);
+            if ((half_move_number % 2) == 0 ) {  // White move
+                move_str_chain.push_back(QString::number(1 + (half_move_number/2)) + ". " + info.pv[i]);
             } else {  // Black move
                 if (i == 0) {
-                    move_str_chain.push_back(QString::number(1 + (half_moves/2)) + "... " + info.pv[i]);
+                    move_str_chain.push_back(QString::number(1 + (half_move_number/2)) + "... " + info.pv[i]);
                 } else {
                     move_str_chain.push_back(info.pv[i]);
                 }
@@ -204,9 +199,10 @@ void MainWindow::UpdateMoveList() {
     ui->teMoves->clear();
     const int length = m_moves_list.length();
     QString moves_str;
+    const uint32_t starting_half_move_num = m_board->GetNumHalfMoves() - m_moves_list.length();
     for (int i = 0; i < length; ++i) {
         const QString&  move = m_moves_list[i];
-        const uint32_t half_moves = (m_start_half_moves + (i+1));
+        const uint32_t half_moves = (starting_half_move_num + (i+1));
         if ((half_moves % 2) != 0) {
             moves_str += QString::number(1 +( half_moves/2)) + ". " + "<b>" + move + "</b> ";
         } else {
@@ -323,4 +319,3 @@ void MainWindow::on_actionRestart_triggered() {
     // TODO: Reset engine position
     RestartSearch();
 }
-

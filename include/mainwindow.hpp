@@ -82,9 +82,6 @@ private:
     /** List of moves from starting position. */
     QStringList m_moves_list;
 
-    /** Number of half moves from starting position. */
-    uint32_t m_start_half_moves;
-
     std::vector<UCIEngine::DepthInfo> m_depth_infos;
     uint32_t m_num_received_lines = 0;
 

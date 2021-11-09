@@ -82,6 +82,12 @@ void ChessBoardWidget::SetPosition(const QString& fen_str) {
 
     m_board.Clear();
 
+    const uint32_t move_number = args[5].toUInt();
+    m_half_moves = 2 * (move_number - 1);
+    if (m_playing_colour == chess::Colour::BLACK) {
+        m_half_moves++;
+    }
+
     const QStringList& lines = args[0].trimmed().split("/");
     uint8_t i, j;
     for (j = 0; j < 8; ++j) {
@@ -165,6 +171,10 @@ chess::Colour ChessBoardWidget::GetPlayingColour() const {
 void ChessBoardWidget::SetColourPalette(const ChessPalette& palette) {
     m_palette = palette;
     repaint();
+}
+
+uint32_t ChessBoardWidget::GetNumHalfMoves() const {
+    return m_half_moves;
 }
 
 void ChessBoardWidget::GetRotatedCoordinates(uint8_t ax, uint8_t ay, uint8_t& bx, uint8_t& by, chess::Colour side) const {

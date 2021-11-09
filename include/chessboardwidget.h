@@ -57,7 +57,6 @@ public:
         QColor highlight_important;
     };
 
-
     static constexpr ChessPalette GREEN_PALETTE {
         .white_square = QColor(238,238,210),
         .black_square = QColor(118,150,86),
@@ -103,6 +102,8 @@ public:
 
     void SetColourPalette(const ChessPalette& palette);
 
+    uint32_t GetNumHalfMoves() const;
+
 signals:
 
 
@@ -116,8 +117,10 @@ private:
 
     ChessPalette m_palette;
 
-
     chess::Board m_board;
+
+    /** Number of half moves from starting position. */
+    uint32_t m_half_moves = 0;
 
     chess::Colour m_playing_colour = chess::Colour::WHITE;
     chess::Colour m_side = chess::Colour::WHITE;
