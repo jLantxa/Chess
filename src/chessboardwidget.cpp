@@ -258,8 +258,8 @@ void ChessBoardWidget::paintEvent(QPaintEvent*) {
     const QRect geometry = this->geometry();
     QFont coordinates_font;
 
-    const int board_x_off = MARGIN + SCORE_BAR_WIDTH + SCORE_BAR_SPACING;
-    const int board_y_off = MARGIN;
+    const float board_x_off = MARGIN + SCORE_BAR_WIDTH + SCORE_BAR_SPACING;
+    const float board_y_off = MARGIN;
     const int board_available_width = geometry.width() - board_x_off;
 
     m_board_size = std::min(board_available_width, geometry.height()) - 2*MARGIN;
@@ -271,6 +271,9 @@ void ChessBoardWidget::paintEvent(QPaintEvent*) {
     QFontMetrics font_metrics(coordinates_font);
 
     painter.setFont(coordinates_font);
+
+    // Board base (white colour)
+    painter.fillRect(board_x_off, board_y_off, m_board_size, m_board_size, m_palette.white_square);
 
     /* i, j -> Coordinates of the board
      * u, v -> Coordinates of the widget grid (accounting for rotation)
