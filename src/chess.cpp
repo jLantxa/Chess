@@ -13,81 +13,80 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
-*/
+ */
 
 #include "chess.hpp"
 
 namespace chess {
 
 bool Square::operator==(const Square& other) const {
-    return (file == other.file) &&
-           (rank == other.rank);
+  return (file == other.file) && (rank == other.rank);
 }
 
 bool Move::operator==(const Move& other) const {
-    return (src == other.src) &&
-           (dst == other.dst);
+  return (src == other.src) && (dst == other.dst);
 }
 
 void ToggleColour(Colour* colour) {
-     if (*colour == Colour::WHITE) {
-        *colour = Colour::BLACK;
-    } else if (*colour == Colour::BLACK) {
-        *colour = Colour::WHITE;
-    }
+  if (*colour == Colour::WHITE) {
+    *colour = Colour::BLACK;
+  } else if (*colour == Colour::BLACK) {
+    *colour = Colour::WHITE;
+  }
 }
 
 uint8_t FileToNumber(char file) {
-    file = tolower(file);
-    const bool invalid_file = (file < 'a') || (file > 'h');
-    if (invalid_file) {
-        return 0;
-    }
+  file = tolower(file);
+  const bool invalid_file = (file < 'a') || (file > 'h');
+  if (invalid_file) {
+    return 0;
+  }
 
-    return (file - 'a');
+  return (file - 'a');
 }
 
 char NumberToFile(uint8_t number) {
-    if (number > 7) {
-        return '-';
-    }
+  if (number > 7) {
+    return '-';
+  }
 
-    return FILES[number];
+  return FILES[number];
 }
 
 std::string SquareToString(const Square& square) {
-    const char file_char = NumberToFile(square.file);
-    const std::string str = std::string{file_char} + (std::to_string(square.rank + 1));
+  const char file_char = NumberToFile(square.file);
+  const std::string str =
+      std::string{file_char} + (std::to_string(square.rank + 1));
 
-    return str;
+  return str;
 }
 
 Square StringToSquare(const std::string& str) {
-    uint8_t file = FileToNumber(str[0]);
-    uint8_t rank = str[1] - '1';
-    Square square {file, rank};
+  uint8_t file = FileToNumber(str[0]);
+  uint8_t rank = str[1] - '1';
+  Square square{file, rank};
 
-    return square;
+  return square;
 }
 
 std::string MoveToUCI(const Move& move) {
-    const std::string src = SquareToString(move.src);
-    const std::string dst = SquareToString(move.dst);
-    const std::string str = src + dst;
+  const std::string src = SquareToString(move.src);
+  const std::string dst = SquareToString(move.dst);
+  const std::string str = src + dst;
 
-    return str;
+  return str;
 }
 
 Move UCIToMove(const std::string& uci) {
-    if (uci.size() < 4) {
-        return Move{{0, 0}, {0, 0}};
-    }
+  if (uci.size() < 4) {
+    return Move{{0, 0}, {0, 0}};
+  }
 
-    Square src = StringToSquare(uci.substr(0, 2));
-    Square dst = StringToSquare(uci.substr(2, 4));
-    Move move {src, dst};
+  Square src = StringToSquare(uci.substr(0, 2));
+  Square dst = StringToSquare(uci.substr(2, 4));
+  Move move{src, dst};
 
-    return move;
+  return move;
 }
 
 }  // namespace chess

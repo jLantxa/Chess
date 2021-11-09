@@ -13,54 +13,43 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
-*/
+ */
 
 #ifndef _CHESS_INCLUDE_CHESS_HPP_
 #define _CHESS_INCLUDE_CHESS_HPP_
 
-#include <cstdint>
-
 #include <array>
+#include <cstdint>
 #include <string>
 
 namespace chess {
 
-enum class Colour {
-    WHITE,
-    BLACK
-};
+enum class Colour { WHITE, BLACK };
 
-enum class PieceType {
-    PAWN,
-    KNIGHT,
-    BISHOP,
-    ROOK,
-    QUEEN,
-    KING
-};
+enum class PieceType { PAWN, KNIGHT, BISHOP, ROOK, QUEEN, KING };
 
-constexpr uint8_t PAWN_VALUE   = 1U;
+constexpr uint8_t PAWN_VALUE = 1U;
 constexpr uint8_t KNIGHT_VALUE = 3U;
 constexpr uint8_t BISHOP_VALUE = 3U;
-constexpr uint8_t ROOK_VALUE   = 5U;
-constexpr uint8_t QUEEN_VALUE  = 9U;
+constexpr uint8_t ROOK_VALUE = 5U;
+constexpr uint8_t QUEEN_VALUE = 9U;
 constexpr uint8_t KING_VALUE = UINT8_MAX;
 
 struct Square {
-    uint8_t file;
-    uint8_t rank;
+  uint8_t file;
+  uint8_t rank;
 
-    bool operator==(const Square& other) const;
+  bool operator==(const Square& other) const;
 };
 
 struct Move {
-    Square src;
-    Square dst;
+  Square src;
+  Square dst;
 
-    bool operator==(const Move& other) const;
+  bool operator==(const Move& other) const;
 };
 
-constexpr std::array<char, 8> FILES {'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'};
+constexpr std::array<char, 8> FILES{'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'};
 
 uint8_t FileToNumber(char file);
 char NumberToFile(uint8_t number);

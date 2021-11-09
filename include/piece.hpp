@@ -13,7 +13,7 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
-*/
+ */
 
 #ifndef _CHESS_INCLUDE_PIECE_HPP_
 #define _CHESS_INCLUDE_PIECE_HPP_
@@ -27,57 +27,59 @@ namespace chess {
 class Board;
 
 class Piece {
-public:
-    Piece(Colour colour, PieceType type, uint8_t value);
+ public:
+  Piece(Colour colour, PieceType type, uint8_t value);
 
-    [[nodiscard]] Colour GetColour() const;
-    [[nodiscard]] PieceType GetType() const;
-    [[nodiscard]] uint8_t GetValue() const;
-    [[nodiscard]] bool IsCaptured() const;
-    void SetCaptured(bool captured);;
-    [[nodiscard]] virtual std::vector<Move> GetMoves(const Board& board) const = 0;
+  [[nodiscard]] Colour GetColour() const;
+  [[nodiscard]] PieceType GetType() const;
+  [[nodiscard]] uint8_t GetValue() const;
+  [[nodiscard]] bool IsCaptured() const;
+  void SetCaptured(bool captured);
+  ;
+  [[nodiscard]] virtual std::vector<Move> GetMoves(
+      const Board& board) const = 0;
 
-protected:
-    const Colour m_colour;
-    const PieceType m_type;
-    const uint8_t m_value;
-    bool m_is_captured = false;
+ protected:
+  const Colour m_colour;
+  const PieceType m_type;
+  const uint8_t m_value;
+  bool m_is_captured = false;
 };
 
 class Pawn : public Piece {
-public:
-    Pawn(Colour colour);
-    [[nodiscard]] std::vector<Move> GetMoves(const Board&) const override;
+ public:
+  Pawn(Colour colour);
+  [[nodiscard]] std::vector<Move> GetMoves(const Board&) const override;
 };
 
 class Knight : public Piece {
-public:
-    Knight(Colour colour);
-    [[nodiscard]] std::vector<Move> GetMoves(const Board&) const override;
+ public:
+  Knight(Colour colour);
+  [[nodiscard]] std::vector<Move> GetMoves(const Board&) const override;
 };
 
 class Bishop : public Piece {
-public:
-    Bishop(Colour colour);
-    [[nodiscard]] std::vector<Move> GetMoves(const Board&) const override;
+ public:
+  Bishop(Colour colour);
+  [[nodiscard]] std::vector<Move> GetMoves(const Board&) const override;
 };
 
 class Rook : public Piece {
-public:
-    Rook(Colour colour);
-    [[nodiscard]] std::vector<Move> GetMoves(const Board&) const override;
+ public:
+  Rook(Colour colour);
+  [[nodiscard]] std::vector<Move> GetMoves(const Board&) const override;
 };
 
 class Queen : public Piece {
-public:
-    Queen(Colour colour);
-    [[nodiscard]] std::vector<Move> GetMoves(const Board&) const override;
+ public:
+  Queen(Colour colour);
+  [[nodiscard]] std::vector<Move> GetMoves(const Board&) const override;
 };
 
 class King : public Piece {
-public:
-    King(Colour colour);
-    [[nodiscard]] std::vector<Move> GetMoves(const Board&) const override;
+ public:
+  King(Colour colour);
+  [[nodiscard]] std::vector<Move> GetMoves(const Board&) const override;
 };
 
 }  // namespace chess

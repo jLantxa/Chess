@@ -9,6 +9,7 @@ BUILD_TEST := $(BUILD)/test
 INCLUDE := include
 SRC:= src
 FORMS := forms
+TEST := test
 RES := res
 
 all: debug release tests
@@ -52,6 +53,12 @@ tests:
 
 cloc:
 	cloc $(SRC) $(INCLUDE) $(FORMS)
+
+format:
+	clang-format --style=Google -i \
+		$(SRC)/*.cpp \
+		$(INCLUDE)/*.h $(INCLUDE)/*.hpp \
+		$(TEST)/*.cpp
 
 clean:
 	rm -r $(BUILD)

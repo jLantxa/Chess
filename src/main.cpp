@@ -13,17 +13,17 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
-*/
-
-#include "mainwindow.hpp"
+ */
 
 #include <QApplication>
 
+#include "mainwindow.hpp"
+
 int main(int argc, char *argv[]) {
-    QApplication a(argc, argv);
-    MainWindow w;
+  QApplication a(argc, argv);
+  MainWindow w;
 
-    w.show();
+  w.show();
 
-    return a.exec();
+  return a.exec();
 }

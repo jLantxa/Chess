@@ -13,7 +13,7 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
-*/
+ */
 
 #ifndef _CHESS_INCLUDE_BOARD_H_
 #define _CHESS_INCLUDE_BOARD_H_
@@ -28,15 +28,15 @@
 namespace chess {
 
 class Board {
-public:
-    const Piece* PieceAt(uint8_t i, uint8_t j) const;
-    void ClearPieceAt(uint8_t i, uint8_t j);
-    void Clear();
-    void SetPiece(std::unique_ptr<Piece> piece, uint8_t i, uint8_t j);
-    void DoMove(const Move& move);
+ public:
+  const Piece* PieceAt(uint8_t i, uint8_t j) const;
+  void ClearPieceAt(uint8_t i, uint8_t j);
+  void Clear();
+  void SetPiece(std::unique_ptr<Piece> piece, uint8_t i, uint8_t j);
+  void DoMove(const Move& move);
 
-private:
-    std::unique_ptr<Piece> m_board[8][8];
+ private:
+  std::unique_ptr<Piece> m_board[8][8];
 };
 
 }  // namespace chess

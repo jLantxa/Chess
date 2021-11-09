@@ -13,15 +13,14 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
-*/
+ */
 
 #ifndef _CHESS_INCLUDE_SETTINGS_DIALOG_H_
 #define _CHESS_INCLUDE_SETTINGS_DIALOG_H_
 
-#include <vector>
-
 #include <QDialog>
 #include <QVariant>
+#include <vector>
 
 #include "chessboardwidget.h"
 
@@ -29,30 +28,29 @@ namespace Ui {
 class SettingsDialog;
 }
 
-class SettingsDialog : public QDialog
-{
-    Q_OBJECT
+class SettingsDialog : public QDialog {
+  Q_OBJECT
 
-public:
-    explicit SettingsDialog(QWidget *parent = nullptr);
-    ~SettingsDialog();
+ public:
+  explicit SettingsDialog(QWidget *parent = nullptr);
+  ~SettingsDialog();
 
-signals:
-    void PaletteChanged(const ChessBoardWidget::ChessPalette& palette);
+ signals:
+  void PaletteChanged(const ChessBoardWidget::ChessPalette &palette);
 
-private slots:
-    void on_buttonBox_accepted();
+ private slots:
+  void on_buttonBox_accepted();
 
-private:
-    Ui::SettingsDialog *ui;
+ private:
+  Ui::SettingsDialog *ui;
 
-    std::vector<std::pair<QString, QVariant>> PALETTES = {
-        {"Green", QVariant::fromValue(ChessBoardWidget::GREEN_PALETTE)},
-        {"Blue", QVariant::fromValue(ChessBoardWidget::BLUE_PALETTE)},
-        {"Yellow", QVariant::fromValue(ChessBoardWidget::YELLOW_PALETTE)},
-        {"Red", QVariant::fromValue(ChessBoardWidget::RED_PALETTE)},
-        {"Purple", QVariant::fromValue(ChessBoardWidget::PURPLE_PALETTE)},
-    };
+  std::vector<std::pair<QString, QVariant>> PALETTES = {
+      {"Green", QVariant::fromValue(ChessBoardWidget::GREEN_PALETTE)},
+      {"Blue", QVariant::fromValue(ChessBoardWidget::BLUE_PALETTE)},
+      {"Yellow", QVariant::fromValue(ChessBoardWidget::YELLOW_PALETTE)},
+      {"Red", QVariant::fromValue(ChessBoardWidget::RED_PALETTE)},
+      {"Purple", QVariant::fromValue(ChessBoardWidget::PURPLE_PALETTE)},
+  };
 };
 
 #endif  // _CHESS_INCLUDE_SETTINGS_DIALOG_H_

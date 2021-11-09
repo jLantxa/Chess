@@ -13,102 +13,73 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
-*/
+ */
 
 #include "piece.hpp"
 
 namespace chess {
 
 Piece::Piece(Colour colour, PieceType type, uint8_t value)
-:   m_colour(colour),
-    m_type(type),
-    m_value(value)
-{}
+    : m_colour(colour), m_type(type), m_value(value) {}
 
-[[nodiscard]] Colour Piece::GetColour() const {
-    return m_colour;
-};
+[[nodiscard]] Colour Piece::GetColour() const { return m_colour; };
 
-[[nodiscard]] PieceType Piece::GetType() const {
-    return m_type;
-};
+[[nodiscard]] PieceType Piece::GetType() const { return m_type; };
 
-[[nodiscard]] uint8_t Piece::GetValue() const {
-    return m_value;
-};
+[[nodiscard]] uint8_t Piece::GetValue() const { return m_value; };
 
-[[nodiscard]] bool Piece::IsCaptured() const {
-    return m_is_captured;
-};
+[[nodiscard]] bool Piece::IsCaptured() const { return m_is_captured; };
 
-void Piece::SetCaptured(bool captured) {
-    m_is_captured = captured;
-};
-
+void Piece::SetCaptured(bool captured) { m_is_captured = captured; };
 
 // PAWN
-Pawn::Pawn(Colour colour)
-:   Piece(colour, PieceType::PAWN, PAWN_VALUE)
-{}
+Pawn::Pawn(Colour colour) : Piece(colour, PieceType::PAWN, PAWN_VALUE) {}
 
 [[nodiscard]] std::vector<Move> Pawn::GetMoves(const Board&) const {
-    // TODO: Implement pawn moves
-    return {};
+  // TODO: Implement pawn moves
+  return {};
 };
-
 
 // KNIGHT
 Knight::Knight(Colour colour)
-:   Piece(colour, PieceType::KNIGHT, KNIGHT_VALUE)
-{}
+    : Piece(colour, PieceType::KNIGHT, KNIGHT_VALUE) {}
 
 [[nodiscard]] std::vector<Move> Knight::GetMoves(const Board&) const {
-    // TODO: Implement knight moves
-    return {};
+  // TODO: Implement knight moves
+  return {};
 };
-
 
 // BISHOP
 Bishop::Bishop(Colour colour)
-:   Piece(colour, PieceType::BISHOP, BISHOP_VALUE)
-{}
+    : Piece(colour, PieceType::BISHOP, BISHOP_VALUE) {}
 
 [[nodiscard]] std::vector<Move> Bishop::GetMoves(const Board&) const {
-    // TODO: Implement bishop moves
-    return {};
+  // TODO: Implement bishop moves
+  return {};
 };
-
 
 // ROOK
-Rook::Rook(Colour colour)
-:   Piece(colour, PieceType::ROOK, ROOK_VALUE)
-{}
+Rook::Rook(Colour colour) : Piece(colour, PieceType::ROOK, ROOK_VALUE) {}
 
 [[nodiscard]] std::vector<Move> Rook::GetMoves(const Board&) const {
-    // TODO: Implement rook moves
-    return {};
+  // TODO: Implement rook moves
+  return {};
 };
-
 
 // QUEEN
-Queen::Queen(Colour colour)
-:   Piece(colour, PieceType::QUEEN, QUEEN_VALUE)
-{}
+Queen::Queen(Colour colour) : Piece(colour, PieceType::QUEEN, QUEEN_VALUE) {}
 
 [[nodiscard]] std::vector<Move> Queen::GetMoves(const Board&) const {
-    // TODO: Implement queen moves
-    return {};
+  // TODO: Implement queen moves
+  return {};
 };
 
-
 // KING
-King::King(Colour colour)
-:   Piece(colour, PieceType::KING, KING_VALUE)
-{}
+King::King(Colour colour) : Piece(colour, PieceType::KING, KING_VALUE) {}
 
 [[nodiscard]] std::vector<Move> King::GetMoves(const Board&) const {
-    // TODO: Implement king moves
-    return {};
+  // TODO: Implement king moves
+  return {};
 };
 
 }  // namespace chess
