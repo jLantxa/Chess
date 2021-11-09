@@ -254,11 +254,12 @@ void ChessBoardWidget::mouseReleaseEvent(QMouseEvent* event) {
 
 void ChessBoardWidget::paintEvent(QPaintEvent*) {
     QPainter painter(this);
-    painter.setRenderHints(QPainter::TextAntialiasing);
+    painter.setRenderHints(QPainter::TextAntialiasing | QPainter::Antialiasing);
     const QRect geometry = this->geometry();
     QFont coordinates_font;
 
-    const int board_x_off = SCORE_BAR_WIDTH + SCORE_BAR_SPACING;
+    const int board_x_off = MARGIN + SCORE_BAR_WIDTH + SCORE_BAR_SPACING;
+    const int board_y_off = MARGIN;
     const int board_available_width = geometry.width() - board_x_off;
 
     m_board_size = std::min(board_available_width, geometry.height()) - 2*MARGIN;
@@ -278,8 +279,8 @@ void ChessBoardWidget::paintEvent(QPaintEvent*) {
     for (uint8_t i = 0; i < 8; ++i) {
         for (uint8_t j = 0; j < 8; ++j) {
             GetRotatedCoordinates(i, j, u, v, m_side);
-            const float x = MARGIN + board_x_off + u*m_square_size;
-            const float y = MARGIN + v*m_square_size;
+            const float x = board_x_off + u*m_square_size;
+            const float y = board_y_off + v*m_square_size;
             const QColor& square_colour = (((i+j) % 2) == 0)?
                                           m_palette.black_square : m_palette.white_square;
             const QColor& text_colour = (((i+j) % 2) == 0)?
@@ -318,33 +319,34 @@ void ChessBoardWidget::paintEvent(QPaintEvent*) {
             }
         }
     }
+    painter.setPen(m_palette.black_square);
+    painter.drawRect(board_x_off, board_y_off, m_board_size, m_board_size);
+
 
     const bool in_mate = m_is_mate && (m_score == 0);
     if (m_score_enabled && !in_mate) {
         const float balance = GetBalance();
-        const int white_height = m_board_size * balance;
-        const int black_height = m_board_size - white_height;
+        const float white_height = m_board_size * balance;
+        const float black_height = m_board_size - white_height;
 
-        if (m_side == chess::Colour::WHITE) {
-            painter.fillRect(MARGIN, MARGIN,
-                             SCORE_BAR_WIDTH, black_height,
-                             m_palette.black_square);
-            painter.fillRect(MARGIN, black_height + MARGIN,
-                             SCORE_BAR_WIDTH, white_height,
-                             m_palette.white_square);
-        } else {
-            painter.fillRect(MARGIN, MARGIN,
-                             SCORE_BAR_WIDTH, white_height,
-                             m_palette.white_square);
-            painter.fillRect(MARGIN, white_height + MARGIN,
-                             SCORE_BAR_WIDTH, black_height,
-                             m_palette.black_square);
-        }
+        const float top_height = (m_side == chess::Colour::WHITE)?
+                               black_height : white_height;
+        const float bottom_height = (m_side == chess::Colour::WHITE)?
+                               white_height : black_height;
+        const QColor& top_colour = (m_side == chess::Colour::WHITE)?
+                               m_palette.black_square : m_palette.white_square;
+        const QColor& bottom_colour = (m_side == chess::Colour::WHITE)?
+                               m_palette.white_square : m_palette.black_square;
 
-        painter.setPen(QPen(m_palette.highlight_important, 3));
-        painter.drawLine(MARGIN, MARGIN + m_board_size/2, SCORE_BAR_WIDTH + MARGIN, m_board_size/2 + MARGIN);
-        painter.setPen(Qt::black);
-        painter.drawRect(MARGIN, MARGIN, SCORE_BAR_WIDTH, m_board_size);
+        painter.fillRect(MARGIN, top_height + MARGIN,
+                         SCORE_BAR_WIDTH, bottom_height,
+                         bottom_colour);
+        painter.fillRect(MARGIN, MARGIN,
+                         SCORE_BAR_WIDTH, top_height,
+                         top_colour);
+
+        painter.setPen(m_palette.black_square);
+        painter.drawRect(MARGIN, MARGIN, SCORE_BAR_WIDTH, white_height+black_height);
     }
 }
 
