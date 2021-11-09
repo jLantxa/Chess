@@ -61,6 +61,7 @@ private slots:
     void on_bRotateBoard_clicked();
     void on_actionSettings_triggered();
     void on_bSettings_clicked();
+    void on_actionRestart_triggered();
 
 private:
     Ui::MainWindow *ui;

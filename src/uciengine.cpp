@@ -43,7 +43,8 @@ void UCIEngine::Close() {
 }
 
 void UCIEngine::Reset() {
-    m_engine_process.reset();
+    m_engine_process.close();
+    m_engine_process.start();
 }
 
 void UCIEngine::Write(const QString& str) {
