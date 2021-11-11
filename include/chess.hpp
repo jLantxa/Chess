@@ -40,6 +40,7 @@ struct Square {
   uint8_t rank;
 
   bool operator==(const Square& other) const;
+  bool operator!=(const Square& other) const;
 };
 
 struct Move {
@@ -47,6 +48,7 @@ struct Move {
   Square dst;
 
   bool operator==(const Move& other) const;
+  bool operator!=(const Move& other) const;
 };
 
 const std::string STARTPOS_FEN =

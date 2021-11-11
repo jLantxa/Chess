@@ -30,9 +30,12 @@ namespace chess {
 class Board {
  public:
   const Piece* PieceAt(uint8_t i, uint8_t j) const;
+  const Piece* PieceAt(const chess::Square& square) const;
   void ClearPieceAt(uint8_t i, uint8_t j);
+  void ClearPieceAt(const chess::Square& square);
   void Clear();
   void SetPiece(std::unique_ptr<Piece> piece, uint8_t i, uint8_t j);
+  void SetPiece(std::unique_ptr<Piece> piece, const chess::Square& square);
   void DoMove(const Move& move);
 
  private:

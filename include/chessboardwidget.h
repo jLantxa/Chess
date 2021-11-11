@@ -21,6 +21,7 @@
 #include <QIcon>
 #include <QWidget>
 #include <cstdint>
+#include <optional>
 #include <set>
 
 #include "board.hpp"
@@ -43,8 +44,11 @@ class ChessBoardWidget : public QWidget {
   chess::Colour GetPlayingColour() const;
 
   void paintEvent(QPaintEvent*);
-  void mousePressEvent(QMouseEvent* event);
-  void mouseReleaseEvent(QMouseEvent* event);
+  void mouseMoveEvent(QMouseEvent*);
+  void mousePressEvent(QMouseEvent*);
+  void mouseReleaseEvent(QMouseEvent*);
+
+  bool HandleBoardMouseEvent(QMouseEvent*);
 
   struct ChessPalette {
     QColor white_square;
@@ -119,10 +123,10 @@ class ChessBoardWidget : public QWidget {
   float m_board_size = 50;
   float m_square_size = m_board_size / 8;
 
-  chess::Square* m_cur_sel_sq = nullptr;
-  chess::Square* m_sel_src_sq = nullptr;
-  chess::Square* m_sel_dst_sq = nullptr;
-  std::set<chess::Square> m_hightlighted;
+  bool m_in_drag_mode = false;
+  std::optional<chess::Square> m_selected_square;
+  std::optional<chess::Square> m_src_square;
+  QPointF m_mouse_position;
 
   int m_score = 0;
   bool m_is_mate = false;

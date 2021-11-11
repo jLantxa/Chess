@@ -24,6 +24,13 @@ void Board::SetPiece(std::unique_ptr<Piece> piece, uint8_t i, uint8_t j) {
   m_board[i][j] = std::move(piece);
 }
 
+void Board::SetPiece(std::unique_ptr<Piece> piece,
+                     const chess::Square& square) {
+  const uint8_t i = square.file;
+  const uint8_t j = square.rank;
+  SetPiece(std::move(piece), i, j);
+}
+
 const Piece* Board::PieceAt(uint8_t i, uint8_t j) const {
   if ((i > 7) || (j > 7)) {
     return nullptr;
@@ -32,15 +39,27 @@ const Piece* Board::PieceAt(uint8_t i, uint8_t j) const {
   return m_board[i][j].get();
 }
 
+const Piece* Board::PieceAt(const chess::Square& square) const {
+  const uint8_t i = square.file;
+  const uint8_t j = square.rank;
+  return PieceAt(i, j);
+}
+
 void Board::ClearPieceAt(uint8_t i, uint8_t j) {
   if (m_board[i][j].get() != nullptr) {
     m_board[i][j].reset();
   }
 }
 
+void Board::ClearPieceAt(const chess::Square& square) {
+  const uint8_t i = square.file;
+  const uint8_t j = square.rank;
+  ClearPieceAt(i, j);
+}
+
 void Board::DoMove(const Move& move) {
-  auto& src = m_board[move.src.rank][move.src.file];
-  auto& dst = m_board[move.dst.rank][move.dst.file];
+  auto& src = m_board[move.src.file][move.src.rank];
+  auto& dst = m_board[move.dst.file][move.dst.rank];
   dst.swap(src);
   src.reset();
 }

@@ -23,9 +23,13 @@ bool Square::operator==(const Square& other) const {
   return (file == other.file) && (rank == other.rank);
 }
 
+bool Square::operator!=(const Square& other) const { return !(*this == other); }
+
 bool Move::operator==(const Move& other) const {
   return (src == other.src) && (dst == other.dst);
 }
+
+bool Move::operator!=(const Move& other) const { return !(*this == other); }
 
 void ToggleColour(Colour* colour) {
   if (*colour == Colour::WHITE) {
