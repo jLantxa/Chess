@@ -35,6 +35,11 @@ ChessBoardWidget::ChessBoardWidget(QWidget* parent) : QWidget(parent) {
 void ChessBoardWidget::Reset() {
   SetPosition(QString::fromStdString(chess::STARTPOS_FEN));
   m_score = 0;
+  m_selected_square.reset();
+  m_src_square.reset();
+  m_last_move_src_square.reset();
+  m_last_move_dst_square.reset();
+  m_in_drag_mode = false;
 }
 
 static bool IsUpperCase(char ch) {
