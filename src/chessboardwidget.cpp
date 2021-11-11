@@ -55,16 +55,16 @@ void ChessBoardWidget::SetPosition(const QString& fen_str) {
   const QStringList& args = fen_str.trimmed().split(" ");
 
   if (args[1] == 'w') {
-    m_playing_colour = chess::Colour::WHITE;
+    m_active_colour = chess::Colour::WHITE;
   } else if (args[1] == 'b') {
-    m_playing_colour = chess::Colour::BLACK;
+    m_active_colour = chess::Colour::BLACK;
   }
 
   m_board.Clear();
 
   const uint32_t move_number = args[5].toUInt();
   m_half_moves = 2 * (move_number - 1);
-  if (m_playing_colour == chess::Colour::BLACK) {
+  if (m_active_colour == chess::Colour::BLACK) {
     m_half_moves++;
   }
 
@@ -139,12 +139,20 @@ void ChessBoardWidget::SetSide(chess::Colour side) {
 
 chess::Colour ChessBoardWidget::GetSide() { return m_side; }
 
-void ChessBoardWidget::SetPlayingColour(chess::Colour colour) {
-  m_playing_colour = colour;
+void ChessBoardWidget::SetActiveColour(chess::Colour colour) {
+  m_active_colour = colour;
 }
 
-chess::Colour ChessBoardWidget::GetPlayingColour() const {
-  return m_playing_colour;
+chess::Colour ChessBoardWidget::GetActiveColour() const {
+  return m_active_colour;
+}
+
+void ChessBoardWidget::SetPlayerColour(chess::Colour colour) {
+  m_player_colour = colour;
+}
+
+chess::Colour ChessBoardWidget::GetPlayerColour() const {
+  return m_player_colour;
 }
 
 void ChessBoardWidget::SetColourPalette(const ChessPalette& palette) {
@@ -202,7 +210,7 @@ void ChessBoardWidget::mouseReleaseEvent(QMouseEvent* event) {
   event->type();
 }
 
-bool ChessBoardWidget::HandleBoardMouseEvent(QMouseEvent* event) {
+void ChessBoardWidget::HandleBoardMouseEvent(QMouseEvent* event) {
   const QPoint position = event->pos();
   const int x = position.x();
   const int y = position.y();
@@ -223,43 +231,62 @@ bool ChessBoardWidget::HandleBoardMouseEvent(QMouseEvent* event) {
 
   if (!click_on_board && (left_press || right_press)) {
     m_selected_square.reset();
-    return false;
+    return;
   }
 
   if (left_release && !click_on_board) {
     m_in_drag_mode = false;
+    m_selected_square.reset();
   }
 
   m_mouse_position = event->position();
   auto square = GetClickedSquare(x, y);
 
+  const chess::Piece* piece = m_board.PieceAt(square);
+  const bool is_selectable_square =
+      (piece != nullptr) && (piece->GetColour() == m_player_colour);
+
   if (left_press) {
-    if (m_src_square.has_value() && (m_src_square != square)) {
-      chess::Move move{m_src_square.value(), square};
-      if (DoMove(move)) {
-        m_selected_square.reset();
-        m_src_square.reset();
+    m_last_move_src_square.reset();
+    m_last_move_dst_square.reset();
+
+    if (m_src_square.has_value()) {
+      if (m_src_square != square) {
+        chess::Move move{m_src_square.value(), square};
+        if (DoMove(move)) {
+          m_selected_square.reset();
+          m_src_square.reset();
+        }
+      } else {
+        m_in_drag_mode = true;
+        m_selected_square = square;
+        m_src_square = square;
       }
-    } else if (m_board.PieceAt(square) != nullptr) {
+    } else if (is_selectable_square) {
       m_in_drag_mode = true;
       m_selected_square = square;
+      m_src_square = square;
     }
-  } else if (left_release && click_on_board) {
+  } else if (left_release) {
     if (m_in_drag_mode) {
-      if (square != m_selected_square.value()) {
+      if (m_selected_square.has_value() &&
+          (square != m_selected_square.value())) {
         chess::Move move{m_selected_square.value(), square};
         DoMove(move);
-      } else {
-        m_src_square = m_selected_square;
+        m_src_square.reset();
       }
     }
 
     m_selected_square.reset();
     m_in_drag_mode = false;
   }
+  if (right_press) {
+    if (m_in_drag_mode) {
+      m_in_drag_mode = false;
+    }
+  }
 
   repaint();
-  return true;
 }
 
 void ChessBoardWidget::paintEvent(QPaintEvent*) {
@@ -297,7 +324,11 @@ void ChessBoardWidget::paintEvent(QPaintEvent*) {
     for (uint8_t j = 0; j < 8; ++j) {
       GetRotatedCoordinates(i, j, u, v, m_side);
       const bool is_selected_square =
-          m_src_square.has_value() && (m_src_square == chess::Square{i, j});
+          (m_src_square.has_value() && (m_src_square == chess::Square{i, j})) ||
+          (m_last_move_src_square.has_value() &&
+           (m_last_move_src_square == chess::Square{i, j})) ||
+          (m_last_move_dst_square.has_value() &&
+           (m_last_move_dst_square == chess::Square{i, j}));
 
       x = board_x_off + u * m_square_size;
       y = board_y_off + v * m_square_size;
@@ -379,9 +410,9 @@ void ChessBoardWidget::paintEvent(QPaintEvent*) {
 
   // Dragged piece
   // TODO: Refactor piece draw
-  if (m_in_drag_mode && m_src_square.has_value()) {
-    const uint8_t i = m_src_square->file;
-    const uint8_t j = m_src_square->rank;
+  if (m_in_drag_mode && m_selected_square.has_value()) {
+    const uint8_t i = m_selected_square->file;
+    const uint8_t j = m_selected_square->rank;
 
     x = m_mouse_position.x() - m_square_size / 2;
     y = m_mouse_position.y() - m_square_size / 2;
@@ -456,6 +487,8 @@ void ChessBoardWidget::SetScoreEnabled(bool enabled) {
 bool ChessBoardWidget::DoMove(const chess::Move& move) {
   if (IsValidMove(move)) {
     m_board.DoMove(move);
+    m_last_move_src_square = move.src;
+    m_last_move_dst_square = move.dst;
     // TODO: Get FEN, update engine and update status
     return true;
   } else {

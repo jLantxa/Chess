@@ -48,7 +48,8 @@ void MainWindow::Init() {
   // GUI defaults
   setWindowTitle(WINDOW_TITLE);
   ui->bEngineOn->setPalette(QColor(Qt::red));
-  m_board->SetPlayingColour(chess::Colour::WHITE);
+  m_board->SetPlayerColour(chess::Colour::WHITE);
+  m_board->SetActiveColour(chess::Colour::WHITE);
 
   ui->bRotateBoard->setIcon(resources::ROTATE_ICON);
   ui->bSettings->setIcon(resources::SETTINGS_ICON);
@@ -176,7 +177,7 @@ void MainWindow::UpdateLineInfo() {
 
     QString score_str;
     int score = info.score;
-    if (m_board->GetPlayingColour() == chess::Colour::BLACK) {
+    if (m_board->GetActiveColour() == chess::Colour::BLACK) {
       score *= -1;
     }
     if (!info.mate_counter) {

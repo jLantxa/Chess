@@ -40,15 +40,17 @@ class ChessBoardWidget : public QWidget {
   void SetSide(chess::Colour side);
   chess::Colour GetSide();
 
-  void SetPlayingColour(chess::Colour colour);
-  chess::Colour GetPlayingColour() const;
+  void SetActiveColour(chess::Colour colour);
+  chess::Colour GetActiveColour() const;
+  void SetPlayerColour(chess::Colour colour);
+  chess::Colour GetPlayerColour() const;
 
   void paintEvent(QPaintEvent*);
   void mouseMoveEvent(QMouseEvent*);
   void mousePressEvent(QMouseEvent*);
   void mouseReleaseEvent(QMouseEvent*);
 
-  bool HandleBoardMouseEvent(QMouseEvent*);
+  void HandleBoardMouseEvent(QMouseEvent*);
 
   struct ChessPalette {
     QColor white_square;
@@ -120,7 +122,8 @@ class ChessBoardWidget : public QWidget {
   /** Number of half moves from starting position. */
   uint32_t m_half_moves = 0;
 
-  chess::Colour m_playing_colour = chess::Colour::WHITE;
+  chess::Colour m_active_colour = chess::Colour::WHITE;
+  chess::Colour m_player_colour = chess::Colour::WHITE;
   chess::Colour m_side = chess::Colour::WHITE;
   float m_board_size = 50;
   float m_square_size = m_board_size / 8;
@@ -128,6 +131,8 @@ class ChessBoardWidget : public QWidget {
   bool m_in_drag_mode = false;
   std::optional<chess::Square> m_selected_square;
   std::optional<chess::Square> m_src_square;
+  std::optional<chess::Square> m_last_move_src_square;
+  std::optional<chess::Square> m_last_move_dst_square;
   QPointF m_mouse_position;
 
   int m_score = 0;
