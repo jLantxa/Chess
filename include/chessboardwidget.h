@@ -104,10 +104,6 @@ class ChessBoardWidget : public QWidget {
  signals:
 
  private:
-  static const QString STARTPOS_FEN;
-  static const std::array<QIcon, 6> WHITE_ICONS;
-  static const std::array<QIcon, 6> BLACK_ICONS;
-
   static constexpr int SCORE_BAR_WIDTH = 10;
   static constexpr int SCORE_BAR_SPACING = 15;
 

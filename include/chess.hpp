@@ -49,6 +49,9 @@ struct Move {
   bool operator==(const Move& other) const;
 };
 
+const std::string STARTPOS_FEN =
+    "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
+
 constexpr std::array<char, 8> FILES{'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'};
 
 uint8_t FileToNumber(char file);

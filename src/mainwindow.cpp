@@ -22,12 +22,9 @@
 #include <QMessageBox>
 #include <QThread>
 
+#include "resources.hpp"
 #include "settingsdialog.h"
 #include "ui_mainwindow.h"
-
-static const QIcon ROTATE_ICON = QIcon("res/icon/rotate.svg");
-static const QIcon SETTINGS_ICON = QIcon("res/icon/settings.svg");
-static const QIcon ENGINE_ICON = QIcon("res/icon/power.svg");
 
 MainWindow::MainWindow(QWidget* parent)
     : QMainWindow(parent), ui(new Ui::MainWindow) {
@@ -53,9 +50,9 @@ void MainWindow::Init() {
   ui->bEngineOn->setPalette(QColor(Qt::red));
   m_board->SetPlayingColour(chess::Colour::WHITE);
 
-  ui->bRotateBoard->setIcon(ROTATE_ICON);
-  ui->bSettings->setIcon(SETTINGS_ICON);
-  ui->bEngineOn->setIcon(ENGINE_ICON);
+  ui->bRotateBoard->setIcon(resources::ROTATE_ICON);
+  ui->bSettings->setIcon(resources::SETTINGS_ICON);
+  ui->bEngineOn->setIcon(resources::ENGINE_ICON);
 
   // Engine defaults
   m_engine.Init(DEFAULT_ENGINE_CMD);

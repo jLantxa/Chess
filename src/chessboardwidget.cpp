@@ -25,19 +25,7 @@
 #include <functional>
 
 #include "chess.hpp"
-
-const QString ChessBoardWidget::STARTPOS_FEN =
-    "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
-
-const std::array<QIcon, 6> ChessBoardWidget::WHITE_ICONS{
-    QIcon("res/icon/wp.svg"), QIcon("res/icon/wn.svg"),
-    QIcon("res/icon/wb.svg"), QIcon("res/icon/wr.svg"),
-    QIcon("res/icon/wq.svg"), QIcon("res/icon/wk.svg")};
-
-const std::array<QIcon, 6> ChessBoardWidget::BLACK_ICONS{
-    QIcon("res/icon/bp.svg"), QIcon("res/icon/bn.svg"),
-    QIcon("res/icon/bb.svg"), QIcon("res/icon/br.svg"),
-    QIcon("res/icon/bq.svg"), QIcon("res/icon/bk.svg")};
+#include "resources.hpp"
 
 ChessBoardWidget::ChessBoardWidget(QWidget* parent) : QWidget(parent) {
   SetColourPalette(GREEN_PALETTE);
@@ -45,7 +33,7 @@ ChessBoardWidget::ChessBoardWidget(QWidget* parent) : QWidget(parent) {
 }
 
 void ChessBoardWidget::Reset() {
-  SetPosition(STARTPOS_FEN);
+  SetPosition(QString::fromStdString(chess::STARTPOS_FEN));
   m_score = 0;
 }
 
@@ -315,8 +303,9 @@ void ChessBoardWidget::paintEvent(QPaintEvent*) {
       if (piece != nullptr) {
         const uint8_t type_index = static_cast<uint8_t>(piece->GetType());
         const std::array<QIcon, 6>& icon_array =
-            (piece->GetColour() == chess::Colour::WHITE) ? WHITE_ICONS
-                                                         : BLACK_ICONS;
+            (piece->GetColour() == chess::Colour::WHITE)
+                ? resources::WHITE_ICONS
+                : resources::BLACK_ICONS;
         const QIcon piece_icon = icon_array[type_index];
         const int piece_icon_size = m_square_size;
         painter.drawPixmap(
