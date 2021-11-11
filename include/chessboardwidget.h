@@ -61,8 +61,8 @@ class ChessBoardWidget : public QWidget {
   static constexpr ChessPalette GREEN_PALETTE{
       .white_square = QColor(238, 238, 210),
       .black_square = QColor(118, 150, 86),
-      .white_highlight = QColor(),
-      .black_highlight = QColor(),
+      .white_highlight = QColor(240, 255, 28),
+      .black_highlight = QColor(174, 186, 0),
       .highlight_important = QColor(255, 113, 74),
   };
 

@@ -240,11 +240,9 @@ bool ChessBoardWidget::HandleBoardMouseEvent(QMouseEvent* event) {
         m_selected_square.reset();
         m_src_square.reset();
       }
-    } else {
-      if (m_board.PieceAt(square) != nullptr) {
-        m_in_drag_mode = true;
-        m_selected_square = square;
-      }
+    } else if (m_board.PieceAt(square) != nullptr) {
+      m_in_drag_mode = true;
+      m_selected_square = square;
     }
   } else if (left_release && click_on_board) {
     if (m_in_drag_mode) {
@@ -298,11 +296,16 @@ void ChessBoardWidget::paintEvent(QPaintEvent*) {
   for (uint8_t i = 0; i < 8; ++i) {
     for (uint8_t j = 0; j < 8; ++j) {
       GetRotatedCoordinates(i, j, u, v, m_side);
+      const bool is_selected_square =
+          m_src_square.has_value() && (m_src_square == chess::Square{i, j});
+
       x = board_x_off + u * m_square_size;
       y = board_y_off + v * m_square_size;
-      const QColor& square_colour = (((i + j) % 2) == 0)
-                                        ? m_palette.black_square
-                                        : m_palette.white_square;
+      const QColor& square_colour =
+          (((i + j) % 2) == 0) ? is_selected_square ? m_palette.black_highlight
+                                                    : m_palette.black_square
+          : is_selected_square ? m_palette.white_highlight
+                               : m_palette.white_square;
       const QColor& text_colour = (((i + j) % 2) == 0) ? m_palette.white_square
                                                        : m_palette.black_square;
 
@@ -324,8 +327,7 @@ void ChessBoardWidget::paintEvent(QPaintEvent*) {
       }
 
       // Pieces (except the one being dragged)
-      if (m_in_drag_mode && m_selected_square.has_value() &&
-          m_selected_square == chess::Square{i, j}) {
+      if (m_in_drag_mode && is_selected_square) {
         continue;
       } else {
         x = board_x_off + u * m_square_size;
@@ -377,9 +379,9 @@ void ChessBoardWidget::paintEvent(QPaintEvent*) {
 
   // Dragged piece
   // TODO: Refactor piece draw
-  if (m_in_drag_mode && m_selected_square.has_value()) {
-    const uint8_t i = m_selected_square->file;
-    const uint8_t j = m_selected_square->rank;
+  if (m_in_drag_mode && m_src_square.has_value()) {
+    const uint8_t i = m_src_square->file;
+    const uint8_t j = m_src_square->rank;
 
     x = m_mouse_position.x() - m_square_size / 2;
     y = m_mouse_position.y() - m_square_size / 2;
