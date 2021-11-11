@@ -235,9 +235,11 @@ bool ChessBoardWidget::HandleBoardMouseEvent(QMouseEvent* event) {
 
   if (left_press) {
     if (m_src_square.has_value() && (m_src_square != square)) {
-      m_board.DoMove(chess::Move{m_src_square.value(), square});
-      m_selected_square.reset();
-      m_src_square.reset();
+      chess::Move move{m_src_square.value(), square};
+      if (DoMove(move)) {
+        m_selected_square.reset();
+        m_src_square.reset();
+      }
     } else {
       if (m_board.PieceAt(square) != nullptr) {
         m_in_drag_mode = true;
@@ -246,13 +248,15 @@ bool ChessBoardWidget::HandleBoardMouseEvent(QMouseEvent* event) {
     }
   } else if (left_release && click_on_board) {
     if (m_in_drag_mode) {
-      m_src_square = m_selected_square;
       if (square != m_selected_square.value()) {
-        m_board.DoMove(chess::Move{m_src_square.value(), square});
-        m_selected_square.reset();
-        m_src_square.reset();
+        chess::Move move{m_selected_square.value(), square};
+        DoMove(move);
+      } else {
+        m_src_square = m_selected_square;
       }
     }
+
+    m_selected_square.reset();
     m_in_drag_mode = false;
   }
 
@@ -445,4 +449,34 @@ void ChessBoardWidget::SetScore(int score, bool mate) {
 void ChessBoardWidget::SetScoreEnabled(bool enabled) {
   m_score_enabled = enabled;
   repaint();
+}
+
+bool ChessBoardWidget::DoMove(const chess::Move& move) {
+  if (IsValidMove(move)) {
+    m_board.DoMove(move);
+    // TODO: Get FEN, update engine and update status
+    return true;
+  } else {
+    return false;
+  }
+}
+
+bool ChessBoardWidget::IsValidMove(const chess::Move& move) const {
+  // TODO: Use real implementation once move generation is complete
+  (void)move;
+  return true;
+
+  // const chess::Piece* src_piece = m_board.PieceAt(move.src);
+  // if (src_piece == nullptr) {
+  //   return false;
+  // }
+
+  // const auto valid_moves = src_piece->GetMoves(m_board);
+  // for (auto& valid_move : valid_moves) {
+  //   if (valid_move == move) {
+  //     return true;
+  //   }
+  // }
+
+  // return false;
 }
