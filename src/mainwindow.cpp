@@ -74,6 +74,8 @@ void MainWindow::Init() {
               QString::number(max_num_threads)));
   m_engine.SetNumThreads(initial_threads);
   ui->sbThreads->setValue(initial_threads);
+
+  NewGame();
 }
 
 uint32_t MainWindow::CurrentMoveNumber() const {
@@ -83,8 +85,10 @@ uint32_t MainWindow::CurrentMoveNumber() const {
 
 void MainWindow::NewGame() {
   m_board->Reset();
+  m_engine.NewGame();
   m_moves_list.clear();
   m_engine.NewGame();
+  SetPosition(QString::fromStdString(chess::STARTPOS_FEN));
   RestartSearch();
 }
 
