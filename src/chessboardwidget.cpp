@@ -229,9 +229,9 @@ void ChessBoardWidget::HandleBoardMouseEvent(QMouseEvent* event) {
                            (button == Qt::RightButton);
   const bool left_release = (event_type == QMouseEvent::MouseButtonRelease) &&
                             (button == Qt::LeftButton);
-  //  const bool right_release = (event_type == QMouseEvent::MouseButtonRelease)
-  //  &&
-  //                             (button == Qt::RightButton);
+  // const bool right_release = (event_type == QMouseEvent::MouseButtonRelease)
+  // &&
+  //                            (button == Qt::RightButton);
 
   if (!click_on_board && (left_press || right_press)) {
     m_selected_square.reset();
@@ -256,10 +256,16 @@ void ChessBoardWidget::HandleBoardMouseEvent(QMouseEvent* event) {
 
     if (m_src_square.has_value()) {
       if (m_src_square != square) {
-        chess::Move move{m_src_square.value(), square};
-        if (DoMove(move)) {
-          m_selected_square.reset();
-          m_src_square.reset();
+        if (is_selectable_square) {
+          m_in_drag_mode = true;
+          m_selected_square = square;
+          m_src_square = square;
+        } else {
+          chess::Move move{m_src_square.value(), square};
+          if (DoMove(move)) {
+            m_selected_square.reset();
+            m_src_square.reset();
+          }
         }
       } else {
         m_in_drag_mode = true;
