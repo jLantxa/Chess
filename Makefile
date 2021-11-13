@@ -37,6 +37,7 @@ release:
 		CONFIG+=release CONFIG+=qml_release
 	cd $(BUILD_RELEASE) && make -j$(nproc)
 	cp -nr $(RES) $(BUILD_RELEASE)/
+	cd $(BUILD_RELEASE) && zip -r $(APP_TARGET).zip $(APP_TARGET) $(RES)
 
 run-release:
 	make release
