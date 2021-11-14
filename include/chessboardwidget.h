@@ -42,8 +42,9 @@ class ChessBoardWidget : public QWidget {
 
   void SetActiveColour(chess::Colour colour);
   chess::Colour GetActiveColour() const;
-  void SetPlayerColour(chess::Colour colour);
-  chess::Colour GetPlayerColour() const;
+  void SetSelectableColour(const chess::Colour& colour);
+
+  QString GetFEN() const;
 
   void paintEvent(QPaintEvent*);
   void mouseMoveEvent(QMouseEvent*);
@@ -110,6 +111,7 @@ class ChessBoardWidget : public QWidget {
   bool DoMove(const chess::Move& move);
 
  signals:
+  void MoveDone(const chess::Move& move);
 
  private:
   static constexpr int SCORE_BAR_WIDTH = 10;
@@ -123,8 +125,8 @@ class ChessBoardWidget : public QWidget {
   uint32_t m_half_moves = 0;
 
   chess::Colour m_active_colour = chess::Colour::WHITE;
-  chess::Colour m_player_colour = chess::Colour::WHITE;
-  chess::Colour m_side = chess::Colour::WHITE;
+  chess::Colour m_selectable_colour = m_active_colour;
+  chess::Colour m_side = m_active_colour;
   float m_board_size = 50;
   float m_square_size = m_board_size / 8;
 

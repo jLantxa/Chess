@@ -38,8 +38,24 @@ class Board {
   void SetPiece(std::unique_ptr<Piece> piece, const chess::Square& square);
   void DoMove(const Move& move);
 
+  std::string GetPosition(const Colour& active_colour) const;
+
+  void SetCastling(bool wkc, bool wqc, bool bkc, bool bqc);
+
  private:
   std::unique_ptr<Piece> m_board[8][8];
+
+  std::optional<Square> m_en_passant;
+
+  bool m_wkc = true;
+  bool m_wqc = true;
+  bool m_bkc = true;
+  bool m_bqc = true;
+
+  bool CanWKC() const;
+  bool CanWQC() const;
+  bool CanBKC() const;
+  bool CanBQC() const;
 };
 
 }  // namespace chess

@@ -67,7 +67,7 @@ char NumberToFile(uint8_t number);
 /**
  * @brief Toggle colour
  */
-inline void ToggleColour(Colour* colour);
+void ToggleColour(Colour* colour);
 
 }  // namespace chess
 

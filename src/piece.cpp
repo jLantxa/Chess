@@ -35,6 +35,14 @@ void Piece::SetCaptured(bool captured) { m_is_captured = captured; };
 // PAWN
 Pawn::Pawn(Colour colour) : Piece(colour, PieceType::PAWN, PAWN_VALUE) {}
 
+[[nodiscard]] char Pawn::GetFenChar() const {
+  if (m_colour == Colour::WHITE) {
+    return 'P';
+  } else {
+    return 'p';
+  }
+}
+
 [[nodiscard]] std::set<Move> Pawn::GetMoves(const Board&) const {
   // TODO: Implement pawn moves
   return {};
@@ -43,6 +51,14 @@ Pawn::Pawn(Colour colour) : Piece(colour, PieceType::PAWN, PAWN_VALUE) {}
 // KNIGHT
 Knight::Knight(Colour colour)
     : Piece(colour, PieceType::KNIGHT, KNIGHT_VALUE) {}
+
+[[nodiscard]] char Knight::GetFenChar() const {
+  if (m_colour == Colour::WHITE) {
+    return 'N';
+  } else {
+    return 'n';
+  }
+}
 
 [[nodiscard]] std::set<Move> Knight::GetMoves(const Board&) const {
   // TODO: Implement knight moves
@@ -53,6 +69,14 @@ Knight::Knight(Colour colour)
 Bishop::Bishop(Colour colour)
     : Piece(colour, PieceType::BISHOP, BISHOP_VALUE) {}
 
+[[nodiscard]] char Bishop::GetFenChar() const {
+  if (m_colour == Colour::WHITE) {
+    return 'B';
+  } else {
+    return 'b';
+  }
+}
+
 [[nodiscard]] std::set<Move> Bishop::GetMoves(const Board&) const {
   // TODO: Implement bishop moves
   return {};
@@ -60,6 +84,14 @@ Bishop::Bishop(Colour colour)
 
 // ROOK
 Rook::Rook(Colour colour) : Piece(colour, PieceType::ROOK, ROOK_VALUE) {}
+
+[[nodiscard]] char Rook::GetFenChar() const {
+  if (m_colour == Colour::WHITE) {
+    return 'R';
+  } else {
+    return 'r';
+  }
+}
 
 [[nodiscard]] std::set<Move> Rook::GetMoves(const Board&) const {
   // TODO: Implement rook moves
@@ -69,6 +101,14 @@ Rook::Rook(Colour colour) : Piece(colour, PieceType::ROOK, ROOK_VALUE) {}
 // QUEEN
 Queen::Queen(Colour colour) : Piece(colour, PieceType::QUEEN, QUEEN_VALUE) {}
 
+[[nodiscard]] char Queen::GetFenChar() const {
+  if (m_colour == Colour::WHITE) {
+    return 'Q';
+  } else {
+    return 'q';
+  }
+}
+
 [[nodiscard]] std::set<Move> Queen::GetMoves(const Board&) const {
   // TODO: Implement queen moves
   return {};
@@ -76,6 +116,14 @@ Queen::Queen(Colour colour) : Piece(colour, PieceType::QUEEN, QUEEN_VALUE) {}
 
 // KING
 King::King(Colour colour) : Piece(colour, PieceType::KING, KING_VALUE) {}
+
+[[nodiscard]] char King::GetFenChar() const {
+  if (m_colour == Colour::WHITE) {
+    return 'K';
+  } else {
+    return 'k';
+  }
+}
 
 [[nodiscard]] std::set<Move> King::GetMoves(const Board&) const {
   // TODO: Implement king moves

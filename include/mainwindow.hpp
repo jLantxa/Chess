@@ -48,6 +48,8 @@ class MainWindow : public QMainWindow {
    */
   void OnDepthInfoAvailable(const UCIEngine::DepthInfo& depth_info);
 
+  void OnMoveDone(const chess::Move& move);
+
  private slots:
   void SetBoardPalette(const ChessBoardWidget::ChessPalette& palette);
 
@@ -63,6 +65,7 @@ class MainWindow : public QMainWindow {
   void on_actionSettings_triggered();
   void on_bSettings_clicked();
   void on_actionRestart_triggered();
+  void on_bDownload_clicked();
 
  private:
   Ui::MainWindow* ui;
@@ -127,7 +130,7 @@ class MainWindow : public QMainWindow {
    * @param fen_str FEN string.
    * @return true if the position is valid.
    */
-  bool SetPosition(const QString& fen_str);
+  bool ResetPosition(const QString& fen_str);
 
   /**
    * @brief Get a score string with a + or - sign.

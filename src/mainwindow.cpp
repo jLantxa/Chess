@@ -37,6 +37,7 @@ MainWindow::MainWindow(QWidget* parent)
   Init();
   connect(&m_engine, &UCIEngine::DepthInfoAvailable, this,
           &MainWindow::OnDepthInfoAvailable);
+  connect(m_board, &ChessBoardWidget::MoveDone, this, &MainWindow::OnMoveDone);
 }
 
 MainWindow::~MainWindow() {
@@ -48,12 +49,14 @@ void MainWindow::Init() {
   // GUI defaults
   setWindowTitle(WINDOW_TITLE);
   ui->bEngineOn->setPalette(QColor(Qt::red));
-  m_board->SetPlayerColour(chess::Colour::WHITE);
-  m_board->SetActiveColour(chess::Colour::WHITE);
 
   ui->bRotateBoard->setIcon(resources::ROTATE_ICON);
   ui->bSettings->setIcon(resources::SETTINGS_ICON);
   ui->bEngineOn->setIcon(resources::ENGINE_ICON);
+  ui->bDownload->setIcon(resources::DOWNLOAD_ICON);
+
+  m_board->SetActiveColour(chess::Colour::WHITE);
+  m_board->SetSelectableColour(chess::Colour::WHITE);
 
   // Engine defaults
   m_engine.Init(DEFAULT_ENGINE_CMD);
@@ -80,16 +83,15 @@ void MainWindow::Init() {
 
 uint32_t MainWindow::CurrentMoveNumber() const {
   const uint32_t half_moves = m_board->GetNumHalfMoves();
-  return 1 + ((half_moves + m_moves_list.size()) / 2);
+  return 1 + ((half_moves + m_moves_list.length()) / 2);
 }
 
 void MainWindow::NewGame() {
   m_board->Reset();
-  m_engine.NewGame();
   m_moves_list.clear();
+  ResetPosition(QString::fromStdString(chess::STARTPOS_FEN));
   m_engine.NewGame();
-  SetPosition(QString::fromStdString(chess::STARTPOS_FEN));
-  RestartSearch();
+  m_board->SetSelectableColour(chess::Colour::WHITE);
 }
 
 void MainWindow::SetNumLines(uint8_t num_lines) {
@@ -111,7 +113,7 @@ void MainWindow::RestartSearch() {
   }
 }
 
-bool MainWindow::SetPosition(const QString& fen_str) {
+bool MainWindow::ResetPosition(const QString& fen_str) {
   if (fen_str.isEmpty()) {
     return false;
   }
@@ -124,6 +126,8 @@ bool MainWindow::SetPosition(const QString& fen_str) {
   }
 
   m_board->SetPosition(fen_str);
+  const auto active_colour = m_board->GetActiveColour();
+  m_board->SetSelectableColour(active_colour);
 
   m_moves_list.clear();
   ui->teMoves->clear();
@@ -202,10 +206,10 @@ void MainWindow::UpdateLineInfo() {
 
 void MainWindow::UpdateMoveList() {
   ui->teMoves->clear();
-  const int length = m_moves_list.length();
+  const int length = m_moves_list.size();
   QString moves_str;
   const uint32_t starting_half_move_num =
-      m_board->GetNumHalfMoves() - m_moves_list.length();
+      m_board->GetNumHalfMoves() - m_moves_list.size();
   for (int i = 0; i < length; ++i) {
     const QString& move = m_moves_list[i];
     const uint32_t half_moves = (starting_half_move_num + (i + 1));
@@ -286,7 +290,7 @@ void MainWindow::on_actionSet_FEN_position_triggered() {
   dialog->exec();
 
   QString fen_str = dialog->textValue();
-  const bool position_ok = SetPosition(fen_str.trimmed());
+  const bool position_ok = ResetPosition(fen_str.trimmed());
   if (!position_ok) {
     ShowMsgBox("Error", "Could not set position.");
   }
@@ -311,4 +315,22 @@ void MainWindow::on_actionRestart_triggered() {
   m_engine.Reset();
   // TODO: Reset engine position
   RestartSearch();
+}
+
+void MainWindow::OnMoveDone(const chess::Move& move) {
+  (void)move;
+
+  const auto active_colour = m_board->GetActiveColour();
+  m_board->SetSelectableColour(active_colour);
+  m_moves_list.push_back(QString::fromStdString(chess::MoveToUCI(move)));
+  UpdateMoveList();
+
+  QString fen_str = m_board->GetFEN();
+  m_engine.SetPosition(fen_str);
+  RestartSearch();
+}
+
+void MainWindow::on_bDownload_clicked() {
+  const QString fen_str = m_board->GetFEN();
+  ShowMsgBox("Position", fen_str);
 }

@@ -34,11 +34,13 @@ ChessBoardWidget::ChessBoardWidget(QWidget* parent) : QWidget(parent) {
 
 void ChessBoardWidget::Reset() {
   m_score = 0;
+  m_half_moves = 0;
   m_selected_square.reset();
   m_src_square.reset();
   m_last_move_src_square.reset();
   m_last_move_dst_square.reset();
   m_in_drag_mode = false;
+  m_active_colour = chess::Colour::WHITE;
 }
 
 static bool IsUpperCase(char ch) {
@@ -71,6 +73,12 @@ void ChessBoardWidget::SetPosition(const QString& fen_str) {
   if (m_active_colour == chess::Colour::BLACK) {
     m_half_moves++;
   }
+
+  bool wkc = args[2].contains("K");
+  bool wqc = args[2].contains("Q");
+  bool bkc = args[2].contains("k");
+  bool bqc = args[2].contains("q");
+  m_board.SetCastling(wkc, wqc, bkc, bqc);
 
   const QStringList& lines = args[0].trimmed().split("/");
   uint8_t i, j;
@@ -149,14 +157,6 @@ void ChessBoardWidget::SetActiveColour(chess::Colour colour) {
 
 chess::Colour ChessBoardWidget::GetActiveColour() const {
   return m_active_colour;
-}
-
-void ChessBoardWidget::SetPlayerColour(chess::Colour colour) {
-  m_player_colour = colour;
-}
-
-chess::Colour ChessBoardWidget::GetPlayerColour() const {
-  return m_player_colour;
 }
 
 void ChessBoardWidget::SetColourPalette(const ChessPalette& palette) {
@@ -248,7 +248,7 @@ void ChessBoardWidget::HandleBoardMouseEvent(QMouseEvent* event) {
 
   const chess::Piece* piece = m_board.PieceAt(square);
   const bool is_selectable_square =
-      (piece != nullptr) && (piece->GetColour() == m_player_colour);
+      (piece != nullptr) && (piece->GetColour() == m_selectable_colour);
 
   if (left_press) {
     m_last_move_src_square.reset();
@@ -499,6 +499,9 @@ bool ChessBoardWidget::DoMove(const chess::Move& move) {
     m_board.DoMove(move);
     m_last_move_src_square = move.src;
     m_last_move_dst_square = move.dst;
+    chess::ToggleColour(&m_active_colour);
+    m_half_moves++;
+    emit MoveDone(move);
     // TODO: Get FEN, update engine and update status
     return true;
   } else {
@@ -524,4 +527,20 @@ bool ChessBoardWidget::IsValidMove(const chess::Move& move) const {
   // }
 
   // return false;
+}
+
+void ChessBoardWidget::SetSelectableColour(const chess::Colour& colour) {
+  m_selectable_colour = colour;
+}
+
+QString ChessBoardWidget::GetFEN() const {
+  const QString board_pos =
+      QString::fromStdString(m_board.GetPosition(m_active_colour));
+  // TODO: Use half moves
+  const QString half_moves = QString::number(0);
+
+  QString fen_str = board_pos + " " + half_moves + " " +
+                    QString::number(1 + (m_half_moves / 2));
+
+  return fen_str;
 }

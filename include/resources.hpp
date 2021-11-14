@@ -36,6 +36,7 @@ const std::array<QIcon, 6> BLACK_ICONS{
 const QIcon ROTATE_ICON = QIcon("res/icon/rotate.svg");
 const QIcon SETTINGS_ICON = QIcon("res/icon/settings.svg");
 const QIcon ENGINE_ICON = QIcon("res/icon/power.svg");
+const QIcon DOWNLOAD_ICON = QIcon("res/icon/download.svg");
 
 }  // namespace resources
 

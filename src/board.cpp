@@ -17,6 +17,8 @@
 
 #include "board.hpp"
 
+#include <sstream>
+
 namespace chess {
 
 void Board::SetPiece(std::unique_ptr<Piece> piece, uint8_t i, uint8_t j) {
@@ -70,6 +72,83 @@ void Board::Clear() {
       ClearPieceAt(i, j);
     }
   }
+}
+
+void Board::SetCastling(bool wkc, bool wqc, bool bkc, bool bqc) {
+  m_wkc = wkc;
+  m_wqc = wqc;
+  m_bkc = bkc;
+  m_bqc = bqc;
+}
+
+std::string Board::GetPosition(const Colour& active_colour) const {
+  std::stringstream ss;
+
+  uint8_t empty_count;
+  for (uint8_t j = 0; j < 8; ++j) {
+    empty_count = 0;
+    for (uint8_t i = 0; i < 8; ++i) {
+      auto piece = m_board[i][7 - j].get();
+      if (piece == nullptr) {
+        empty_count++;
+      } else {
+        if (empty_count > 0) {
+          ss << std::to_string(empty_count);
+          empty_count = 0;
+        }
+        ss << std::string{piece->GetFenChar()};
+      }
+    }
+
+    if (empty_count > 0) {
+      ss << std::to_string(empty_count);
+    }
+    if (j != 7) {
+      ss << "/";
+    } else {
+      ss << " ";
+    }
+  }
+
+  ss << ((active_colour == Colour::WHITE) ? "w " : "b ");
+
+  const bool some_castling_possible =
+      CanWKC() || CanWQC() || CanBKC() || CanBQC();
+
+  if (some_castling_possible) {
+    ss << (CanWKC() ? "K" : "");
+    ss << (CanWQC() ? "Q" : "");
+    ss << (CanBKC() ? "k" : "");
+    ss << (CanBQC() ? "q" : "");
+    ss << " ";
+  } else {
+    ss << "- ";
+  }
+
+  ss << ((m_en_passant.has_value()) ? SquareToString(m_en_passant.value())
+                                    : "- ");
+
+  return ss.str();
+}
+
+bool Board::CanWKC() const {
+  // TODO: Implement
+  return m_wkc;
+}
+
+bool Board::CanWQC() const {
+  // TODO: Implement
+  return m_wqc;
+}
+
+bool Board::CanBKC() const {
+  // TODO: Implement
+  return m_bkc;
+}
+
+bool Board::CanBQC() const {
+  // TODO: Implement
+  return m_bqc;
 }
 
 }  // namespace chess

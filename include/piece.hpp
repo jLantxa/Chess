@@ -37,6 +37,7 @@ class Piece {
   void SetCaptured(bool captured);
   ;
   [[nodiscard]] virtual std::set<Move> GetMoves(const Board& board) const = 0;
+  [[nodiscard]] virtual char GetFenChar() const = 0;
 
  protected:
   const Colour m_colour;
@@ -48,36 +49,42 @@ class Piece {
 class Pawn : public Piece {
  public:
   Pawn(Colour colour);
+  [[nodiscard]] char GetFenChar() const override;
   [[nodiscard]] std::set<Move> GetMoves(const Board&) const override;
 };
 
 class Knight : public Piece {
  public:
   Knight(Colour colour);
+  [[nodiscard]] char GetFenChar() const override;
   [[nodiscard]] std::set<Move> GetMoves(const Board&) const override;
 };
 
 class Bishop : public Piece {
  public:
   Bishop(Colour colour);
+  [[nodiscard]] char GetFenChar() const override;
   [[nodiscard]] std::set<Move> GetMoves(const Board&) const override;
 };
 
 class Rook : public Piece {
  public:
   Rook(Colour colour);
+  [[nodiscard]] char GetFenChar() const override;
   [[nodiscard]] std::set<Move> GetMoves(const Board&) const override;
 };
 
 class Queen : public Piece {
  public:
   Queen(Colour colour);
+  [[nodiscard]] char GetFenChar() const override;
   [[nodiscard]] std::set<Move> GetMoves(const Board&) const override;
 };
 
 class King : public Piece {
  public:
   King(Colour colour);
+  [[nodiscard]] char GetFenChar() const override;
   [[nodiscard]] std::set<Move> GetMoves(const Board&) const override;
 };
 
