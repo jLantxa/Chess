@@ -95,6 +95,7 @@ void MainWindow::NewGame() {
 }
 
 void MainWindow::SetNumLines(uint8_t num_lines) {
+  num_lines = std::max(static_cast<uint8_t>(1U), num_lines);
   m_depth_infos.clear();
   m_depth_infos.resize(num_lines);
   m_engine.SetNumLines(num_lines);
@@ -159,6 +160,15 @@ void MainWindow::OnDepthInfoAvailable(const UCIEngine::DepthInfo& info) {
 
 void MainWindow::UpdateLineInfo() {
   ui->teLines->clear();
+
+  if (m_depth_infos.size() > 0) {
+    const auto& info = m_depth_infos[0];
+    m_board->SetScore(info.score, info.mate_counter);
+  }
+
+  if (!m_show_lines) {
+    return;
+  }
   for (uint32_t i = 0; i < m_num_received_lines; ++i) {
     auto& info = m_depth_infos[i];
     QStringList move_str_chain;
@@ -197,10 +207,6 @@ void MainWindow::UpdateLineInfo() {
     }
 
     ui->teLines->append(score_str + " " + move_str_chain.join(" ") + "<br>");
-
-    if (i == 0) {
-      m_board->SetScore(score, info.mate_counter);
-    }
   }
 }
 
@@ -274,6 +280,8 @@ void MainWindow::on_sbThreads_editingFinished() {
 
 void MainWindow::on_sbLines_editingFinished() {
   const int num_lines = ui->sbLines->value();
+  m_show_lines = (num_lines > 0);
+  ui->teLines->setVisible(m_show_lines);
   SetNumLines(num_lines);
 }
 

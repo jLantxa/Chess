@@ -92,6 +92,8 @@ class MainWindow : public QMainWindow {
   /** Number of lines received from the engine. */
   uint32_t m_num_received_lines = 0;
 
+  bool m_show_lines = true;
+
   ChessBoardWidget* m_board;
 
   SettingsDialog* m_settings_dialog;
