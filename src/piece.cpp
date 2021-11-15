@@ -22,15 +22,19 @@ namespace chess {
 Piece::Piece(Colour colour, PieceType type, uint8_t value)
     : m_colour(colour), m_type(type), m_value(value) {}
 
-[[nodiscard]] Colour Piece::GetColour() const { return m_colour; };
+[[nodiscard]] Colour Piece::GetColour() const { return m_colour; }
 
-[[nodiscard]] PieceType Piece::GetType() const { return m_type; };
+[[nodiscard]] PieceType Piece::GetType() const { return m_type; }
 
-[[nodiscard]] uint8_t Piece::GetValue() const { return m_value; };
+[[nodiscard]] uint8_t Piece::GetValue() const { return m_value; }
 
-[[nodiscard]] bool Piece::IsCaptured() const { return m_is_captured; };
+[[nodiscard]] bool Piece::IsCaptured() const { return m_is_captured; }
 
-void Piece::SetCaptured(bool captured) { m_is_captured = captured; };
+[[nodiscard]] Square Piece::GetSquare() const { return m_square; }
+
+void Piece::SetSquare(const Square& square) { m_square = square; }
+
+void Piece::SetCaptured(bool captured) { m_is_captured = captured; }
 
 // PAWN
 Pawn::Pawn(Colour colour) : Piece(colour, PieceType::PAWN, PAWN_VALUE) {}
@@ -43,9 +47,49 @@ Pawn::Pawn(Colour colour) : Piece(colour, PieceType::PAWN, PAWN_VALUE) {}
   }
 }
 
-[[nodiscard]] std::set<Move> Pawn::GetMoves(const Board&) const {
-  // TODO: Implement pawn moves
-  return {};
+[[nodiscard]] std::vector<Move> Pawn::GetMoves(const Board& board) const {
+  std::vector<Move> moves;
+
+  uint8_t i = m_square.file;
+  uint8_t j = m_square.rank;
+
+  bool has_moved = ((m_colour == Colour::WHITE) && (m_square.rank != 1)) ||
+                   ((m_colour == Colour::BLACK) && (m_square.rank != 6));
+
+  const auto square_front = (m_colour == Colour::WHITE)
+                                ? Square{i, static_cast<uint8_t>(j + 1)}
+                                : Square{i, static_cast<uint8_t>(j - 1)};
+  const auto square_front_two = (m_colour == Colour::WHITE)
+                                    ? Square{i, static_cast<uint8_t>(j + 2)}
+                                    : Square{i, static_cast<uint8_t>(j - 2)};
+  const auto square_left =
+      (m_colour == Colour::WHITE)
+          ? Square{static_cast<uint8_t>(i - 1), static_cast<uint8_t>(j + 1)}
+          : Square{static_cast<uint8_t>(i + 1), static_cast<uint8_t>(j - 1)};
+  const auto square_right =
+      (m_colour == Colour::WHITE)
+          ? Square{static_cast<uint8_t>(i + 1), static_cast<uint8_t>(j + 1)}
+          : Square{static_cast<uint8_t>(i - 1), static_cast<uint8_t>(j - 1)};
+
+  const auto* piece_front = board.PieceAt(square_front);
+  const auto* piece_front_two = board.PieceAt(square_front_two);
+  const auto* piece_left = board.PieceAt(square_left);
+  const auto* piece_right = board.PieceAt(square_right);
+
+  if (piece_front == nullptr) {
+    moves.push_back(Move{m_square, square_front});
+  }
+  if (!has_moved && (piece_front == nullptr) && (piece_front_two == nullptr)) {
+    moves.push_back(Move{m_square, square_front_two});
+  }
+  if (piece_left != nullptr && (piece_left->GetColour() != m_colour)) {
+    moves.push_back(Move{m_square, square_left});
+  }
+  if (piece_right != nullptr && (piece_right->GetColour() != m_colour)) {
+    moves.push_back(Move{m_square, square_right});
+  }
+
+  return moves;
 };
 
 // KNIGHT
@@ -60,9 +104,9 @@ Knight::Knight(Colour colour)
   }
 }
 
-[[nodiscard]] std::set<Move> Knight::GetMoves(const Board&) const {
+[[nodiscard]] std::vector<Move> Knight::GetMoves(const Board&) const {
   // TODO: Implement knight moves
-  return {};
+  return std::vector<Move>();
 };
 
 // BISHOP
@@ -77,7 +121,7 @@ Bishop::Bishop(Colour colour)
   }
 }
 
-[[nodiscard]] std::set<Move> Bishop::GetMoves(const Board&) const {
+[[nodiscard]] std::vector<Move> Bishop::GetMoves(const Board&) const {
   // TODO: Implement bishop moves
   return {};
 };
@@ -93,7 +137,7 @@ Rook::Rook(Colour colour) : Piece(colour, PieceType::ROOK, ROOK_VALUE) {}
   }
 }
 
-[[nodiscard]] std::set<Move> Rook::GetMoves(const Board&) const {
+[[nodiscard]] std::vector<Move> Rook::GetMoves(const Board&) const {
   // TODO: Implement rook moves
   return {};
 };
@@ -109,7 +153,7 @@ Queen::Queen(Colour colour) : Piece(colour, PieceType::QUEEN, QUEEN_VALUE) {}
   }
 }
 
-[[nodiscard]] std::set<Move> Queen::GetMoves(const Board&) const {
+[[nodiscard]] std::vector<Move> Queen::GetMoves(const Board&) const {
   // TODO: Implement queen moves
   return {};
 };
@@ -125,7 +169,7 @@ King::King(Colour colour) : Piece(colour, PieceType::KING, KING_VALUE) {}
   }
 }
 
-[[nodiscard]] std::set<Move> King::GetMoves(const Board&) const {
+[[nodiscard]] std::vector<Move> King::GetMoves(const Board&) const {
   // TODO: Implement king moves
   return {};
 };

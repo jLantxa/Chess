@@ -21,26 +21,35 @@
 #include <memory>
 #include <optional>
 #include <string>
+#include <vector>
 
 #include "chess.hpp"
 #include "piece.hpp"
 
 namespace chess {
 
+class Piece;
+
 class Board {
  public:
   const Piece* PieceAt(uint8_t i, uint8_t j) const;
   const Piece* PieceAt(const chess::Square& square) const;
+
   void ClearPieceAt(uint8_t i, uint8_t j);
   void ClearPieceAt(const chess::Square& square);
   void Clear();
+
   void SetPiece(std::unique_ptr<Piece> piece, uint8_t i, uint8_t j);
   void SetPiece(std::unique_ptr<Piece> piece, const chess::Square& square);
+
   void DoMove(const Move& move);
 
   std::string GetPosition(const Colour& active_colour) const;
 
   void SetCastling(bool wkc, bool wqc, bool bkc, bool bqc);
+
+  std::vector<Move> GetMovesFrom(uint8_t i, uint8_t j) const;
+  std::vector<Move> GetMovesFrom(const Square& square) const;
 
  private:
   std::unique_ptr<Piece> m_board[8][8];

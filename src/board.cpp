@@ -24,6 +24,7 @@ namespace chess {
 void Board::SetPiece(std::unique_ptr<Piece> piece, uint8_t i, uint8_t j) {
   ClearPieceAt(i, j);
   m_board[i][j] = std::move(piece);
+  m_board[i][j]->SetSquare({i, j});
 }
 
 void Board::SetPiece(std::unique_ptr<Piece> piece,
@@ -63,6 +64,7 @@ void Board::DoMove(const Move& move) {
   auto& src = m_board[move.src.file][move.src.rank];
   auto& dst = m_board[move.dst.file][move.dst.rank];
   dst.swap(src);
+  dst->SetSquare(move.dst);
   src.reset();
 }
 
@@ -149,6 +151,21 @@ bool Board::CanBKC() const {
 bool Board::CanBQC() const {
   // TODO: Implement
   return m_bqc;
+}
+
+std::vector<Move> Board::GetMovesFrom(uint8_t i, uint8_t j) const {
+  const Square square{i, j};
+  return GetMovesFrom(square);
+}
+
+std::vector<Move> Board::GetMovesFrom(const Square& square) const {
+  // TODO: Handle en passant moves.
+  const Piece* src_piece = PieceAt(square);
+  if (src_piece == nullptr) {
+    return {};
+  }
+
+  return src_piece->GetMoves(*this);
 }
 
 }  // namespace chess
