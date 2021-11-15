@@ -325,7 +325,8 @@ void MainWindow::on_bSettings_clicked() { m_settings_dialog->exec(); }
 
 void MainWindow::on_actionRestart_triggered() {
   m_engine.Reset();
-  // TODO: Reset engine position
+  const QString fen = m_board->GetFEN();
+  m_engine.SetPosition(fen);
   RestartSearch();
 }
 
