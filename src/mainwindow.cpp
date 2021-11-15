@@ -155,58 +155,62 @@ void MainWindow::OnDepthInfoAvailable(const UCIEngine::DepthInfo& info) {
   m_num_received_lines = line_id;
   m_depth_infos[line_id - 1] = info;  // Lines start counting at 1
 
+  if (m_board->GetActiveColour() == chess::Colour::BLACK) {
+    for (auto& info : m_depth_infos) {
+      info.score *= -1;
+    }
+  }
+
   UpdateLineInfo();
 }
 
 void MainWindow::UpdateLineInfo() {
   ui->teLines->clear();
 
-  if (m_depth_infos.size() > 0) {
-    const auto& info = m_depth_infos[0];
-    m_board->SetScore(info.score, info.mate_counter);
-  }
-
-  if (!m_show_lines) {
-    return;
-  }
   for (uint32_t i = 0; i < m_num_received_lines; ++i) {
     auto& info = m_depth_infos[i];
     QStringList move_str_chain;
 
-    /* If black plays, the first move in the sequence belongs to black, and
-     * we must omit white's move:
-     * n... <black> instead of n. <white> <black>
-     */
-    const uint32_t starting_half_move_num = m_board->GetNumHalfMoves();
-    for (int i = 0; i < info.pv.length(); ++i) {
-      const uint32_t half_move_number = (starting_half_move_num + i);
-      if ((half_move_number % 2) == 0) {  // White move
-        move_str_chain.push_back(QString::number(1 + (half_move_number / 2)) +
-                                 ". " + info.pv[i]);
-      } else {  // Black move
-        if (i == 0) {
+    // Show info in widget
+    if (m_show_lines) {
+      /* If black plays, the first move in the sequence belongs to black, and
+       * we must omit white's move:
+       * n... <black> instead of n. <white> <black>
+       */
+      const uint32_t starting_half_move_num = m_board->GetNumHalfMoves();
+      for (int i = 0; i < info.pv.length(); ++i) {
+        const uint32_t half_move_number = (starting_half_move_num + i);
+        if ((half_move_number % 2) == 0) {  // White move
           move_str_chain.push_back(QString::number(1 + (half_move_number / 2)) +
-                                   "... " + info.pv[i]);
-        } else {
-          move_str_chain.push_back(info.pv[i]);
+                                   ". " + info.pv[i]);
+        } else {  // Black move
+          if (i == 0) {
+            move_str_chain.push_back(
+                QString::number(1 + (half_move_number / 2)) + "... " +
+                info.pv[i]);
+          } else {
+            move_str_chain.push_back(info.pv[i]);
+          }
         }
       }
-    }
 
-    QString score_str;
-    int score = info.score;
-    if (m_board->GetActiveColour() == chess::Colour::BLACK) {
-      score *= -1;
-    }
-    if (!info.mate_counter) {
-      score_str = "<b>[" + GetSignedScore(score) + "]</b>";
-    } else {
-      QString signed_mate_str = (score >= 0) ? "M" : "-M";
-      score_str =
-          "<b>[" + signed_mate_str + QString::number(info.score) + "]</b>";
-    }
+      QString score_str;
+      if (!info.mate_counter) {
+        score_str = "<b>[" + GetSignedScore(info.score) + "]</b>";
+      } else {
+        QString signed_mate_str = (info.score >= 0) ? "M" : "-M";
+        score_str =
+            "<b>[" + signed_mate_str + QString::number(info.score) + "]</b>";
+      }
 
-    ui->teLines->append(score_str + " " + move_str_chain.join(" ") + "<br>");
+      ui->teLines->append(score_str + " " + move_str_chain.join(" ") + "<br>");
+    }
+  }
+
+  // Send score to board widget
+  if (m_depth_infos.size() > 0) {
+    const auto& info = m_depth_infos[0];
+    m_board->SetScore(info.score, info.mate_counter);
   }
 }
 
