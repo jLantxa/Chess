@@ -139,6 +139,25 @@ bool MainWindow::ResetPosition(const QString& fen_str) {
   return true;
 }
 
+void MainWindow::OnMoveDone(const chess::Move& move) {
+  (void)move;
+
+  const auto active_colour = m_board->GetActiveColour();
+  m_board->SetSelectableColour(active_colour);
+  m_moves_list.push_back(QString::fromStdString(chess::MoveToUCI(move)));
+  UpdateMoveList();
+
+  QString fen_str = m_board->GetFEN();
+  m_engine.SetPosition(fen_str);
+  RestartSearch();
+}
+
+void MainWindow::on_bDownload_clicked() {
+  const QString fen_str = m_board->GetFEN();
+  ShowMsgBox("Position", fen_str);
+}
+
+
 void MainWindow::ShowMsgBox(const QString& title, const QString& text) {
   QMessageBox msg_box(this);
   msg_box.setWindowTitle(title);
@@ -328,22 +347,4 @@ void MainWindow::on_actionRestart_triggered() {
   const QString fen = m_board->GetFEN();
   m_engine.SetPosition(fen);
   RestartSearch();
-}
-
-void MainWindow::OnMoveDone(const chess::Move& move) {
-  (void)move;
-
-  const auto active_colour = m_board->GetActiveColour();
-  m_board->SetSelectableColour(active_colour);
-  m_moves_list.push_back(QString::fromStdString(chess::MoveToUCI(move)));
-  UpdateMoveList();
-
-  QString fen_str = m_board->GetFEN();
-  m_engine.SetPosition(fen_str);
-  RestartSearch();
-}
-
-void MainWindow::on_bDownload_clicked() {
-  const QString fen_str = m_board->GetFEN();
-  ShowMsgBox("Position", fen_str);
 }
