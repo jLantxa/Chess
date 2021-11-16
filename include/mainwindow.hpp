@@ -48,6 +48,10 @@ class MainWindow : public QMainWindow {
    */
   void OnDepthInfoAvailable(const UCIEngine::DepthInfo& depth_info);
 
+  /**
+   * @brief Called when a valid move is done on the board
+   * @param move Move
+   */
   void OnMoveDone(const chess::Move& move);
 
  private slots:
@@ -92,6 +96,7 @@ class MainWindow : public QMainWindow {
   /** Number of lines received from the engine. */
   uint32_t m_num_received_lines = 0;
 
+  /** Show analysis lines while engine is on */
   bool m_show_lines = true;
 
   ChessBoardWidget* m_board;
