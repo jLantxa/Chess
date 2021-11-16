@@ -17,6 +17,8 @@
 
 #include "piece.hpp"
 
+#include <cstdio>
+
 namespace chess {
 
 Piece::Piece(Colour colour, PieceType type, uint8_t value)
@@ -190,9 +192,28 @@ King::King(Colour colour) : Piece(colour, PieceType::KING, KING_VALUE) {}
   }
 }
 
-[[nodiscard]] std::vector<Move> King::GetMoves(const Board&) const {
-  // TODO: Implement king moves
-  return {};
+[[nodiscard]] std::vector<Move> King::GetMoves(const Board& board) const {
+  std::vector<Move> moves;
+
+  uint8_t i = m_square.file;
+  uint8_t j = m_square.rank;
+
+  for (int8_t di = -1; di < 2; ++di) {
+    for (int8_t dj = -1; dj < 2; ++dj) {
+      const Square dst_square = {static_cast<uint8_t>(i + di),
+                                 static_cast<uint8_t>(j + dj)};
+      const auto* dst_piece = board.PieceAt(dst_square);
+      if (dst_piece == nullptr || (dst_piece->GetColour() != m_colour)) {
+        const Move move{m_square, dst_square};
+        const Board future_board = board.AfterMove(move);
+        if (!future_board.CanBeCaptured(dst_square)) {
+          moves.push_back({m_square, dst_square});
+        }
+      }
+    }
+  }
+
+  return moves;
 };
 
 }  // namespace chess

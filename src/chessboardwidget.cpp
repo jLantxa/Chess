@@ -511,22 +511,24 @@ bool ChessBoardWidget::DoMove(const chess::Move& move) {
 
 bool ChessBoardWidget::IsValidMove(const chess::Move& move) const {
   // TODO: Use real implementation once move generation is complete
+#if 0
+  const chess::Piece* src_piece = m_board.PieceAt(move.src);
+  if (src_piece == nullptr) {
+    return false;
+  }
+
+  const auto valid_moves = src_piece->GetMoves(m_board);
+  for (auto& valid_move : valid_moves) {
+    if (valid_move == move) {
+      return true;
+    }
+  }
+
+  return false;
+#else
   (void)move;
   return true;
-
-  // const chess::Piece* src_piece = m_board.PieceAt(move.src);
-  // if (src_piece == nullptr) {
-  //   return false;
-  // }
-
-  // const auto valid_moves = src_piece->GetMoves(m_board);
-  // for (auto& valid_move : valid_moves) {
-  //   if (valid_move == move) {
-  //     return true;
-  //   }
-  // }
-
-  // return false;
+#endif
 }
 
 void ChessBoardWidget::SetSelectableColour(const chess::Colour& colour) {
