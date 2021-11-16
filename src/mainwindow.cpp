@@ -157,7 +157,6 @@ void MainWindow::on_bDownload_clicked() {
   ShowMsgBox("Position", fen_str);
 }
 
-
 void MainWindow::ShowMsgBox(const QString& title, const QString& text) {
   QMessageBox msg_box(this);
   msg_box.setWindowTitle(title);

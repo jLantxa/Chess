@@ -104,9 +104,30 @@ Knight::Knight(Colour colour)
   }
 }
 
-[[nodiscard]] std::vector<Move> Knight::GetMoves(const Board&) const {
-  // TODO: Implement knight moves
-  return std::vector<Move>();
+[[nodiscard]] std::vector<Move> Knight::GetMoves(const Board& board) const {
+  std::vector<Move> moves;
+
+  uint8_t i = m_square.file;
+  uint8_t j = m_square.rank;
+
+  const std::vector<Square> dsts{
+      {static_cast<uint8_t>(i + 1), static_cast<uint8_t>(j + 2)},
+      {static_cast<uint8_t>(i + 2), static_cast<uint8_t>(j + 1)},
+      {static_cast<uint8_t>(i + 2), static_cast<uint8_t>(j - 1)},
+      {static_cast<uint8_t>(i + 1), static_cast<uint8_t>(j - 2)},
+      {static_cast<uint8_t>(i - 1), static_cast<uint8_t>(j + 2)},
+      {static_cast<uint8_t>(i - 2), static_cast<uint8_t>(j + 1)},
+      {static_cast<uint8_t>(i - 2), static_cast<uint8_t>(j - 1)},
+      {static_cast<uint8_t>(i - 1), static_cast<uint8_t>(j - 2)}};
+
+  for (const auto& dst_square : dsts) {
+    const auto* dst_piece = board.PieceAt(dst_square);
+    if (dst_piece == nullptr || (dst_piece->GetColour() != m_colour)) {
+      moves.push_back({m_square, dst_square});
+    }
+  }
+
+  return moves;
 };
 
 // BISHOP
