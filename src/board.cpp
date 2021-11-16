@@ -168,4 +168,34 @@ std::vector<Move> Board::GetMovesFrom(const Square& square) const {
   return src_piece->GetMoves(*this);
 }
 
+[[nodiscard]] bool Board::CanBeCaptured(const Square& square) const {
+  const auto* piece_in_check = PieceAt(square);
+  for (uint8_t i = 0; i < 8; ++i) {
+    for (uint8_t j = 0; j < 8; ++j) {
+      const Square src_square{i, j};
+      const auto* src_piece = PieceAt(src_square);
+      if (src_piece == nullptr ||
+          (src_piece->GetColour() == piece_in_check->GetColour()) ||
+          (src_piece->GetType() == PieceType::KING)) {
+        continue;
+      }
+
+      const auto moves = src_piece->GetMoves(*this);
+      for (auto& move : moves) {
+        if (move.dst == square) {
+          return true;
+        }
+      }
+    }
+  }
+
+  return false;
+}
+
+[[nodiscard]] Board Board::AfterMove(const Move& move) const {
+  // TODO: Return a copy of this board with the move applied.
+  (void)move;
+  return {};
+}
+
 }  // namespace chess
