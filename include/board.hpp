@@ -51,6 +51,22 @@ class Board {
   [[nodiscard]] std::vector<Move> GetMovesFrom(uint8_t i, uint8_t j) const;
   [[nodiscard]] std::vector<Move> GetMovesFrom(const Square& square) const;
 
+  /**
+   * @brief Check if player is in check.
+   *
+   * @param colour Colour
+   * @return true The player is in check.
+   * @return false  The player is not in check.
+   */
+  [[nodiscard]] bool IsInCheck(chess::Colour colour) const;
+
+  /**
+   * @brief A piece in a give square can be captured by the other colour.
+   *
+   * @param square Square to check
+   * @return true An existing piece can be captured.
+   * @return false No piece can be captured in the given square.
+   */
   [[nodiscard]] bool CanBeCaptured(const Square& square) const;
 
   [[nodiscard]] Board AfterMove(const Move& move) const;

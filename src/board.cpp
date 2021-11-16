@@ -174,7 +174,7 @@ std::vector<Move> Board::GetMovesFrom(const Square& square) const {
     for (uint8_t j = 0; j < 8; ++j) {
       const Square src_square{i, j};
       const auto* src_piece = PieceAt(src_square);
-      if (src_piece == nullptr ||
+      if ((src_piece == nullptr) ||
           (src_piece->GetColour() == piece_in_check->GetColour()) ||
           (src_piece->GetType() == PieceType::KING)) {
         continue;
@@ -185,6 +185,22 @@ std::vector<Move> Board::GetMovesFrom(const Square& square) const {
         if (move.dst == square) {
           return true;
         }
+      }
+    }
+  }
+
+  return false;
+}
+
+[[nodiscard]] bool Board::IsInCheck(chess::Colour colour) const {
+  for (uint8_t i = 0; i < 8; ++i) {
+    for (uint8_t j = 0; j < 8; ++j) {
+      const Piece* piece = PieceAt(i, j);
+      const bool is_colour_king = (piece != nullptr) &&
+                                  (piece->GetType() == PieceType::KING) &&
+                                  (piece->GetColour() == colour);
+      if (is_colour_king && CanBeCaptured({i, j})) {
+        return true;
       }
     }
   }

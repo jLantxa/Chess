@@ -107,6 +107,10 @@ Knight::Knight(Colour colour)
 }
 
 [[nodiscard]] std::vector<Move> Knight::GetMoves(const Board& board) const {
+  if (board.IsInCheck(m_colour)) {
+    return {};
+  }
+
   std::vector<Move> moves;
 
   uint8_t i = m_square.file;
@@ -124,7 +128,7 @@ Knight::Knight(Colour colour)
 
   for (const auto& dst_square : dsts) {
     const auto* dst_piece = board.PieceAt(dst_square);
-    if (dst_piece == nullptr || (dst_piece->GetColour() != m_colour)) {
+    if ((dst_piece == nullptr) || (dst_piece->GetColour() != m_colour)) {
       moves.push_back({m_square, dst_square});
     }
   }
@@ -144,7 +148,11 @@ Bishop::Bishop(Colour colour)
   }
 }
 
-[[nodiscard]] std::vector<Move> Bishop::GetMoves(const Board&) const {
+[[nodiscard]] std::vector<Move> Bishop::GetMoves(const Board& board) const {
+  if (board.IsInCheck(m_colour)) {
+    return {};
+  }
+
   // TODO: Implement bishop moves
   return {};
 };
@@ -160,7 +168,11 @@ Rook::Rook(Colour colour) : Piece(colour, PieceType::ROOK, ROOK_VALUE) {}
   }
 }
 
-[[nodiscard]] std::vector<Move> Rook::GetMoves(const Board&) const {
+[[nodiscard]] std::vector<Move> Rook::GetMoves(const Board& board) const {
+  if (board.IsInCheck(m_colour)) {
+    return {};
+  }
+
   // TODO: Implement rook moves
   return {};
 };
@@ -176,7 +188,11 @@ Queen::Queen(Colour colour) : Piece(colour, PieceType::QUEEN, QUEEN_VALUE) {}
   }
 }
 
-[[nodiscard]] std::vector<Move> Queen::GetMoves(const Board&) const {
+[[nodiscard]] std::vector<Move> Queen::GetMoves(const Board& board) const {
+  if (board.IsInCheck(m_colour)) {
+    return {};
+  }
+
   // TODO: Implement queen moves
   return {};
 };
@@ -203,7 +219,7 @@ King::King(Colour colour) : Piece(colour, PieceType::KING, KING_VALUE) {}
       const Square dst_square = {static_cast<uint8_t>(i + di),
                                  static_cast<uint8_t>(j + dj)};
       const auto* dst_piece = board.PieceAt(dst_square);
-      if (dst_piece == nullptr || (dst_piece->GetColour() != m_colour)) {
+      if ((dst_piece == nullptr) || (dst_piece->GetColour() != m_colour)) {
         const Move move{m_square, dst_square};
         const Board future_board = board.AfterMove(move);
         if (!future_board.CanBeCaptured(dst_square)) {
