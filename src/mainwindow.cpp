@@ -199,8 +199,8 @@ void MainWindow::UpdateLineInfo() {
         score_str = "<b>[" + GetSignedScore(info.score) + "]</b>";
       } else {
         QString signed_mate_str = (info.score >= 0) ? "M" : "-M";
-        score_str =
-            "<b>[" + signed_mate_str + QString::number(info.score) + "]</b>";
+        score_str = "<b>[" + signed_mate_str +
+                    QString::number(abs(info.score)) + "]</b>";
       }
 
       ui->teLines->append(score_str + " " + move_str_chain.join(" ") + "<br>");
