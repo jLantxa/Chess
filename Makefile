@@ -53,7 +53,7 @@ tests:
 	./$(BUILD_TEST)/$(TEST_TARGET)
 
 cloc:
-	cloc $(SRC) $(INCLUDE) $(FORMS)
+	cloc $(SRC) $(INCLUDE) $(FORMS) $(TEST)
 
 format:
 	clang-format --style=Google -i \
