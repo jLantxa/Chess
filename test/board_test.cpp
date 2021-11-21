@@ -48,3 +48,27 @@ TEST(BoardTest, GetFen) {
 
   ASSERT_EQ(start_pos, board.GetPosition(chess::Colour::WHITE));
 }
+
+TEST(BoardTest, CanBeCaptured) {
+  chess::Board board;
+  board.SetPiece(std::make_unique<chess::Pawn>(chess::Colour::WHITE), {2, 3});
+  board.SetPiece(std::make_unique<chess::Pawn>(chess::Colour::WHITE), {3, 3});
+  board.SetPiece(std::make_unique<chess::Pawn>(chess::Colour::BLACK), {4, 4});
+  board.SetPiece(std::make_unique<chess::Pawn>(chess::Colour::BLACK), {5, 4});
+
+  EXPECT_FALSE(board.CanBeCaptured({2, 3}));
+  EXPECT_TRUE(board.CanBeCaptured({3, 3}));
+  EXPECT_TRUE(board.CanBeCaptured({4, 4}));
+  EXPECT_FALSE(board.CanBeCaptured({5, 4}));
+}
+
+TEST(BoardTest, IsInCheck) {
+  chess::Board board;
+  board.SetPiece(std::make_unique<chess::King>(chess::Colour::WHITE), {2, 3});
+  board.SetPiece(std::make_unique<chess::Pawn>(chess::Colour::WHITE), {3, 3});
+  board.SetPiece(std::make_unique<chess::King>(chess::Colour::BLACK), {4, 4});
+  board.SetPiece(std::make_unique<chess::Pawn>(chess::Colour::BLACK), {5, 4});
+
+  EXPECT_FALSE(board.IsInCheck(chess::Colour::WHITE));
+  EXPECT_TRUE(board.IsInCheck(chess::Colour::BLACK));
+}
