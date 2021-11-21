@@ -17,9 +17,27 @@
 
 #include "board.hpp"
 
+#include <algorithm>
 #include <sstream>
 
 namespace chess {
+
+Board::Board(const Board& original) {
+  for (uint8_t i = 0; i < 8; ++i) {
+    for (uint8_t j = 0; j < 8; ++j) {
+      if (original.m_board[i][j]) {
+        m_board[i][j] = original.m_board[i][j]->Clone();
+      }
+    }
+  }
+
+  m_en_passant = original.m_en_passant;
+
+  m_wkc = original.m_wkc;
+  m_wqc = original.m_wqc;
+  m_bkc = original.m_bkc;
+  m_bqc = original.m_bqc;
+}
 
 void Board::SetPiece(std::unique_ptr<Piece> piece, uint8_t i, uint8_t j) {
   ClearPieceAt(i, j);
@@ -35,9 +53,9 @@ void Board::SetPiece(std::unique_ptr<Piece> piece,
 }
 
 const Piece* Board::PieceAt(uint8_t i, uint8_t j) const {
-  if ((i > 7) || (j > 7)) {
-    return nullptr;
-  }
+  //   if (!IsValidSquare({i, j})) {
+  //    return nullptr;
+  //  }
 
   return m_board[i][j].get();
 }
@@ -169,7 +187,15 @@ std::vector<Move> Board::GetMovesFrom(const Square& square) const {
 }
 
 [[nodiscard]] bool Board::CanBeCaptured(const Square& square) const {
+  if (!IsValidSquare(square)) {
+    return false;
+  }
+
   const auto* piece_in_check = PieceAt(square);
+  if (piece_in_check == nullptr) {
+    return false;
+  }
+
   for (uint8_t i = 0; i < 8; ++i) {
     for (uint8_t j = 0; j < 8; ++j) {
       const Square src_square{i, j};
@@ -209,9 +235,9 @@ std::vector<Move> Board::GetMovesFrom(const Square& square) const {
 }
 
 [[nodiscard]] Board Board::AfterMove(const Move& move) const {
-  // TODO: Return a copy of this board with the move applied.
-  (void)move;
-  return {};
+  Board future_board(*this);
+  future_board.DoMove(move);
+  return future_board;
 }
 
 }  // namespace chess

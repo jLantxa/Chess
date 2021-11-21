@@ -93,4 +93,12 @@ Move UCIToMove(const std::string& uci) {
   return move;
 }
 
+bool IsValidSquare(const Square& square) {
+  return ((square.file < 8) && (square.rank < 8));
+}
+
+bool IsMoveInBoard(const Move& move) {
+  return (IsValidSquare(move.src) && IsValidSquare(move.dst));
+}
+
 }  // namespace chess

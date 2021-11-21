@@ -39,6 +39,8 @@ class Piece {
   void SetSquare(const Square& square);
   void SetCaptured(bool captured);
 
+  [[nodiscard]] virtual std::unique_ptr<Piece> Clone() const = 0;
+
   [[nodiscard]] virtual std::vector<Move> GetMoves(
       const Board& board) const = 0;
   [[nodiscard]] virtual char GetFenChar() const = 0;
@@ -51,44 +53,50 @@ class Piece {
   bool m_is_captured = false;
 };
 
-class Pawn : public Piece {
+class Pawn final : public Piece {
  public:
   Pawn(Colour colour);
+  [[nodiscard]] std::unique_ptr<Piece> Clone() const override;
   [[nodiscard]] char GetFenChar() const override;
   [[nodiscard]] std::vector<Move> GetMoves(const Board& board) const override;
 };
 
-class Knight : public Piece {
+class Knight final : public Piece {
  public:
   Knight(Colour colour);
+  [[nodiscard]] std::unique_ptr<Piece> Clone() const override;
   [[nodiscard]] char GetFenChar() const override;
   [[nodiscard]] std::vector<Move> GetMoves(const Board&) const override;
 };
 
-class Bishop : public Piece {
+class Bishop final : public Piece {
  public:
   Bishop(Colour colour);
+  [[nodiscard]] std::unique_ptr<Piece> Clone() const override;
   [[nodiscard]] char GetFenChar() const override;
   [[nodiscard]] std::vector<Move> GetMoves(const Board&) const override;
 };
 
-class Rook : public Piece {
+class Rook final : public Piece {
  public:
   Rook(Colour colour);
+  [[nodiscard]] std::unique_ptr<Piece> Clone() const override;
   [[nodiscard]] char GetFenChar() const override;
   [[nodiscard]] std::vector<Move> GetMoves(const Board&) const override;
 };
 
-class Queen : public Piece {
+class Queen final : public Piece {
  public:
   Queen(Colour colour);
+  [[nodiscard]] std::unique_ptr<Piece> Clone() const override;
   [[nodiscard]] char GetFenChar() const override;
   [[nodiscard]] std::vector<Move> GetMoves(const Board&) const override;
 };
 
-class King : public Piece {
+class King final : public Piece {
  public:
   King(Colour colour);
+  [[nodiscard]] std::unique_ptr<Piece> Clone() const override;
   [[nodiscard]] char GetFenChar() const override;
   [[nodiscard]] std::vector<Move> GetMoves(const Board&) const override;
 };

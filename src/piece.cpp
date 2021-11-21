@@ -41,6 +41,10 @@ void Piece::SetCaptured(bool captured) { m_is_captured = captured; }
 // PAWN
 Pawn::Pawn(Colour colour) : Piece(colour, PieceType::PAWN, PAWN_VALUE) {}
 
+[[nodiscard]] std::unique_ptr<Piece> Pawn::Clone() const {
+  return std::unique_ptr<Piece>(new Pawn(*this));
+}
+
 [[nodiscard]] char Pawn::GetFenChar() const {
   if (m_colour == Colour::WHITE) {
     return 'P';
@@ -73,22 +77,33 @@ Pawn::Pawn(Colour colour) : Piece(colour, PieceType::PAWN, PAWN_VALUE) {}
           ? Square{static_cast<uint8_t>(i + 1), static_cast<uint8_t>(j + 1)}
           : Square{static_cast<uint8_t>(i - 1), static_cast<uint8_t>(j - 1)};
 
-  const auto* piece_front = board.PieceAt(square_front);
-  const auto* piece_front_two = board.PieceAt(square_front_two);
-  const auto* piece_left = board.PieceAt(square_left);
-  const auto* piece_right = board.PieceAt(square_right);
+  if (IsValidSquare(square_front)) {
+    const auto* piece_front = board.PieceAt(square_front);
+    if (piece_front == nullptr) {
+      moves.push_back(Move{m_square, square_front});
+    }
 
-  if (piece_front == nullptr) {
-    moves.push_back(Move{m_square, square_front});
+    if (IsValidSquare(square_front_two)) {
+      const auto* piece_front_two = board.PieceAt(square_front_two);
+      if (!has_moved && (piece_front == nullptr) &&
+          (piece_front_two == nullptr)) {
+        moves.push_back(Move{m_square, square_front_two});
+      }
+    }
   }
-  if (!has_moved && (piece_front == nullptr) && (piece_front_two == nullptr)) {
-    moves.push_back(Move{m_square, square_front_two});
+
+  if (IsValidSquare(square_left)) {
+    const auto* piece_left = board.PieceAt(square_left);
+    if (piece_left != nullptr && (piece_left->GetColour() != m_colour)) {
+      moves.push_back(Move{m_square, square_left});
+    }
   }
-  if (piece_left != nullptr && (piece_left->GetColour() != m_colour)) {
-    moves.push_back(Move{m_square, square_left});
-  }
-  if (piece_right != nullptr && (piece_right->GetColour() != m_colour)) {
-    moves.push_back(Move{m_square, square_right});
+
+  if (IsValidSquare(square_right)) {
+    const auto* piece_right = board.PieceAt(square_right);
+    if (piece_right != nullptr && (piece_right->GetColour() != m_colour)) {
+      moves.push_back(Move{m_square, square_right});
+    }
   }
 
   return moves;
@@ -97,6 +112,10 @@ Pawn::Pawn(Colour colour) : Piece(colour, PieceType::PAWN, PAWN_VALUE) {}
 // KNIGHT
 Knight::Knight(Colour colour)
     : Piece(colour, PieceType::KNIGHT, KNIGHT_VALUE) {}
+
+[[nodiscard]] std::unique_ptr<Piece> Knight::Clone() const {
+  return std::unique_ptr<Piece>(new Knight(*this));
+}
 
 [[nodiscard]] char Knight::GetFenChar() const {
   if (m_colour == Colour::WHITE) {
@@ -107,10 +126,6 @@ Knight::Knight(Colour colour)
 }
 
 [[nodiscard]] std::vector<Move> Knight::GetMoves(const Board& board) const {
-  if (board.IsInCheck(m_colour)) {
-    return {};
-  }
-
   std::vector<Move> moves;
 
   uint8_t i = m_square.file;
@@ -127,6 +142,9 @@ Knight::Knight(Colour colour)
       {static_cast<uint8_t>(i - 1), static_cast<uint8_t>(j - 2)}};
 
   for (const auto& dst_square : dsts) {
+    if (!IsValidSquare(dst_square)) {
+      continue;
+    }
     const auto* dst_piece = board.PieceAt(dst_square);
     if ((dst_piece == nullptr) || (dst_piece->GetColour() != m_colour)) {
       moves.push_back({m_square, dst_square});
@@ -140,6 +158,10 @@ Knight::Knight(Colour colour)
 Bishop::Bishop(Colour colour)
     : Piece(colour, PieceType::BISHOP, BISHOP_VALUE) {}
 
+[[nodiscard]] std::unique_ptr<Piece> Bishop::Clone() const {
+  return std::unique_ptr<Piece>(new Bishop(*this));
+}
+
 [[nodiscard]] char Bishop::GetFenChar() const {
   if (m_colour == Colour::WHITE) {
     return 'B';
@@ -148,17 +170,17 @@ Bishop::Bishop(Colour colour)
   }
 }
 
-[[nodiscard]] std::vector<Move> Bishop::GetMoves(const Board& board) const {
-  if (board.IsInCheck(m_colour)) {
-    return {};
-  }
-
+[[nodiscard]] std::vector<Move> Bishop::GetMoves(const Board&) const {
   // TODO: Implement bishop moves
   return {};
 };
 
 // ROOK
 Rook::Rook(Colour colour) : Piece(colour, PieceType::ROOK, ROOK_VALUE) {}
+
+[[nodiscard]] std::unique_ptr<Piece> Rook::Clone() const {
+  return std::unique_ptr<Piece>(new Rook(*this));
+}
 
 [[nodiscard]] char Rook::GetFenChar() const {
   if (m_colour == Colour::WHITE) {
@@ -168,17 +190,17 @@ Rook::Rook(Colour colour) : Piece(colour, PieceType::ROOK, ROOK_VALUE) {}
   }
 }
 
-[[nodiscard]] std::vector<Move> Rook::GetMoves(const Board& board) const {
-  if (board.IsInCheck(m_colour)) {
-    return {};
-  }
-
+[[nodiscard]] std::vector<Move> Rook::GetMoves(const Board&) const {
   // TODO: Implement rook moves
   return {};
 };
 
 // QUEEN
 Queen::Queen(Colour colour) : Piece(colour, PieceType::QUEEN, QUEEN_VALUE) {}
+
+[[nodiscard]] std::unique_ptr<Piece> Queen::Clone() const {
+  return std::unique_ptr<Piece>(new Queen(*this));
+}
 
 [[nodiscard]] char Queen::GetFenChar() const {
   if (m_colour == Colour::WHITE) {
@@ -188,17 +210,17 @@ Queen::Queen(Colour colour) : Piece(colour, PieceType::QUEEN, QUEEN_VALUE) {}
   }
 }
 
-[[nodiscard]] std::vector<Move> Queen::GetMoves(const Board& board) const {
-  if (board.IsInCheck(m_colour)) {
-    return {};
-  }
-
+[[nodiscard]] std::vector<Move> Queen::GetMoves(const Board&) const {
   // TODO: Implement queen moves
   return {};
 };
 
 // KING
 King::King(Colour colour) : Piece(colour, PieceType::KING, KING_VALUE) {}
+
+[[nodiscard]] std::unique_ptr<Piece> King::Clone() const {
+  return std::unique_ptr<Piece>(new King(*this));
+}
 
 [[nodiscard]] char King::GetFenChar() const {
   if (m_colour == Colour::WHITE) {
@@ -219,11 +241,17 @@ King::King(Colour colour) : Piece(colour, PieceType::KING, KING_VALUE) {}
       const Square dst_square = {static_cast<uint8_t>(i + di),
                                  static_cast<uint8_t>(j + dj)};
       const auto* dst_piece = board.PieceAt(dst_square);
+      if (!IsValidSquare(dst_square)) {
+        continue;
+      }
       if ((dst_piece == nullptr) || (dst_piece->GetColour() != m_colour)) {
         const Move move{m_square, dst_square};
-        const Board future_board = board.AfterMove(move);
-        if (!future_board.CanBeCaptured(dst_square)) {
-          moves.push_back({m_square, dst_square});
+        if (!IsMoveInBoard(move)) {
+          continue;
+        }
+        const Board* future_board = new Board(board.AfterMove(move));
+        if (!future_board->CanBeCaptured(dst_square)) {
+          moves.push_back(move);
         }
       }
     }
