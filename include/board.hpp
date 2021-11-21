@@ -32,6 +32,9 @@ class Piece;
 
 class Board {
  public:
+  Board() = default;
+  Board(const Board& b);
+
   [[nodiscard]] const Piece* PieceAt(uint8_t i, uint8_t j) const;
   [[nodiscard]] const Piece* PieceAt(const chess::Square& square) const;
 

@@ -511,10 +511,19 @@ bool ChessBoardWidget::DoMove(const chess::Move& move) {
 
 bool ChessBoardWidget::IsValidMove(const chess::Move& move) const {
   // TODO: Use real implementation once move generation is complete
-#if 0
+#if 1
   const chess::Piece* src_piece = m_board.PieceAt(move.src);
   if (src_piece == nullptr) {
     return false;
+  }
+
+  // If in check, can only make moves that prevent being in check
+  if (m_board.IsInCheck(m_active_colour)) {
+    const auto future_board = m_board.AfterMove(move);
+    const bool move_prevents_check = !future_board.IsInCheck(m_active_colour);
+    if (!move_prevents_check) {
+      return false;
+    }
   }
 
   const auto valid_moves = src_piece->GetMoves(m_board);

@@ -69,6 +69,9 @@ char NumberToFile(uint8_t number);
  */
 void ToggleColour(Colour* colour);
 
+bool IsValidSquare(const Square& square);
+bool IsMoveInBoard(const Move& move);
+
 }  // namespace chess
 
 #endif  // _CHESS_INCLUDE_CHESS_HPP_
