@@ -64,40 +64,40 @@ class ChessBoardWidget : public QWidget {
   static constexpr ChessPalette GREEN_PALETTE{
       .white_square = QColor(238, 238, 210),
       .black_square = QColor(118, 150, 86),
-      .white_highlight = QColor(240, 255, 28),
-      .black_highlight = QColor(174, 186, 0),
+      .white_highlight = QColor(246, 255, 115),
+      .black_highlight = QColor(190, 201, 24),
       .highlight_important = QColor(255, 113, 74),
   };
 
   static constexpr ChessPalette RED_PALETTE{
       .white_square = QColor(255, 191, 191),
       .black_square = QColor(125, 26, 26),
-      .white_highlight = QColor(),
-      .black_highlight = QColor(),
+      .white_highlight = QColor(246, 255, 115),
+      .black_highlight = QColor(190, 201, 24),
       .highlight_important = QColor(255, 113, 74),
   };
 
   static constexpr ChessPalette PURPLE_PALETTE{
       .white_square = QColor(246, 217, 255),
       .black_square = QColor(170, 84, 255),
-      .white_highlight = QColor(),
-      .black_highlight = QColor(),
+      .white_highlight = QColor(246, 255, 115),
+      .black_highlight = QColor(190, 201, 24),
       .highlight_important = QColor(255, 113, 74),
   };
 
   static constexpr ChessPalette BLUE_PALETTE{
       .white_square = QColor(217, 232, 255),
       .black_square = QColor(76, 149, 252),
-      .white_highlight = QColor(),
-      .black_highlight = QColor(),
+      .white_highlight = QColor(246, 255, 115),
+      .black_highlight = QColor(190, 201, 24),
       .highlight_important = QColor(255, 113, 74),
   };
 
   static constexpr ChessPalette YELLOW_PALETTE{
       .white_square = QColor(255, 232, 168),
       .black_square = QColor(230, 179, 41),
-      .white_highlight = QColor(),
-      .black_highlight = QColor(),
+      .white_highlight = QColor(246, 255, 115),
+      .black_highlight = QColor(190, 201, 24),
       .highlight_important = QColor(255, 113, 74),
   };
 
