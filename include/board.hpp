@@ -80,6 +80,8 @@ class Board {
   std::unique_ptr<Piece> m_board[8][8];
 
   std::optional<Square> m_en_passant;
+  std::optional<Square> m_white_king_square;
+  std::optional<Square> m_black_king_square;
 
   bool m_wkc = true;
   bool m_wqc = true;
@@ -90,6 +92,9 @@ class Board {
   bool CanWQC() const;
   bool CanBKC() const;
   bool CanBQC() const;
+
+  void SaveSquareIfKing(Piece* const piece);
+  void UpdateCastles();
 };
 
 }  // namespace chess

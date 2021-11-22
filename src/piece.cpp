@@ -30,13 +30,13 @@ Piece::Piece(Colour colour, PieceType type, uint8_t value)
 
 [[nodiscard]] uint8_t Piece::GetValue() const { return m_value; }
 
-[[nodiscard]] bool Piece::IsCaptured() const { return m_is_captured; }
-
 [[nodiscard]] Square Piece::GetSquare() const { return m_square; }
 
 void Piece::SetSquare(const Square& square) { m_square = square; }
 
-void Piece::SetCaptured(bool captured) { m_is_captured = captured; }
+[[nodiscard]] bool Piece::HasMoved() const { return m_has_moved; }
+
+void Piece::SetMoved(bool moved) { m_has_moved = moved; }
 
 [[nodiscard]] std::vector<Move> Piece::GetSlidingMoves(
     const Board& board, Direction direction) const {
@@ -83,9 +83,6 @@ Pawn::Pawn(Colour colour) : Piece(colour, PieceType::PAWN, PAWN_VALUE) {}
   uint8_t i = m_square.file;
   uint8_t j = m_square.rank;
 
-  bool has_moved = ((m_colour == Colour::WHITE) && (m_square.rank != 1)) ||
-                   ((m_colour == Colour::BLACK) && (m_square.rank != 6));
-
   const auto square_front = (m_colour == Colour::WHITE)
                                 ? Square{i, static_cast<uint8_t>(j + 1)}
                                 : Square{i, static_cast<uint8_t>(j - 1)};
@@ -109,7 +106,7 @@ Pawn::Pawn(Colour colour) : Piece(colour, PieceType::PAWN, PAWN_VALUE) {}
 
     if (IsValidSquare(square_front_two)) {
       const auto* piece_front_two = board.PieceAt(square_front_two);
-      if (!has_moved && (piece_front == nullptr) &&
+      if (!m_has_moved && (piece_front == nullptr) &&
           (piece_front_two == nullptr)) {
         moves.push_back(Move{m_square, square_front_two});
       }

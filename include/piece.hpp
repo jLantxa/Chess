@@ -34,10 +34,10 @@ class Piece {
   [[nodiscard]] Colour GetColour() const;
   [[nodiscard]] PieceType GetType() const;
   [[nodiscard]] uint8_t GetValue() const;
-  [[nodiscard]] bool IsCaptured() const;
   [[nodiscard]] Square GetSquare() const;
   void SetSquare(const Square& square);
-  void SetCaptured(bool captured);
+  [[nodiscard]] bool HasMoved() const;
+  void SetMoved(bool moved);
 
   [[nodiscard]] virtual std::unique_ptr<Piece> Clone() const = 0;
 
@@ -50,7 +50,7 @@ class Piece {
   const PieceType m_type;
   Square m_square;
   const uint8_t m_value;
-  bool m_is_captured = false;
+  bool m_has_moved = false;
 
   [[nodiscard]] std::vector<Move> GetSlidingMoves(const Board& board,
                                                   Direction direction) const;

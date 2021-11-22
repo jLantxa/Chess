@@ -17,6 +17,7 @@
 
 #include "board.hpp"
 
+#include <QDebug>
 #include <algorithm>
 #include <sstream>
 
@@ -32,6 +33,8 @@ Board::Board(const Board& original) {
   }
 
   m_en_passant = original.m_en_passant;
+  m_white_king_square = original.m_white_king_square;
+  m_black_king_square = original.m_black_king_square;
 
   m_wkc = original.m_wkc;
   m_wqc = original.m_wqc;
@@ -43,6 +46,7 @@ void Board::SetPiece(std::unique_ptr<Piece> piece, uint8_t i, uint8_t j) {
   ClearPieceAt(i, j);
   m_board[i][j] = std::move(piece);
   m_board[i][j]->SetSquare({i, j});
+  SaveSquareIfKing(m_board[i][j].get());
 }
 
 void Board::SetPiece(std::unique_ptr<Piece> piece,
@@ -74,11 +78,33 @@ void Board::ClearPieceAt(const chess::Square& square) {
   ClearPieceAt(i, j);
 }
 
+void Board::SaveSquareIfKing(Piece* const piece) {
+  if (piece == nullptr) {
+    return;
+  }
+
+  const auto type = piece->GetType();
+  const auto colour = piece->GetColour();
+  if (type == PieceType::KING) {
+    if (colour == Colour::WHITE) {
+      m_white_king_square = piece->GetSquare();
+    } else {
+      m_black_king_square = piece->GetSquare();
+    }
+  }
+}
+
 void Board::DoMove(const Move& move) {
   auto& src = m_board[move.src.file][move.src.rank];
   auto& dst = m_board[move.dst.file][move.dst.rank];
+
   dst.swap(src);
+
   dst->SetSquare(move.dst);
+  dst->SetMoved(true);
+  SaveSquareIfKing(dst.get());
+  UpdateCastles();
+
   src.reset();
 }
 
@@ -147,25 +173,13 @@ std::string Board::GetPosition(const Colour& active_colour) const {
   return ss.str();
 }
 
-bool Board::CanWKC() const {
-  // TODO: Implement
-  return m_wkc;
-}
+bool Board::CanWKC() const { return m_wkc; }
 
-bool Board::CanWQC() const {
-  // TODO: Implement
-  return m_wqc;
-}
+bool Board::CanWQC() const { return m_wqc; }
 
-bool Board::CanBKC() const {
-  // TODO: Implement
-  return m_bkc;
-}
+bool Board::CanBKC() const { return m_bkc; }
 
-bool Board::CanBQC() const {
-  // TODO: Implement
-  return m_bqc;
-}
+bool Board::CanBQC() const { return m_bqc; }
 
 std::vector<Move> Board::GetMovesFrom(uint8_t i, uint8_t j) const {
   const Square square{i, j};
@@ -238,25 +252,59 @@ bool Board::IsValidMove(const Move& move, Colour active_colour) const {
 }
 
 [[nodiscard]] bool Board::IsInCheck(chess::Colour colour) const {
-  for (uint8_t i = 0; i < 8; ++i) {
-    for (uint8_t j = 0; j < 8; ++j) {
-      const Piece* piece = PieceAt(i, j);
-      const bool is_colour_king = (piece != nullptr) &&
-                                  (piece->GetType() == PieceType::KING) &&
-                                  (piece->GetColour() == colour);
-      if (is_colour_king && CanBeCaptured({i, j})) {
-        return true;
-      }
-    }
+  const auto king_square =
+      (colour == Colour::WHITE) ? m_white_king_square : m_black_king_square;
+  if (!king_square.has_value()) {
+    return false;
   }
 
-  return false;
+  return CanBeCaptured(king_square.value());
 }
 
 [[nodiscard]] Board Board::AfterMove(const Move& move) const {
   Board future_board(*this);
   future_board.DoMove(move);
   return future_board;
+}
+
+void Board::UpdateCastles() {
+  if (m_white_king_square.has_value()) {
+    const auto* white_king = PieceAt(m_white_king_square.value());
+    const auto* a1 = PieceAt(0, 0);
+    const auto* h1 = PieceAt(7, 0);
+
+    const bool king_not_moved = (white_king != nullptr) &&
+                                (!white_king->HasMoved()) &&
+                                (white_king->GetSquare() == Square{4, 0});
+    const bool a1_not_moved = (a1 != nullptr) && !a1->HasMoved() &&
+                              (a1->GetType() == PieceType::ROOK) &&
+                              (a1->GetColour() == Colour::WHITE);
+    const bool h1_not_moved = (h1 != nullptr) && !h1->HasMoved() &&
+                              (h1->GetType() == PieceType::ROOK) &&
+                              (h1->GetColour() == Colour::WHITE);
+
+    m_wkc = king_not_moved && h1_not_moved;
+    m_wqc = king_not_moved && a1_not_moved;
+  }
+
+  if (m_black_king_square.has_value()) {
+    const auto* black_king = PieceAt(m_black_king_square.value());
+    const auto* a8 = PieceAt(0, 7);
+    const auto* h8 = PieceAt(7, 7);
+
+    const bool king_not_moved = (black_king != nullptr) &&
+                                (!black_king->HasMoved()) &&
+                                (black_king->GetSquare() == Square{4, 7});
+    const bool a8_not_moved = (a8 != nullptr) && !a8->HasMoved() &&
+                              (a8->GetType() == PieceType::ROOK) &&
+                              (a8->GetColour() == Colour::BLACK);
+    const bool h8_not_moved = (h8 != nullptr) && !h8->HasMoved() &&
+                              (h8->GetType() == PieceType::ROOK) &&
+                              (h8->GetColour() == Colour::BLACK);
+
+    m_bkc = king_not_moved && h8_not_moved;
+    m_bqc = king_not_moved && a8_not_moved;
+  }
 }
 
 }  // namespace chess
