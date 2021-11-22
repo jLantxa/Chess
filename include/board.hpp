@@ -97,10 +97,10 @@ class Board {
   void SaveSquareIfKing(Piece* const piece);
   void UpdateCastles();
 
-  bool MoveIsWKC(const Move& move) const;
-  bool MoveIsWQC(const Move& move) const;
-  bool MoveIsBKC(const Move& move) const;
-  bool MoveIsBQC(const Move& move) const;
+  [[nodiscard]] bool MoveIsWKC(const Move& move) const;
+  [[nodiscard]] bool MoveIsWQC(const Move& move) const;
+  [[nodiscard]] bool MoveIsBKC(const Move& move) const;
+  [[nodiscard]] bool MoveIsBQC(const Move& move) const;
 };
 
 }  // namespace chess

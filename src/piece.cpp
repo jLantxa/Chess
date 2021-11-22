@@ -77,7 +77,9 @@ Pawn::Pawn(Colour colour) : Piece(colour, PieceType::PAWN, PAWN_VALUE) {}
   }
 }
 
-[[nodiscard]] std::vector<Move> Pawn::GetMoves(const Board& board) const {
+[[nodiscard]] std::vector<Move> Pawn::GetMoves(const Board& board,
+                                               uint32_t flags) const {
+  (void)flags;
   std::vector<Move> moves;
 
   uint8_t i = m_square.file;
@@ -146,7 +148,9 @@ Knight::Knight(Colour colour)
   }
 }
 
-[[nodiscard]] std::vector<Move> Knight::GetMoves(const Board& board) const {
+[[nodiscard]] std::vector<Move> Knight::GetMoves(const Board& board,
+                                                 uint32_t flags) const {
+  (void)flags;
   std::vector<Move> moves;
 
   uint8_t i = m_square.file;
@@ -191,7 +195,9 @@ Bishop::Bishop(Colour colour)
   }
 }
 
-[[nodiscard]] std::vector<Move> Bishop::GetMoves(const Board& board) const {
+[[nodiscard]] std::vector<Move> Bishop::GetMoves(const Board& board,
+                                                 uint32_t flags) const {
+  (void)flags;
   std::vector<Move> moves;
 
   std::vector<Move> up_left_moves = GetSlidingMoves(board, Direction::UP_LEFT);
@@ -229,7 +235,9 @@ Rook::Rook(Colour colour) : Piece(colour, PieceType::ROOK, ROOK_VALUE) {}
   }
 }
 
-[[nodiscard]] std::vector<Move> Rook::GetMoves(const Board& board) const {
+[[nodiscard]] std::vector<Move> Rook::GetMoves(const Board& board,
+                                               uint32_t flags) const {
+  (void)flags;
   std::vector<Move> moves;
 
   std::vector<Move> up_moves = GetSlidingMoves(board, Direction::UP);
@@ -264,7 +272,9 @@ Queen::Queen(Colour colour) : Piece(colour, PieceType::QUEEN, QUEEN_VALUE) {}
   }
 }
 
-[[nodiscard]] std::vector<Move> Queen::GetMoves(const Board& board) const {
+[[nodiscard]] std::vector<Move> Queen::GetMoves(const Board& board,
+                                                uint32_t flags) const {
+  (void)flags;
   std::vector<Move> moves;
 
   std::vector<Move> up_moves = GetSlidingMoves(board, Direction::UP);
@@ -314,7 +324,8 @@ King::King(Colour colour) : Piece(colour, PieceType::KING, KING_VALUE) {}
   }
 }
 
-[[nodiscard]] std::vector<Move> King::GetMoves(const Board& board) const {
+[[nodiscard]] std::vector<Move> King::GetMoves(const Board& board,
+                                               uint32_t flags) const {
   std::vector<Move> moves;
 
   uint8_t i = m_square.file;
@@ -339,19 +350,21 @@ King::King(Colour colour) : Piece(colour, PieceType::KING, KING_VALUE) {}
   }
 
   // Castles
-  if (m_colour == Colour::WHITE) {
-    if (board.CanWKC()) {
-      moves.push_back(WHITE_KING_CASTLE);
-    }
-    if (board.CanWQC()) {
-      moves.push_back(WHITE_QUEEN_CASTLE);
-    }
-  } else if (m_colour == Colour::BLACK) {
-    if (board.CanBKC()) {
-      moves.push_back(BLACK_KING_CASTLE);
-    }
-    if (board.CanBQC()) {
-      moves.push_back(BLACK_QUEEN_CASTLE);
+  if (flags & ~FLAG_EXCLUDE_CASTLES) {
+    if (m_colour == Colour::WHITE) {
+      if (board.CanWKC()) {
+        moves.push_back(WHITE_KING_CASTLE);
+      }
+      if (board.CanWQC()) {
+        moves.push_back(WHITE_QUEEN_CASTLE);
+      }
+    } else {
+      if (board.CanBKC()) {
+        moves.push_back(BLACK_KING_CASTLE);
+      }
+      if (board.CanBQC()) {
+        moves.push_back(BLACK_QUEEN_CASTLE);
+      }
     }
   }
 

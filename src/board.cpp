@@ -170,14 +170,13 @@ std::string Board::GetPosition(const Colour& active_colour) const {
 
   ss << ((active_colour == Colour::WHITE) ? "w " : "b ");
 
-  const bool some_castling_possible =
-      CanWKC() || CanWQC() || CanBKC() || CanBQC();
+  const bool some_castling_possible = m_wkc || m_wqc || m_bkc || m_bqc;
 
   if (some_castling_possible) {
-    ss << (CanWKC() ? "K" : "");
-    ss << (CanWQC() ? "Q" : "");
-    ss << (CanBKC() ? "k" : "");
-    ss << (CanBQC() ? "q" : "");
+    ss << (m_wkc ? "K" : "");
+    ss << (m_wqc ? "Q" : "");
+    ss << (m_bkc ? "k" : "");
+    ss << (m_bqc ? "q" : "");
     ss << " ";
   } else {
     ss << "- ";
@@ -189,13 +188,65 @@ std::string Board::GetPosition(const Colour& active_colour) const {
   return ss.str();
 }
 
-[[nodiscard]] bool Board::CanWKC() const { return m_wkc; }
+[[nodiscard]] bool Board::CanWKC() const {
+  if (!m_wkc || IsInCheck(Colour::WHITE)) {
+    return false;
+  }
 
-[[nodiscard]] bool Board::CanWQC() const { return m_wqc; }
+  constexpr std::array<Square, 3> path{Square{5, 0}, {6, 0}, {7, 0}};
+  for (const auto& sq : path) {
+    if (CanBeCaptured(sq)) {
+      return false;
+    }
+  }
 
-[[nodiscard]] bool Board::CanBKC() const { return m_bkc; }
+  return true;
+}
 
-[[nodiscard]] bool Board::CanBQC() const { return m_bqc; }
+[[nodiscard]] bool Board::CanWQC() const {
+  if (!m_wqc || IsInCheck(Colour::WHITE)) {
+    return false;
+  }
+
+  constexpr std::array<Square, 5> path{Square{3, 0}, {2, 0}, {1, 0}, {0, 0}};
+  for (const auto& sq : path) {
+    if (CanBeCaptured(sq)) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
+[[nodiscard]] bool Board::CanBKC() const {
+  if (!m_bkc || IsInCheck(Colour::BLACK)) {
+    return false;
+  }
+
+  constexpr std::array<Square, 3> path{Square{5, 7}, {6, 7}, {7, 7}};
+  for (const auto& sq : path) {
+    if (CanBeCaptured(sq)) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
+[[nodiscard]] bool Board::CanBQC() const {
+  if (!m_bqc || IsInCheck(Colour::BLACK)) {
+    return false;
+  }
+
+  constexpr std::array<Square, 5> path{Square{3, 7}, {2, 7}, {1, 7}, {0, 7}};
+  for (const auto& sq : path) {
+    if (CanBeCaptured(sq)) {
+      return false;
+    }
+  }
+
+  return true;
+}
 
 std::vector<Move> Board::GetMovesFrom(uint8_t i, uint8_t j) const {
   const Square square{i, j};
@@ -242,20 +293,19 @@ bool Board::IsValidMove(const Move& move, Colour active_colour) const {
   }
 
   const auto* piece_in_check = PieceAt(square);
-  if (piece_in_check == nullptr) {
-    return false;
-  }
 
   for (uint8_t i = 0; i < 8; ++i) {
     for (uint8_t j = 0; j < 8; ++j) {
       const Square src_square{i, j};
       const auto* src_piece = PieceAt(src_square);
-      if ((src_piece == nullptr) ||
-          (src_piece->GetColour() == piece_in_check->GetColour())) {
+      if ((piece_in_check == nullptr) || (src_piece == nullptr)) {
+        continue;
+      } else if (src_piece->GetColour() == piece_in_check->GetColour()) {
         continue;
       }
 
-      const auto moves = src_piece->GetMoves(*this);
+      const auto moves =
+          src_piece->GetMoves(*this, Piece::FLAG_EXCLUDE_CASTLES);
       for (auto& move : moves) {
         if (move.dst == square) {
           return true;
@@ -328,7 +378,7 @@ void Board::UpdateCastles() {
   const bool is_white_king_moving = (piece != nullptr) &&
                                     (piece->GetType() == PieceType::KING) &&
                                     (piece->GetColour() == Colour::WHITE);
-  return (is_white_king_moving && (move == WHITE_KING_CASTLE) && CanWKC());
+  return (is_white_king_moving && (move == WHITE_KING_CASTLE));
 }
 
 [[nodiscard]] bool Board::MoveIsWQC(const Move& move) const {
@@ -336,7 +386,7 @@ void Board::UpdateCastles() {
   const bool is_white_king_moving = (piece != nullptr) &&
                                     (piece->GetType() == PieceType::KING) &&
                                     (piece->GetColour() == Colour::WHITE);
-  return (is_white_king_moving && (move == WHITE_QUEEN_CASTLE) && CanWQC());
+  return (is_white_king_moving && (move == WHITE_QUEEN_CASTLE));
 }
 
 [[nodiscard]] bool Board::MoveIsBKC(const Move& move) const {
@@ -344,7 +394,7 @@ void Board::UpdateCastles() {
   const bool is_black_king_moving = (piece != nullptr) &&
                                     (piece->GetType() == PieceType::KING) &&
                                     (piece->GetColour() == Colour::BLACK);
-  return (is_black_king_moving && (move == BLACK_KING_CASTLE) && CanBKC());
+  return (is_black_king_moving && (move == BLACK_KING_CASTLE));
 }
 
 [[nodiscard]] bool Board::MoveIsBQC(const Move& move) const {
@@ -352,7 +402,7 @@ void Board::UpdateCastles() {
   const bool is_black_king_moving = (piece != nullptr) &&
                                     (piece->GetType() == PieceType::KING) &&
                                     (piece->GetColour() == Colour::BLACK);
-  return (is_black_king_moving && (move == BLACK_QUEEN_CASTLE) && CanBQC());
+  return (is_black_king_moving && (move == BLACK_QUEEN_CASTLE));
 }
 
 }  // namespace chess

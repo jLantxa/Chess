@@ -31,6 +31,8 @@ class Piece {
  public:
   Piece(Colour colour, PieceType type, uint8_t value);
 
+  static constexpr uint32_t FLAG_EXCLUDE_CASTLES = (1 << 0);
+
   [[nodiscard]] Colour GetColour() const;
   [[nodiscard]] PieceType GetType() const;
   [[nodiscard]] uint8_t GetValue() const;
@@ -41,8 +43,8 @@ class Piece {
 
   [[nodiscard]] virtual std::unique_ptr<Piece> Clone() const = 0;
 
-  [[nodiscard]] virtual std::vector<Move> GetMoves(
-      const Board& board) const = 0;
+  [[nodiscard]] virtual std::vector<Move> GetMoves(const Board& board,
+                                                   uint32_t flag = 0) const = 0;
   [[nodiscard]] virtual char GetFenChar() const = 0;
 
  protected:
@@ -61,7 +63,8 @@ class Pawn final : public Piece {
   Pawn(Colour colour);
   [[nodiscard]] std::unique_ptr<Piece> Clone() const override;
   [[nodiscard]] char GetFenChar() const override;
-  [[nodiscard]] std::vector<Move> GetMoves(const Board& board) const override;
+  [[nodiscard]] std::vector<Move> GetMoves(const Board& board,
+                                           uint32_t flag = 0) const override;
 };
 
 class Knight final : public Piece {
@@ -69,7 +72,8 @@ class Knight final : public Piece {
   Knight(Colour colour);
   [[nodiscard]] std::unique_ptr<Piece> Clone() const override;
   [[nodiscard]] char GetFenChar() const override;
-  [[nodiscard]] std::vector<Move> GetMoves(const Board&) const override;
+  [[nodiscard]] std::vector<Move> GetMoves(const Board& board,
+                                           uint32_t flag = 0) const override;
 };
 
 class Bishop final : public Piece {
@@ -77,7 +81,8 @@ class Bishop final : public Piece {
   Bishop(Colour colour);
   [[nodiscard]] std::unique_ptr<Piece> Clone() const override;
   [[nodiscard]] char GetFenChar() const override;
-  [[nodiscard]] std::vector<Move> GetMoves(const Board&) const override;
+  [[nodiscard]] std::vector<Move> GetMoves(const Board& board,
+                                           uint32_t flag = 0) const override;
 };
 
 class Rook final : public Piece {
@@ -85,7 +90,8 @@ class Rook final : public Piece {
   Rook(Colour colour);
   [[nodiscard]] std::unique_ptr<Piece> Clone() const override;
   [[nodiscard]] char GetFenChar() const override;
-  [[nodiscard]] std::vector<Move> GetMoves(const Board&) const override;
+  [[nodiscard]] std::vector<Move> GetMoves(const Board& board,
+                                           uint32_t flag = 0) const override;
 };
 
 class Queen final : public Piece {
@@ -93,7 +99,8 @@ class Queen final : public Piece {
   Queen(Colour colour);
   [[nodiscard]] std::unique_ptr<Piece> Clone() const override;
   [[nodiscard]] char GetFenChar() const override;
-  [[nodiscard]] std::vector<Move> GetMoves(const Board&) const override;
+  [[nodiscard]] std::vector<Move> GetMoves(const Board& board,
+                                           uint32_t flag = 0) const override;
 };
 
 class King final : public Piece {
@@ -101,7 +108,8 @@ class King final : public Piece {
   King(Colour colour);
   [[nodiscard]] std::unique_ptr<Piece> Clone() const override;
   [[nodiscard]] char GetFenChar() const override;
-  [[nodiscard]] std::vector<Move> GetMoves(const Board&) const override;
+  [[nodiscard]] std::vector<Move> GetMoves(const Board& board,
+                                           uint32_t flag = 0) const override;
 };
 
 }  // namespace chess
