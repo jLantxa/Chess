@@ -6,7 +6,7 @@ A chess game and analysis tool built with Qt 6. It supports chess engines compat
   - Can configure number of lines, depth and number of CPU threads.
 - Can load a position for analysis using Forsyth–Edwards Notation.
 - Board widget.
-  - Move generation is in progress; (missing castles, en passant and promotion).
+  - Move generation is in progress; (missing en passant and promotion).
   - Evaluation bar.
 - Colour themes.
 
