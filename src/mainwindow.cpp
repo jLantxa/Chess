@@ -110,7 +110,12 @@ void MainWindow::SetDepth(uint8_t depth) {
 void MainWindow::RestartSearch() {
   if (ui->bEngineOn->isChecked()) {
     m_engine.Stop();
-    m_engine.SearchWithDepth(m_depth);
+    const bool infinite_search = ui->chInfinite->isChecked();
+    if (infinite_search) {
+      m_engine.SearchInfinite();
+    } else {
+      m_engine.SearchWithDepth(m_depth);
+    }
   }
 }
 
@@ -255,7 +260,8 @@ void MainWindow::UpdateMoveList() {
 void MainWindow::SetEngineEnabled(bool enabled) {
   if (enabled) {
     ui->bEngineOn->setPalette(QColor(Qt::green));
-    if (ui->chInfinite->isChecked()) {
+    const bool infinite_search = ui->chInfinite->isChecked();
+    if (infinite_search) {
       m_engine.SearchInfinite();
     } else {
       m_engine.SearchWithDepth(m_depth);
@@ -289,10 +295,7 @@ void MainWindow::on_bEngineOn_toggled(bool checked) {
 void MainWindow::on_chInfinite_toggled(bool checked) {
   ui->lDepth->setEnabled(!checked);
   ui->sbDepth->setEnabled(!checked);
-
-  if (!checked) {
-    m_engine.Stop();
-  }
+  RestartSearch();
 }
 
 void MainWindow::on_sbThreads_editingFinished() {
