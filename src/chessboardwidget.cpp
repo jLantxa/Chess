@@ -215,9 +215,9 @@ void ChessBoardWidget::mouseReleaseEvent(QMouseEvent* event) {
 }
 
 void ChessBoardWidget::HandleBoardMouseEvent(QMouseEvent* event) {
-  const QPoint position = event->pos();
-  const int x = position.x();
-  const int y = position.y();
+  const QPointF position = event->position();
+  const float x = position.x();
+  const float y = position.y();
 
   const bool click_on_board = IsOnBoard(x, y);
 
@@ -240,7 +240,7 @@ void ChessBoardWidget::HandleBoardMouseEvent(QMouseEvent* event) {
     m_selected_square.reset();
   }
 
-  m_mouse_position = event->position();
+  m_mouse_position = position;
   auto square = GetClickedSquare(x, y);
 
   const chess::Piece* piece = m_board.PieceAt(square);
