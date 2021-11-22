@@ -338,6 +338,23 @@ King::King(Colour colour) : Piece(colour, PieceType::KING, KING_VALUE) {}
     }
   }
 
+  // Castles
+  if (m_colour == Colour::WHITE) {
+    if (board.CanWKC()) {
+      moves.push_back(WHITE_KING_CASTLE);
+    }
+    if (board.CanWQC()) {
+      moves.push_back(WHITE_QUEEN_CASTLE);
+    }
+  } else if (m_colour == Colour::BLACK) {
+    if (board.CanBKC()) {
+      moves.push_back(BLACK_KING_CASTLE);
+    }
+    if (board.CanBQC()) {
+      moves.push_back(BLACK_QUEEN_CASTLE);
+    }
+  }
+
   return moves;
 };
 

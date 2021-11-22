@@ -95,16 +95,32 @@ void Board::SaveSquareIfKing(Piece* const piece) {
 }
 
 void Board::DoMove(const Move& move) {
+  if (MoveIsWKC(move)) {
+    MovePieces(move);
+    MovePieces(WHITE_KING_ROOK_CASTLE);
+  } else if (MoveIsWQC(move)) {
+    MovePieces(move);
+    MovePieces(WHITE_QUEEN_ROOK_CASTLE);
+  } else if (MoveIsBKC(move)) {
+    MovePieces(move);
+    MovePieces(BLACK_KING_ROOK_CASTLE);
+  } else if (MoveIsBQC(move)) {
+    MovePieces(move);
+    MovePieces(BLACK_QUEEN_ROOK_CASTLE);
+  } else {
+    MovePieces(move);
+  }
+}
+
+void Board::MovePieces(const Move& move) {
   auto& src = m_board[move.src.file][move.src.rank];
   auto& dst = m_board[move.dst.file][move.dst.rank];
 
   dst.swap(src);
-
   dst->SetSquare(move.dst);
   dst->SetMoved(true);
   SaveSquareIfKing(dst.get());
   UpdateCastles();
-
   src.reset();
 }
 
@@ -173,13 +189,13 @@ std::string Board::GetPosition(const Colour& active_colour) const {
   return ss.str();
 }
 
-bool Board::CanWKC() const { return m_wkc; }
+[[nodiscard]] bool Board::CanWKC() const { return m_wkc; }
 
-bool Board::CanWQC() const { return m_wqc; }
+[[nodiscard]] bool Board::CanWQC() const { return m_wqc; }
 
-bool Board::CanBKC() const { return m_bkc; }
+[[nodiscard]] bool Board::CanBKC() const { return m_bkc; }
 
-bool Board::CanBQC() const { return m_bqc; }
+[[nodiscard]] bool Board::CanBQC() const { return m_bqc; }
 
 std::vector<Move> Board::GetMovesFrom(uint8_t i, uint8_t j) const {
   const Square square{i, j};
@@ -305,6 +321,38 @@ void Board::UpdateCastles() {
     m_bkc = king_not_moved && h8_not_moved;
     m_bqc = king_not_moved && a8_not_moved;
   }
+}
+
+[[nodiscard]] bool Board::MoveIsWKC(const Move& move) const {
+  const auto* piece = PieceAt(move.src);
+  const bool is_white_king_moving = (piece != nullptr) &&
+                                    (piece->GetType() == PieceType::KING) &&
+                                    (piece->GetColour() == Colour::WHITE);
+  return (is_white_king_moving && (move == WHITE_KING_CASTLE) && CanWKC());
+}
+
+[[nodiscard]] bool Board::MoveIsWQC(const Move& move) const {
+  const auto* piece = PieceAt(move.src);
+  const bool is_white_king_moving = (piece != nullptr) &&
+                                    (piece->GetType() == PieceType::KING) &&
+                                    (piece->GetColour() == Colour::WHITE);
+  return (is_white_king_moving && (move == WHITE_QUEEN_CASTLE) && CanWQC());
+}
+
+[[nodiscard]] bool Board::MoveIsBKC(const Move& move) const {
+  const auto* piece = PieceAt(move.src);
+  const bool is_black_king_moving = (piece != nullptr) &&
+                                    (piece->GetType() == PieceType::KING) &&
+                                    (piece->GetColour() == Colour::BLACK);
+  return (is_black_king_moving && (move == BLACK_KING_CASTLE) && CanBKC());
+}
+
+[[nodiscard]] bool Board::MoveIsBQC(const Move& move) const {
+  const auto* piece = PieceAt(move.src);
+  const bool is_black_king_moving = (piece != nullptr) &&
+                                    (piece->GetType() == PieceType::KING) &&
+                                    (piece->GetColour() == Colour::BLACK);
+  return (is_black_king_moving && (move == BLACK_QUEEN_CASTLE) && CanBQC());
 }
 
 }  // namespace chess

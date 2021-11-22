@@ -56,6 +56,11 @@ class Board {
 
   [[nodiscard]] bool IsValidMove(const Move& move, Colour active_colour) const;
 
+  [[nodiscard]] bool CanWKC() const;
+  [[nodiscard]] bool CanWQC() const;
+  [[nodiscard]] bool CanBKC() const;
+  [[nodiscard]] bool CanBQC() const;
+
   /**
    * @brief Check if player is in check.
    *
@@ -88,13 +93,14 @@ class Board {
   bool m_bkc = true;
   bool m_bqc = true;
 
-  bool CanWKC() const;
-  bool CanWQC() const;
-  bool CanBKC() const;
-  bool CanBQC() const;
-
+  void MovePieces(const Move& move);
   void SaveSquareIfKing(Piece* const piece);
   void UpdateCastles();
+
+  bool MoveIsWKC(const Move& move) const;
+  bool MoveIsWQC(const Move& move) const;
+  bool MoveIsBKC(const Move& move) const;
+  bool MoveIsBQC(const Move& move) const;
 };
 
 }  // namespace chess

@@ -65,6 +65,15 @@ struct Move {
   bool operator!=(const Move& other) const;
 };
 
+constexpr Move WHITE_KING_CASTLE{{4, 0}, {6, 0}};
+constexpr Move WHITE_QUEEN_CASTLE{{4, 0}, {2, 0}};
+constexpr Move BLACK_KING_CASTLE{{4, 7}, {6, 7}};
+constexpr Move BLACK_QUEEN_CASTLE{{4, 7}, {2, 7}};
+constexpr Move WHITE_KING_ROOK_CASTLE{{7, 0}, {5, 0}};
+constexpr Move WHITE_QUEEN_ROOK_CASTLE{{0, 0}, {3, 0}};
+constexpr Move BLACK_KING_ROOK_CASTLE{{7, 7}, {5, 7}};
+constexpr Move BLACK_QUEEN_ROOK_CASTLE{{0, 7}, {3, 7}};
+
 const std::string STARTPOS_FEN =
     "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
 
