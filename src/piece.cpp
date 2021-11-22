@@ -38,6 +38,30 @@ void Piece::SetSquare(const Square& square) { m_square = square; }
 
 void Piece::SetCaptured(bool captured) { m_is_captured = captured; }
 
+[[nodiscard]] std::vector<Move> Piece::GetSlidingMoves(
+    const Board& board, Direction direction) const {
+  std::vector<Move> moves;
+
+  for (uint8_t n = 1; n < 7; ++n) {
+    const Square dst_square = GetSquareInDirection(direction, n, m_square);
+    if (!IsValidSquare(dst_square)) {
+      break;
+    }
+    const chess::Move move{m_square, dst_square};
+    const auto* dst_piece = board.PieceAt(dst_square);
+    if (dst_piece == nullptr) {
+      moves.push_back(move);
+    } else {
+      if (dst_piece->GetColour() != m_colour) {
+        moves.push_back(move);
+      }
+      break;
+    }
+  }
+
+  return moves;
+}
+
 // PAWN
 Pawn::Pawn(Colour colour) : Piece(colour, PieceType::PAWN, PAWN_VALUE) {}
 
@@ -190,9 +214,24 @@ Rook::Rook(Colour colour) : Piece(colour, PieceType::ROOK, ROOK_VALUE) {}
   }
 }
 
-[[nodiscard]] std::vector<Move> Rook::GetMoves(const Board&) const {
-  // TODO: Implement rook moves
-  return {};
+[[nodiscard]] std::vector<Move> Rook::GetMoves(const Board& board) const {
+  std::vector<Move> moves;
+
+  std::vector<Move> up_moves = GetSlidingMoves(board, Direction::UP);
+  std::vector<Move> down_moves = GetSlidingMoves(board, Direction::DOWN);
+  std::vector<Move> left_moves = GetSlidingMoves(board, Direction::LEFT);
+  std::vector<Move> right_moves = GetSlidingMoves(board, Direction::RIGHT);
+
+  moves.insert(moves.end(), std::make_move_iterator(up_moves.begin()),
+               std::make_move_iterator(up_moves.end()));
+  moves.insert(moves.end(), std::make_move_iterator(down_moves.begin()),
+               std::make_move_iterator(down_moves.end()));
+  moves.insert(moves.end(), std::make_move_iterator(left_moves.begin()),
+               std::make_move_iterator(left_moves.end()));
+  moves.insert(moves.end(), std::make_move_iterator(right_moves.begin()),
+               std::make_move_iterator(right_moves.end()));
+
+  return moves;
 };
 
 // QUEEN

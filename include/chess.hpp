@@ -43,6 +43,11 @@ struct Square {
   bool operator!=(const Square& other) const;
 };
 
+enum class Direction { LEFT, UP, RIGHT, DOWN };
+
+Square GetSquareInDirection(Direction direction, uint8_t n,
+                            const Square& square);
+
 struct Move {
   Square src;
   Square dst;
