@@ -1,11 +1,29 @@
 # Chess
-A chess game and analysis tool built with Qt. It supports chess engines compatible with the UCI protocol, such as Stockfish.
+A chess game and analysis tool built with Qt 6. It supports chess engines compatible with the UCI protocol, such as Stockfish.
 
-**Currently implemented features:**
+**Currently implemented:**
 - Communication with Stockfish in multithread, multi PV mode.
-- Loading a position for analysis using Forsyth–Edwards Notation.
+  - Can configure number of lines, depth and number of CPU threads.
+- Can load a position for analysis using Forsyth–Edwards Notation.
+- Board widget.
+  - Move generation is in progress; bishop, rook and queen missing.
+  - Evaluation bar.
+- Colour themes.
+
+**To-Do:**
+- Complete move generation.
+- Play against engine.
+- Undo moves.
+- Move tree (main line and variations).
+- Add sound effects.
+- Load and save games in PGN format.
+- Network play.
+
 
 # How to build
+## Dependencies
+* Qt 6.2.1
+
 ## Using Qt Creator
 You can directly import the project into Qt Creator.
 
