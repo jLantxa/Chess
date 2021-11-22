@@ -43,7 +43,16 @@ struct Square {
   bool operator!=(const Square& other) const;
 };
 
-enum class Direction { LEFT, UP, RIGHT, DOWN };
+enum class Direction {
+  LEFT,
+  UP,
+  RIGHT,
+  DOWN,
+  UP_LEFT,
+  UP_RIGHT,
+  DOWN_LEFT,
+  DOWN_RIGHT
+};
 
 Square GetSquareInDirection(Direction direction, uint8_t n,
                             const Square& square);
