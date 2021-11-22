@@ -194,9 +194,27 @@ Bishop::Bishop(Colour colour)
   }
 }
 
-[[nodiscard]] std::vector<Move> Bishop::GetMoves(const Board&) const {
-  // TODO: Implement bishop moves
-  return {};
+[[nodiscard]] std::vector<Move> Bishop::GetMoves(const Board& board) const {
+  std::vector<Move> moves;
+
+  std::vector<Move> up_left_moves = GetSlidingMoves(board, Direction::UP_LEFT);
+  std::vector<Move> up_right_moves =
+      GetSlidingMoves(board, Direction::UP_RIGHT);
+  std::vector<Move> down_left_moves =
+      GetSlidingMoves(board, Direction::DOWN_LEFT);
+  std::vector<Move> down_right_moves =
+      GetSlidingMoves(board, Direction::DOWN_RIGHT);
+
+  moves.insert(moves.end(), std::make_move_iterator(up_left_moves.begin()),
+               std::make_move_iterator(up_left_moves.end()));
+  moves.insert(moves.end(), std::make_move_iterator(up_right_moves.begin()),
+               std::make_move_iterator(up_right_moves.end()));
+  moves.insert(moves.end(), std::make_move_iterator(down_left_moves.begin()),
+               std::make_move_iterator(down_left_moves.end()));
+  moves.insert(moves.end(), std::make_move_iterator(down_right_moves.begin()),
+               std::make_move_iterator(down_right_moves.end()));
+
+  return moves;
 };
 
 // ROOK

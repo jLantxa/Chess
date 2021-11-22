@@ -120,6 +120,22 @@ Square GetSquareInDirection(Direction direction, uint8_t n,
       return {static_cast<uint8_t>(square.file + n),
               static_cast<uint8_t>(square.rank)};
       break;
+    case Direction::UP_LEFT:
+      return {static_cast<uint8_t>(square.file - n),
+              static_cast<uint8_t>(square.rank + n)};
+      break;
+    case Direction::UP_RIGHT:
+      return {static_cast<uint8_t>(square.file + n),
+              static_cast<uint8_t>(square.rank + n)};
+      break;
+    case Direction::DOWN_LEFT:
+      return {static_cast<uint8_t>(square.file - n),
+              static_cast<uint8_t>(square.rank - n)};
+      break;
+    case Direction::DOWN_RIGHT:
+      return {static_cast<uint8_t>(square.file + n),
+              static_cast<uint8_t>(square.rank - n)};
+      break;
     default:
       return {};
   }
