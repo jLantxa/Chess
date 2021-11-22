@@ -229,9 +229,6 @@ void ChessBoardWidget::HandleBoardMouseEvent(QMouseEvent* event) {
                            (button == Qt::RightButton);
   const bool left_release = (event_type == QMouseEvent::MouseButtonRelease) &&
                             (button == Qt::LeftButton);
-  // const bool right_release = (event_type == QMouseEvent::MouseButtonRelease)
-  // &&
-  //                            (button == Qt::RightButton);
 
   if (!click_on_board && (left_press || right_press)) {
     m_selected_square.reset();
