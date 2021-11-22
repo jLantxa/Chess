@@ -240,19 +240,16 @@ King::King(Colour colour) : Piece(colour, PieceType::KING, KING_VALUE) {}
     for (int8_t dj = -1; dj < 2; ++dj) {
       const Square dst_square = {static_cast<uint8_t>(i + di),
                                  static_cast<uint8_t>(j + dj)};
-      const auto* dst_piece = board.PieceAt(dst_square);
       if (!IsValidSquare(dst_square)) {
         continue;
       }
+      const auto* dst_piece = board.PieceAt(dst_square);
       if ((dst_piece == nullptr) || (dst_piece->GetColour() != m_colour)) {
         const Move move{m_square, dst_square};
         if (!IsMoveInBoard(move)) {
           continue;
         }
-        const Board* future_board = new Board(board.AfterMove(move));
-        if (!future_board->CanBeCaptured(dst_square)) {
-          moves.push_back(move);
-        }
+        moves.push_back(move);
       }
     }
   }
