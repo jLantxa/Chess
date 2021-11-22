@@ -101,4 +101,28 @@ bool IsMoveInBoard(const Move& move) {
   return (IsValidSquare(move.src) && IsValidSquare(move.dst));
 }
 
+Square GetSquareInDirection(Direction direction, uint8_t n,
+                            const Square& square) {
+  switch (direction) {
+    case Direction::UP:
+      return {static_cast<uint8_t>(square.file),
+              static_cast<uint8_t>(square.rank + n)};
+      break;
+    case Direction::DOWN:
+      return {static_cast<uint8_t>(square.file),
+              static_cast<uint8_t>(square.rank - n)};
+      break;
+    case Direction::LEFT:
+      return {static_cast<uint8_t>(square.file - n),
+              static_cast<uint8_t>(square.rank)};
+      break;
+    case Direction::RIGHT:
+      return {static_cast<uint8_t>(square.file + n),
+              static_cast<uint8_t>(square.rank)};
+      break;
+    default:
+      return {};
+  }
+}
+
 }  // namespace chess

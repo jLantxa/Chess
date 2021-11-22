@@ -51,6 +51,9 @@ class Piece {
   Square m_square;
   const uint8_t m_value;
   bool m_is_captured = false;
+
+  [[nodiscard]] std::vector<Move> GetSlidingMoves(const Board& board,
+                                                  Direction direction) const;
 };
 
 class Pawn final : public Piece {
