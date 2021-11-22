@@ -53,10 +53,6 @@ void Board::SetPiece(std::unique_ptr<Piece> piece,
 }
 
 const Piece* Board::PieceAt(uint8_t i, uint8_t j) const {
-  //   if (!IsValidSquare({i, j})) {
-  //    return nullptr;
-  //  }
-
   return m_board[i][j].get();
 }
 
@@ -186,6 +182,30 @@ std::vector<Move> Board::GetMovesFrom(const Square& square) const {
   return src_piece->GetMoves(*this);
 }
 
+bool Board::IsValidMove(const Move& move, Colour active_colour) const {
+  const chess::Piece* src_piece = PieceAt(move.src);
+  if (src_piece == nullptr) {
+    return false;
+  }
+
+  // Can only make moves that don't put yourself in check or prevent being in
+  // check
+  auto future_board = AfterMove(move);
+  const bool will_be_in_check = future_board.IsInCheck(active_colour);
+  if (will_be_in_check) {
+    return false;
+  }
+
+  const auto valid_moves = GetMovesFrom(move.src);
+  for (auto& valid_move : valid_moves) {
+    if (valid_move == move) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
 [[nodiscard]] bool Board::CanBeCaptured(const Square& square) const {
   if (!IsValidSquare(square)) {
     return false;
@@ -201,8 +221,7 @@ std::vector<Move> Board::GetMovesFrom(const Square& square) const {
       const Square src_square{i, j};
       const auto* src_piece = PieceAt(src_square);
       if ((src_piece == nullptr) ||
-          (src_piece->GetColour() == piece_in_check->GetColour()) ||
-          (src_piece->GetType() == PieceType::KING)) {
+          (src_piece->GetColour() == piece_in_check->GetColour())) {
         continue;
       }
 

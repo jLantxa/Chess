@@ -151,8 +151,6 @@ class ChessBoardWidget : public QWidget {
 
   float GetBalance() const;
   float Transform(float x) const;
-
-  bool IsValidMove(const chess::Move& move) const;
 };
 
 #endif  // _CHESS_INCLUDE_CHESS_H_

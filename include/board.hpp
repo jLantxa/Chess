@@ -54,6 +54,8 @@ class Board {
   [[nodiscard]] std::vector<Move> GetMovesFrom(uint8_t i, uint8_t j) const;
   [[nodiscard]] std::vector<Move> GetMovesFrom(const Square& square) const;
 
+  [[nodiscard]] bool IsValidMove(const Move& move, Colour active_colour) const;
+
   /**
    * @brief Check if player is in check.
    *
