@@ -267,9 +267,39 @@ Queen::Queen(Colour colour) : Piece(colour, PieceType::QUEEN, QUEEN_VALUE) {}
   }
 }
 
-[[nodiscard]] std::vector<Move> Queen::GetMoves(const Board&) const {
-  // TODO: Implement queen moves
-  return {};
+[[nodiscard]] std::vector<Move> Queen::GetMoves(const Board& board) const {
+  std::vector<Move> moves;
+
+  std::vector<Move> up_moves = GetSlidingMoves(board, Direction::UP);
+  std::vector<Move> down_moves = GetSlidingMoves(board, Direction::DOWN);
+  std::vector<Move> left_moves = GetSlidingMoves(board, Direction::LEFT);
+  std::vector<Move> right_moves = GetSlidingMoves(board, Direction::RIGHT);
+  std::vector<Move> up_left_moves = GetSlidingMoves(board, Direction::UP_LEFT);
+  std::vector<Move> up_right_moves =
+      GetSlidingMoves(board, Direction::UP_RIGHT);
+  std::vector<Move> down_left_moves =
+      GetSlidingMoves(board, Direction::DOWN_LEFT);
+  std::vector<Move> down_right_moves =
+      GetSlidingMoves(board, Direction::DOWN_RIGHT);
+
+  moves.insert(moves.end(), std::make_move_iterator(up_moves.begin()),
+               std::make_move_iterator(up_moves.end()));
+  moves.insert(moves.end(), std::make_move_iterator(down_moves.begin()),
+               std::make_move_iterator(down_moves.end()));
+  moves.insert(moves.end(), std::make_move_iterator(left_moves.begin()),
+               std::make_move_iterator(left_moves.end()));
+  moves.insert(moves.end(), std::make_move_iterator(right_moves.begin()),
+               std::make_move_iterator(right_moves.end()));
+  moves.insert(moves.end(), std::make_move_iterator(up_left_moves.begin()),
+               std::make_move_iterator(up_left_moves.end()));
+  moves.insert(moves.end(), std::make_move_iterator(up_right_moves.begin()),
+               std::make_move_iterator(up_right_moves.end()));
+  moves.insert(moves.end(), std::make_move_iterator(down_left_moves.begin()),
+               std::make_move_iterator(down_left_moves.end()));
+  moves.insert(moves.end(), std::make_move_iterator(down_right_moves.begin()),
+               std::make_move_iterator(down_right_moves.end()));
+
+  return moves;
 };
 
 // KING
