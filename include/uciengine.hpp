@@ -18,7 +18,6 @@
 #ifndef _CHESS_INCLUDE_UCI_ENGINE_HPP_
 #define _CHESS_INCLUDE_UCI_ENGINE_HPP_
 
-#include <QDebug>
 #include <QProcess>
 #include <QString>
 

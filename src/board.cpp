@@ -17,7 +17,6 @@
 
 #include "board.hpp"
 
-#include <QDebug>
 #include <algorithm>
 #include <sstream>
 

@@ -17,8 +17,6 @@
 
 #include "piece.hpp"
 
-#include <cstdio>
-
 namespace chess {
 
 Piece::Piece(Colour colour, PieceType type, uint8_t value)
