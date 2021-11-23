@@ -23,7 +23,7 @@ TEST(BoardTest, GetFen) {
   chess::Board board;
 
   const std::string start_pos =
-      "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - ";
+      "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq -";
 
   for (uint8_t i = 0; i < 8; ++i) {
     board.SetPiece(std::make_unique<chess::Pawn>(chess::Colour::WHITE), {i, 1});

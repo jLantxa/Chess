@@ -183,7 +183,7 @@ std::string Board::GetPosition(const Colour& active_colour) const {
   }
 
   ss << ((m_en_passant.has_value()) ? SquareToString(m_en_passant.value())
-                                    : "- ");
+                                    : "-");
 
   return ss.str();
 }

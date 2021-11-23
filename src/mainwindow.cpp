@@ -125,7 +125,10 @@ bool MainWindow::ResetPosition(const QString& fen_str) {
   }
 
   const char* FEN_SEPARATOR = " ";
-  const QStringList args = fen_str.split(FEN_SEPARATOR);
+  QStringList args = fen_str.trimmed().split(FEN_SEPARATOR);
+  for (auto& arg : args) {
+    arg = arg.trimmed();
+  }
 
   if (args.length() != 6) {
     return false;
