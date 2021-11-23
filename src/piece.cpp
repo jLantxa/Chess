@@ -350,7 +350,8 @@ King::King(Colour colour) : Piece(colour, PieceType::KING, KING_VALUE) {}
   }
 
   // Castles
-  if (flags & ~FLAG_EXCLUDE_CASTLES) {
+  const bool include_castles = ((flags & FLAG_EXCLUDE_CASTLES) == 0);
+  if (include_castles) {
     if (m_colour == Colour::WHITE) {
       if (board.CanWKC()) {
         moves.push_back(WHITE_KING_CASTLE);
