@@ -179,12 +179,10 @@ void MainWindow::OnDepthInfoAvailable(const UCIEngine::DepthInfo& info) {
   }
 
   m_num_received_lines = line_id;
-  m_depth_infos[line_id - 1] = info;  // Lines start counting at 1
-
+  auto& stored_info = m_depth_infos[line_id - 1];
+  stored_info = info;  // Lines start counting at 1
   if (m_board->GetActiveColour() == chess::Colour::BLACK) {
-    for (auto& info : m_depth_infos) {
-      info.score *= -1;
-    }
+    stored_info.score *= -1;
   }
 
   UpdateLineInfo();
