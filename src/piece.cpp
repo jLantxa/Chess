@@ -40,7 +40,7 @@ void Piece::SetMoved(bool moved) { m_has_moved = moved; }
     const Board& board, Direction direction) const {
   std::vector<Move> moves;
 
-  for (uint8_t n = 1; n < 7; ++n) {
+  for (uint8_t n = 1; n < 8; ++n) {
     const Square dst_square = GetSquareInDirection(direction, n, m_square);
     if (!IsValidSquare(dst_square)) {
       break;
