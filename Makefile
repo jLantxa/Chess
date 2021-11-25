@@ -12,7 +12,7 @@ FORMS := forms
 TEST := test
 RES := res
 
-all: debug release tests
+all: debug release doc tests
 	@make cloc
 
 binaries: debug release
@@ -62,6 +62,9 @@ format:
 		$(SRC)/*.cpp \
 		$(INCLUDE)/*.h $(INCLUDE)/*.hpp \
 		$(TEST)/*.cpp
+
+doc:
+	@doxygen
 
 clean:
 	rm -r $(BUILD)

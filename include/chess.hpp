@@ -35,6 +35,11 @@ constexpr uint8_t ROOK_VALUE = 5U;
 constexpr uint8_t QUEEN_VALUE = 9U;
 constexpr uint8_t KING_VALUE = UINT8_MAX;
 
+/**
+ * @brief A square in a chess board.
+ * A file is a column.
+ * A rank is a row.
+ */
 struct Square {
   uint8_t file;
   uint8_t rank;
@@ -43,6 +48,9 @@ struct Square {
   bool operator!=(const Square& other) const;
 };
 
+/**
+ * @brief A direction of movement in the chess board.
+ */
 enum class Direction {
   LEFT,
   UP,
@@ -54,9 +62,21 @@ enum class Direction {
   DOWN_RIGHT
 };
 
+/**
+ * @brief Get the Square in a given direction from a departing square.
+ *
+ * @param direction Direction of movement.
+ * @param n Steps to advance.
+ * @param square Departing square.
+ * @return Square Destination.
+ */
 Square GetSquareInDirection(Direction direction, uint8_t n,
                             const Square& square);
 
+/**
+ * @brief A move in a game of chess. It is defined by a source and destination
+ * square.
+ */
 struct Move {
   Square src;
   Square dst;
@@ -79,12 +99,27 @@ const std::string STARTPOS_FEN =
 
 constexpr std::array<char, 8> FILES{'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'};
 
+/**
+ * @brief Converts a file index into its corresponding letter.
+ */
 uint8_t FileToNumber(char file);
+
+/**
+ * @brief Converts a file letter into its corresponding index 0-7.
+ */
 char NumberToFile(uint8_t number);
 
 [[nodiscard]] std::string SquareToString(const Square& square);
 [[nodiscard]] Square StringToSquare(const std::string& str);
+
+/**
+ * @brief Converts a move into a string representation
+ */
 [[nodiscard]] std::string MoveToUCI(const Move& move);
+
+/**
+ * @brief Converts a move string into a Move object.
+ */
 [[nodiscard]] Move UCIToMove(const std::string& uci);
 
 /**
@@ -92,7 +127,14 @@ char NumberToFile(uint8_t number);
  */
 void ToggleColour(Colour* colour);
 
+/**
+ * @brief Returns true if the given square is contained in the 8x8 chess board.
+ */
 bool IsValidSquare(const Square& square);
+
+/**
+ * @brief Returns true if the given move is contained in the 8x8 chess board.
+ */
 bool IsMoveInBoard(const Move& move);
 
 }  // namespace chess
