@@ -20,11 +20,13 @@
 
 #include <QLabel>
 #include <QMainWindow>
+#include <memory>
 #include <vector>
 
 #include "board.hpp"
 #include "chess.hpp"
 #include "chessboardwidget.h"
+#include "player.hpp"
 #include "settingsdialog.h"
 #include "uciengine.hpp"
 
@@ -41,12 +43,14 @@ class MainWindow : public QMainWindow {
   MainWindow(QWidget* parent = nullptr);
   ~MainWindow();
 
+  std::vector<UCIEngine::DepthInfo>& GetLines() const;
+
  public slots:
   /**
    * @brief Depth search info available from the engine
    * @param depth_info
    */
-  void OnDepthInfoAvailable(const UCIEngine::DepthInfo& depth_info);
+  void OnDepthInfoAvailable();
 
   /**
    * @brief Called when a valid move is done on the board
@@ -74,6 +78,8 @@ class MainWindow : public QMainWindow {
  private:
   Ui::MainWindow* ui;
 
+  friend class EnginePlayer;
+
   /**
    * @brief Initialise window.
    */
@@ -90,14 +96,13 @@ class MainWindow : public QMainWindow {
   /** List of moves from starting position. */
   QStringList m_moves_list;
 
-  /** Line info received from engine. */
-  std::vector<UCIEngine::DepthInfo> m_depth_infos;
-
-  /** Number of lines received from the engine. */
-  uint32_t m_num_received_lines = 0;
-
   /** Show analysis lines while engine is on */
   bool m_show_lines = true;
+
+  std::unique_ptr<Player> m_white_player =
+      std::make_unique<LocalPlayer>(chess::Colour::WHITE, m_board);
+  std::unique_ptr<Player> m_black_player =
+      std::make_unique<LocalPlayer>(chess::Colour::BLACK, m_board);
 
   ChessBoardWidget* m_board;
 
@@ -113,9 +118,6 @@ class MainWindow : public QMainWindow {
    * @brief Restart engine search.
    */
   void RestartSearch();
-
-  /** Update the engine search info. */
-  void UpdateLineInfo();
 
   /** Update the move list widget*/
   void UpdateMoveList();
@@ -160,5 +162,7 @@ class MainWindow : public QMainWindow {
    * @brief Set the engine controls enabled or disabled.
    */
   void SetEngineControlsEnabled(bool enabled);
+
+  std::unique_ptr<Player>& GetNextPlayer(chess::Colour colour);
 };
 #endif  // _CHESS_INCLUDE_MAINWINDOW_HPP_

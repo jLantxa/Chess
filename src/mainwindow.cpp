@@ -17,6 +17,8 @@
 
 #include "mainwindow.hpp"
 
+#include <unistd.h>
+
 #include <QColor>
 #include <QInputDialog>
 #include <QMessageBox>
@@ -96,8 +98,6 @@ void MainWindow::NewGame() {
 
 void MainWindow::SetNumLines(uint8_t num_lines) {
   num_lines = std::max(static_cast<uint8_t>(1U), num_lines);
-  m_depth_infos.clear();
-  m_depth_infos.resize(num_lines);
   m_engine.SetNumLines(num_lines);
   RestartSearch();
 }
@@ -151,7 +151,10 @@ void MainWindow::OnMoveDone(const chess::Move& move) {
   (void)move;
 
   const auto active_colour = m_board->GetActiveColour();
+  auto& next_player = GetNextPlayer(active_colour);
   m_board->SetSelectableColour(active_colour);
+  next_player->Prompt(move);
+
   m_moves_list.push_back(QString::fromStdString(chess::MoveToUCI(move)));
   UpdateMoveList();
 
@@ -172,27 +175,12 @@ void MainWindow::ShowMsgBox(const QString& title, const QString& text) {
   msg_box.exec();
 }
 
-void MainWindow::OnDepthInfoAvailable(const UCIEngine::DepthInfo& info) {
-  const uint32_t line_id = info.line_id;
-  if (line_id > m_depth_infos.size()) {
-    return;
-  }
-
-  m_num_received_lines = line_id;
-  auto& stored_info = m_depth_infos[line_id - 1];
-  stored_info = info;  // Lines start counting at 1
-  if (m_board->GetActiveColour() == chess::Colour::BLACK) {
-    stored_info.score *= -1;
-  }
-
-  UpdateLineInfo();
-}
-
-void MainWindow::UpdateLineInfo() {
+void MainWindow::OnDepthInfoAvailable() {
   ui->teLines->clear();
+  std::vector<UCIEngine::DepthInfo> lines = m_engine.GetLines();
 
-  for (uint32_t i = 0; i < m_num_received_lines; ++i) {
-    auto& info = m_depth_infos[i];
+  for (uint32_t i = 0; i < lines.size(); ++i) {
+    auto& info = lines[i];
     QStringList move_str_chain;
 
     // Show info in widget
@@ -232,8 +220,8 @@ void MainWindow::UpdateLineInfo() {
   }
 
   // Send score to board widget
-  if (m_depth_infos.size() > 0) {
-    const auto& info = m_depth_infos[0];
+  if (lines.size() > 0) {
+    const auto& info = lines[0];
     m_board->SetScore(info.score, info.mate_counter);
   }
 }
@@ -287,6 +275,10 @@ void MainWindow::SetEngineControlsEnabled(bool enabled) {
   ui->sbThreads->setVisible(enabled);
   ui->sbDepth->setVisible(enabled);
   ui->teLines->setVisible(enabled);
+}
+
+std::unique_ptr<Player>& MainWindow::GetNextPlayer(chess::Colour colour) {
+  return ((colour == chess::Colour::WHITE) ? m_white_player : m_black_player);
 }
 
 void MainWindow::on_bEngineOn_toggled(bool checked) {

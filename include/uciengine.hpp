@@ -20,6 +20,9 @@
 
 #include <QProcess>
 #include <QString>
+#include <mutex>
+#include <optional>
+#include <vector>
 
 class UCIEngine : public QObject {
   Q_OBJECT;
@@ -114,6 +117,16 @@ class UCIEngine : public QObject {
    */
   void SetNumThreads(uint16_t num_threads);
 
+  /**
+   * @brief Get a copy of the best move.
+   */
+  std::optional<BestMove> GetBestMove();
+
+  /**
+   * @brief Get a copy of the DepthInfo vector
+   */
+  std::vector<DepthInfo> GetLines();
+
  public slots:
   /**
    * @brief The engine process has started.
@@ -126,17 +139,20 @@ class UCIEngine : public QObject {
   void OnReadyReadStdout();
 
  signals:
-  void BestMoveAvailable(const UCIEngine::BestMove& best_move);
-  void DepthInfoAvailable(const UCIEngine::DepthInfo& depth_info);
+  void BestMoveAvailable();
+  void DepthInfoAvailable();
 
  private:
   QProcess m_engine_process;
 
+  std::vector<DepthInfo> m_lines;
+  std::optional<BestMove> m_best_move;
+  std::mutex m_info_mutex;
+
   void ConnectProcessSignals();
 
   void ParseText(const QString& text);
-  bool ParseInfo(const QStringList& args);
-  bool ParseBestMove(const QStringList& args);
+  BestMove ParseBestMove(const QStringList& args);
   UCIEngine::DepthInfo ParseDepthInfo(const QStringList& args);
 };
 
