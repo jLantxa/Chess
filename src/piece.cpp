@@ -22,6 +22,25 @@ namespace chess {
 Piece::Piece(Colour colour, PieceType type, uint8_t value)
     : m_colour(colour), m_type(type), m_value(value) {}
 
+[[nodiscard]] std::unique_ptr<Piece> Piece::Factory(PieceType type,
+                                                    Colour colour) {
+  switch (type) {
+    default:
+    case PieceType::PAWN:
+      return std::make_unique<Pawn>(colour);
+    case PieceType::KNIGHT:
+      return std::make_unique<Knight>(colour);
+    case PieceType::BISHOP:
+      return std::make_unique<Bishop>(colour);
+    case PieceType::ROOK:
+      return std::make_unique<Rook>(colour);
+    case PieceType::QUEEN:
+      return std::make_unique<Queen>(colour);
+    case PieceType::KING:
+      return std::make_unique<King>(colour);
+  }
+}
+
 [[nodiscard]] Colour Piece::GetColour() const { return m_colour; }
 
 [[nodiscard]] PieceType Piece::GetType() const { return m_type; }

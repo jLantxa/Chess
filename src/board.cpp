@@ -94,6 +94,7 @@ void Board::SaveSquareIfKing(Piece* const piece) {
 }
 
 void Board::DoMove(const Move& move) {
+  // Handle special moves first
   if (MoveIsWKC(move)) {
     MovePieces(move);
     MovePieces(WHITE_KING_ROOK_CASTLE);
@@ -106,6 +107,9 @@ void Board::DoMove(const Move& move) {
   } else if (MoveIsBQC(move)) {
     MovePieces(move);
     MovePieces(BLACK_QUEEN_ROOK_CASTLE);
+  } else if (MoveIsPawnPromotion(move)) {
+    MoveForPromotion(move);
+  } else if (MoveIsEnPassant(move)) {
   } else {
     MovePieces(move);
   }
@@ -121,6 +125,27 @@ void Board::MovePieces(const Move& move) {
   SaveSquareIfKing(dst.get());
   UpdateCastles();
   src.reset();
+}
+
+void Board::MoveForPromotion(const Move& move) {
+  auto& src = m_board[move.src.file][move.src.rank];
+  auto& dst = m_board[move.dst.file][move.dst.rank];
+
+  const auto* src_piece = PieceAt(move.src);
+  const PieceType type = move.promotion_type;
+  const Colour colour = src_piece->GetColour();
+
+  // Reset both pieces
+  src.reset();
+  dst.reset();
+
+  // Set promoted piece at dst square
+  std::unique_ptr<Piece> promoted_piece = Piece::Factory(type, colour);
+  SetPiece(std::move(promoted_piece), move.dst);
+
+  dst->SetSquare(move.dst);
+  dst->SetMoved(true);
+  UpdateCastles();
 }
 
 void Board::Clear() {
@@ -402,6 +427,23 @@ void Board::UpdateCastles() {
                                     (piece->GetType() == PieceType::KING) &&
                                     (piece->GetColour() == Colour::BLACK);
   return (is_black_king_moving && (move == BLACK_QUEEN_CASTLE));
+}
+
+[[nodiscard]] bool Board::MoveIsPawnPromotion(const Move& move) const {
+  if (!move.is_pawn_promotion) {
+    return false;
+  }
+
+  const bool advance_to_last_rank =
+      ((move.src.rank == 6) && (move.dst.rank == 7)) ||
+      ((move.src.rank == 1) && (move.dst.rank == 0));
+
+  return advance_to_last_rank;
+}
+
+[[nodiscard]] bool Board::MoveIsEnPassant(const Move& move) const {
+  (void)move;
+  return false;
 }
 
 }  // namespace chess

@@ -26,7 +26,18 @@ namespace chess {
 
 enum class Colour { WHITE, BLACK };
 
-enum class PieceType { PAWN, KNIGHT, BISHOP, ROOK, QUEEN, KING };
+enum class PieceType {
+  PAWN = 0,
+  KNIGHT = 1,
+  BISHOP = 2,
+  ROOK = 3,
+  QUEEN = 4,
+  KING = 5
+};
+
+constexpr std::array<char, 6> PIECE_CHARS = {'p', 'n', 'b', 'r', 'q', 'k'};
+
+PieceType GetPieceTypeFromChar(char c);
 
 constexpr uint8_t PAWN_VALUE = 1U;
 constexpr uint8_t KNIGHT_VALUE = 3U;
@@ -80,6 +91,8 @@ Square GetSquareInDirection(Direction direction, uint8_t n,
 struct Move {
   Square src;
   Square dst;
+  bool is_pawn_promotion = false;
+  PieceType promotion_type = PieceType::QUEEN;
 
   bool operator==(const Move& other) const;
   bool operator!=(const Move& other) const;

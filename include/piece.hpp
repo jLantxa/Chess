@@ -31,6 +31,9 @@ class Piece {
  public:
   Piece(Colour colour, PieceType type, uint8_t value);
 
+  [[nodiscard]] static std::unique_ptr<Piece> Factory(PieceType type,
+                                                      Colour colour);
+
   static constexpr uint32_t FLAG_EXCLUDE_CASTLES = (1 << 0);
 
   [[nodiscard]] Colour GetColour() const;

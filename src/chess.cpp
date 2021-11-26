@@ -14,18 +14,23 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+
 #include "chess.hpp"
+
+#include <sstream>
 
 namespace chess {
 
 bool Square::operator==(const Square& other) const {
-  return (file == other.file) && (rank == other.rank);
+  return ((file == other.file) && (rank == other.rank));
 }
 
 bool Square::operator!=(const Square& other) const { return !(*this == other); }
 
 bool Move::operator==(const Move& other) const {
-  return (src == other.src) && (dst == other.dst);
+  return (src == other.src) && (dst == other.dst) &&
+         (is_pawn_promotion == other.is_pawn_promotion) &&
+         (promotion_type == other.promotion_type);
 }
 
 bool Move::operator!=(const Move& other) const { return !(*this == other); }
@@ -73,11 +78,15 @@ Square StringToSquare(const std::string& str) {
 }
 
 std::string MoveToUCI(const Move& move) {
-  const std::string src = SquareToString(move.src);
-  const std::string dst = SquareToString(move.dst);
-  const std::string str = src + dst;
+  std::stringstream ss;
 
-  return str;
+  ss << SquareToString(move.src);
+  ss << SquareToString(move.dst);
+  if (move.is_pawn_promotion) {
+    ss << PIECE_CHARS[static_cast<uint8_t>(move.promotion_type)];
+  }
+
+  return ss.str();
 }
 
 Move UCIToMove(const std::string& uci) {
@@ -88,6 +97,11 @@ Move UCIToMove(const std::string& uci) {
   Square src = StringToSquare(uci.substr(0, 2));
   Square dst = StringToSquare(uci.substr(2, 4));
   Move move{src, dst};
+
+  if (uci.size() == 5) {
+    move.is_pawn_promotion = true;
+    move.promotion_type = GetPieceTypeFromChar(uci.at(4));
+  }
 
   return move;
 }
@@ -137,6 +151,30 @@ Square GetSquareInDirection(Direction direction, uint8_t n,
       break;
     default:
       return {};
+  }
+}
+
+PieceType GetPieceTypeFromChar(char c) {
+  switch (std::tolower(c)) {
+    default:
+    case 'p':
+      return PieceType::PAWN;
+      break;
+    case 'n':
+      return PieceType::KNIGHT;
+      break;
+    case 'b':
+      return PieceType::BISHOP;
+      break;
+    case 'r':
+      return PieceType::ROOK;
+      break;
+    case 'q':
+      return PieceType::QUEEN;
+      break;
+    case 'k':
+      return PieceType::KING;
+      break;
   }
 }
 

@@ -92,38 +92,24 @@ void ChessBoardWidget::SetPosition(const QString& fen_str) {
         const uint8_t num = ch - '0';
         i += num;
       } else {
+        const char piece_char = qch.toLower().toLatin1();
         const chess::Colour colour =
             IsUpperCase(ch) ? chess::Colour::WHITE : chess::Colour::BLACK;
-        switch (qch.toLower().toLatin1()) {
+        const chess::PieceType type =
+            chess::GetPieceTypeFromChar(qch.toLower().toLatin1());
+        switch (piece_char) {
           case 'p':
-            m_board.SetPiece(std::make_unique<chess::Pawn>(colour), i, j);
-            i++;
-            break;
-
           case 'n':
-            m_board.SetPiece(std::make_unique<chess::Knight>(colour), i, j);
-            i++;
-            break;
-
           case 'b':
-            m_board.SetPiece(std::make_unique<chess::Bishop>(colour), i, j);
-            i++;
-            break;
-
           case 'r':
-            m_board.SetPiece(std::make_unique<chess::Rook>(colour), i, j);
-            i++;
-            break;
-
           case 'q':
-            m_board.SetPiece(std::make_unique<chess::Queen>(colour), i, j);
+          case 'k': {
+            std::unique_ptr<chess::Piece> piece =
+                chess::Piece::Factory(type, colour);
+            m_board.SetPiece(std::move(piece), i, j);
             i++;
             break;
-
-          case 'k':
-            m_board.SetPiece(std::make_unique<chess::King>(colour), i, j);
-            i++;
-            break;
+          }
 
           default:
             i++;

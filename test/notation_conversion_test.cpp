@@ -58,6 +58,11 @@ TEST(NotationConversion, MoveToUCI) {
   EXPECT_EQ(chess::MoveToUCI(chess::Move{{4, 1}, {4, 3}}), "e2e4");
   EXPECT_EQ(chess::MoveToUCI(chess::Move{{6, 0}, {5, 2}}), "g1f3");
   EXPECT_EQ(chess::MoveToUCI(chess::Move{{4, 0}, {6, 0}}), "e1g1");
+
+  // Pawn promotion
+  EXPECT_EQ(chess::MoveToUCI(
+                chess::Move{{4, 6}, {4, 7}, true, chess::PieceType::KNIGHT}),
+            "e7e8n");
 }
 
 TEST(NotationConversion, UCIToMove) {
@@ -71,4 +76,10 @@ TEST(NotationConversion, UCIToMove) {
   // Mixed case
   EXPECT_EQ(chess::UCIToMove("E1g1"), (chess::Move{{4, 0}, {6, 0}}));
   EXPECT_EQ(chess::UCIToMove("e1G1"), (chess::Move{{4, 0}, {6, 0}}));
+
+  // Pawn promotion
+  EXPECT_EQ(chess::UCIToMove("a7a8q"),
+            (chess::Move{{0, 6}, {0, 7}, true, chess::PieceType::QUEEN}));
+  EXPECT_EQ(chess::UCIToMove("a7a8r"),
+            (chess::Move{{0, 6}, {0, 7}, true, chess::PieceType::ROOK}));
 }
