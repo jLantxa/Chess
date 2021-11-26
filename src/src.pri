@@ -8,4 +8,5 @@ SOURCES += \
   $$PWD/mainwindow.cpp \
   $$PWD/settingsdialog.cpp \
   $$PWD/uciengine.cpp \
-  $$PWD/chessboardwidget.cpp
+  $$PWD/chessboardwidget.cpp \
+  $$PWD/player.cpp

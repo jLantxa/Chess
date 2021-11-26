@@ -43,6 +43,7 @@ class ChessBoardWidget : public QWidget {
   void SetActiveColour(chess::Colour colour);
   chess::Colour GetActiveColour() const;
   void SetSelectableColour(const chess::Colour& colour);
+  void SetSelectable(bool selectable);
 
   QString GetFEN() const;
 
@@ -125,6 +126,7 @@ class ChessBoardWidget : public QWidget {
   uint32_t m_half_moves = 0;
 
   chess::Colour m_active_colour = chess::Colour::WHITE;
+  bool m_selectable = true;
   chess::Colour m_selectable_colour = m_active_colour;
   chess::Colour m_side = m_active_colour;
   float m_board_size = 50;

@@ -201,6 +201,10 @@ void ChessBoardWidget::mouseReleaseEvent(QMouseEvent* event) {
 }
 
 void ChessBoardWidget::HandleBoardMouseEvent(QMouseEvent* event) {
+  if (!m_selectable) {
+    return;
+  }
+
   const QPointF position = event->position();
   const float x = position.x();
   const float y = position.y();
@@ -506,4 +510,8 @@ QString ChessBoardWidget::GetFEN() const {
                     QString::number(1 + (m_half_moves / 2));
 
   return fen_str;
+}
+
+void ChessBoardWidget::SetSelectable(bool selectable) {
+  m_selectable = selectable;
 }
