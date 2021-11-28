@@ -287,6 +287,14 @@ std::vector<Move> Board::GetMovesFrom(const Square& square) const {
   return src_piece->GetMoves(*this);
 }
 
+const std::optional<Square>& Board::GetWhiteKing() const {
+  return m_white_king_square;
+}
+
+const std::optional<Square>& Board::GetBlackKing() const {
+  return m_black_king_square;
+}
+
 bool Board::IsValidMove(const Move& move, Colour active_colour) const {
   const chess::Piece* src_piece = PieceAt(move.src);
   if (src_piece == nullptr) {

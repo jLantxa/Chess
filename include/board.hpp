@@ -81,6 +81,9 @@ class Board {
 
   [[nodiscard]] Board AfterMove(const Move& move) const;
 
+  const std::optional<Square>& GetWhiteKing() const;
+  const std::optional<Square>& GetBlackKing() const;
+
  private:
   std::unique_ptr<Piece> m_board[8][8];
 
@@ -106,6 +109,8 @@ class Board {
 
   [[nodiscard]] bool MoveIsPawnPromotion(const Move& move) const;
   [[nodiscard]] bool MoveIsEnPassant(const Move& move) const;
+
+  friend class BoardTest;
 };
 
 }  // namespace chess
