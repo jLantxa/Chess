@@ -146,10 +146,9 @@ class MainWindow : public QMainWindow {
    * @param cp_score Score is centipawns.
    * @return A score string with a + or - sign.
    */
-  QString GetSignedScore(int cp_score) const {
-    QString sign = (cp_score > 0) ? "+" : "";
-    return sign + QString::number(static_cast<float>(cp_score) / 100, 'f', 2);
-  }
+  QString GetSignedScoreStr(int cp_score) const;
+
+  int GetColourScore(chess::Colour colour, int score) const;
 
   /**
    * @brief Display a message box.

@@ -175,9 +175,23 @@ void MainWindow::ShowMsgBox(const QString& title, const QString& text) {
   msg_box.exec();
 }
 
+QString MainWindow::GetSignedScoreStr(int cp_score) const {
+  QString sign = (cp_score > 0) ? "+" : "";
+  return sign + QString::number(static_cast<float>(cp_score) / 100, 'f', 2);
+}
+
+int MainWindow::GetColourScore(chess::Colour colour, int score) const {
+  if (colour == chess::Colour::WHITE) {
+    return score;
+  } else {
+    return -score;
+  }
+}
+
 void MainWindow::OnDepthInfoAvailable() {
   ui->teLines->clear();
   std::vector<UCIEngine::DepthInfo> lines = m_engine.GetLines();
+  const auto colour = m_board->GetActiveColour();
 
   for (uint32_t i = 0; i < lines.size(); ++i) {
     auto& info = lines[i];
@@ -206,23 +220,23 @@ void MainWindow::OnDepthInfoAvailable() {
         }
       }
 
+      const int score = GetColourScore(colour, info.score);
+
       QString score_str;
       if (!info.mate_counter) {
-        score_str = "<b>[" + GetSignedScore(info.score) + "]</b>";
+        score_str = "<b>[" + GetSignedScoreStr(score) + "]</b>";
       } else {
-        QString signed_mate_str = (info.score >= 0) ? "M" : "-M";
-        score_str = "<b>[" + signed_mate_str +
-                    QString::number(abs(info.score)) + "]</b>";
+        QString signed_mate_str = (score >= 0) ? "M" : "-M";
+        score_str =
+            "<b>[" + signed_mate_str + QString::number(abs(score)) + "]</b>";
       }
-
       ui->teLines->append(score_str + " " + move_str_chain.join(" ") + "<br>");
-    }
-  }
 
-  // Send score to board widget
-  if (lines.size() > 0) {
-    const auto& info = lines[0];
-    m_board->SetScore(info.score, info.mate_counter);
+      // Send score to board widget
+      if (i == 0) {
+        m_board->SetScore(score, info.mate_counter);
+      }
+    }
   }
 }
 
