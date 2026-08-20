@@ -35,12 +35,8 @@ bool Move::operator==(const Move& other) const {
 
 bool Move::operator!=(const Move& other) const { return !(*this == other); }
 
-void ToggleColour(Colour* colour) {
-  if (*colour == Colour::WHITE) {
-    *colour = Colour::BLACK;
-  } else if (*colour == Colour::BLACK) {
-    *colour = Colour::WHITE;
-  }
+Colour ToggleColour(Colour colour) {
+  return (colour == Colour::WHITE) ? Colour::BLACK : Colour::WHITE;
 }
 
 uint8_t FileToNumber(char file) {
@@ -120,35 +116,27 @@ Square GetSquareInDirection(Direction direction, uint8_t n,
     case Direction::UP:
       return {static_cast<uint8_t>(square.file),
               static_cast<uint8_t>(square.rank + n)};
-      break;
     case Direction::DOWN:
       return {static_cast<uint8_t>(square.file),
               static_cast<uint8_t>(square.rank - n)};
-      break;
     case Direction::LEFT:
       return {static_cast<uint8_t>(square.file - n),
               static_cast<uint8_t>(square.rank)};
-      break;
     case Direction::RIGHT:
       return {static_cast<uint8_t>(square.file + n),
               static_cast<uint8_t>(square.rank)};
-      break;
     case Direction::UP_LEFT:
       return {static_cast<uint8_t>(square.file - n),
               static_cast<uint8_t>(square.rank + n)};
-      break;
     case Direction::UP_RIGHT:
       return {static_cast<uint8_t>(square.file + n),
               static_cast<uint8_t>(square.rank + n)};
-      break;
     case Direction::DOWN_LEFT:
       return {static_cast<uint8_t>(square.file - n),
               static_cast<uint8_t>(square.rank - n)};
-      break;
     case Direction::DOWN_RIGHT:
       return {static_cast<uint8_t>(square.file + n),
               static_cast<uint8_t>(square.rank - n)};
-      break;
     default:
       return {};
   }
@@ -159,22 +147,16 @@ PieceType GetPieceTypeFromChar(char c) {
     default:
     case 'p':
       return PieceType::PAWN;
-      break;
     case 'n':
       return PieceType::KNIGHT;
-      break;
     case 'b':
       return PieceType::BISHOP;
-      break;
     case 'r':
       return PieceType::ROOK;
-      break;
     case 'q':
       return PieceType::QUEEN;
-      break;
     case 'k':
       return PieceType::KING;
-      break;
   }
 }
 

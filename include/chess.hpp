@@ -20,7 +20,10 @@
 
 #include <array>
 #include <cstdint>
+#include <deque>
+#include <memory>
 #include <string>
+#include <vector>
 
 namespace chess {
 
@@ -107,7 +110,7 @@ constexpr Move WHITE_QUEEN_ROOK_CASTLE{{0, 0}, {3, 0}};
 constexpr Move BLACK_KING_ROOK_CASTLE{{7, 7}, {5, 7}};
 constexpr Move BLACK_QUEEN_ROOK_CASTLE{{0, 7}, {3, 7}};
 
-const std::string STARTPOS_FEN =
+inline constexpr std::string_view STARTPOS_FEN =
     "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
 
 constexpr std::array<char, 8> FILES{'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'};
@@ -138,7 +141,7 @@ char NumberToFile(uint8_t number);
 /**
  * @brief Toggle colour
  */
-void ToggleColour(Colour* colour);
+[[nodiscard]] Colour ToggleColour(Colour colour);
 
 /**
  * @brief Returns true if the given square is contained in the 8x8 chess board.
@@ -149,6 +152,20 @@ bool IsValidSquare(const Square& square);
  * @brief Returns true if the given move is contained in the 8x8 chess board.
  */
 bool IsMoveInBoard(const Move& move);
+
+/**
+ * @brief A node in a move tree (supports variations/branches).
+ */
+struct MoveNode {
+  Move move;
+  std::string san;
+  MoveNode* parent = nullptr;
+  std::deque<std::unique_ptr<MoveNode>> children;
+
+  MoveNode(const Move& m, const std::string& s, MoveNode* p)
+      : move(m), san(s), parent(p) {}
+  MoveNode() = default;
+};
 
 }  // namespace chess
 

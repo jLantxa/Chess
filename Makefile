@@ -18,7 +18,7 @@ all: debug release doc tests
 binaries: debug release
 
 debug:
-	$(QMAKE) \
+	qmake \
 		Chess.pro -o $(BUILD_DEBUG)/ \
 		-spec linux-g++ \
 		CONFIG+=debug CONFIG+=qml_debug
@@ -30,7 +30,7 @@ run-debug:
 	./$(BUILD_DEBUG)/$(APP_TARGET)
 
 release:
-	$(QMAKE) \
+	qmake \
 		Chess.pro \
 		-o $(BUILD_RELEASE)/ \
 		-spec linux-g++ \
@@ -46,7 +46,7 @@ pack-release:
 	cd $(BUILD_RELEASE) && zip -r $(APP_TARGET).zip $(APP_TARGET) $(RES)
 
 tests:
-	$(QMAKE) \
+	qmake \
 		test.pro \
 		-o $(BUILD_TEST)/ \
 		-spec linux-g++ \

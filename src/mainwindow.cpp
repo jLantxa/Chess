@@ -17,11 +17,11 @@
 
 #include "mainwindow.hpp"
 
-#include <unistd.h>
-
 #include <QColor>
+#include <QFont>
 #include <QInputDialog>
 #include <QMessageBox>
+#include <QSignalBlocker>
 #include <QThread>
 
 #include "resources.hpp"
@@ -32,8 +32,8 @@ MainWindow::MainWindow(QWidget* parent)
     : QMainWindow(parent), ui(new Ui::MainWindow) {
   ui->setupUi(this);
   m_board = ui->boardWidget;
-  m_settings_dialog = new SettingsDialog;
-  connect(m_settings_dialog, &SettingsDialog::PaletteChanged, this,
+  m_settings_dialog = std::make_unique<SettingsDialog>();
+  connect(m_settings_dialog.get(), &SettingsDialog::PaletteChanged, this,
           &MainWindow::SetBoardPalette);
 
   Init();
@@ -48,7 +48,6 @@ MainWindow::~MainWindow() {
 }
 
 void MainWindow::Init() {
-  // GUI defaults
   setWindowTitle(WINDOW_TITLE);
   ui->bEngineOn->setPalette(QColor(Qt::red));
 
@@ -60,9 +59,13 @@ void MainWindow::Init() {
   m_board->SetActiveColour(chess::Colour::WHITE);
   m_board->SetSelectableColour(chess::Colour::WHITE);
 
-  // Engine defaults
   m_engine.Init(DEFAULT_ENGINE_CMD);
   SetEngineEnabled(false);
+
+  m_restart_timer.setSingleShot(true);
+  m_restart_timer.setInterval(50);
+  connect(&m_restart_timer, &QTimer::timeout, this,
+          &MainWindow::DoRestartSearch);
 
   SetDepth(20);
 
@@ -83,15 +86,9 @@ void MainWindow::Init() {
   NewGame();
 }
 
-uint32_t MainWindow::CurrentMoveNumber() const {
-  const uint32_t half_moves = m_board->GetNumHalfMoves();
-  return 1 + ((half_moves + m_moves_list.length()) / 2);
-}
-
 void MainWindow::NewGame() {
   m_board->Reset();
-  m_moves_list.clear();
-  ResetPosition(QString::fromStdString(chess::STARTPOS_FEN));
+  ResetPosition(QString::fromUtf8(chess::STARTPOS_FEN));
   m_engine.NewGame();
   m_board->SetSelectableColour(chess::Colour::WHITE);
 }
@@ -107,7 +104,9 @@ void MainWindow::SetDepth(uint8_t depth) {
   RestartSearch();
 }
 
-void MainWindow::RestartSearch() {
+void MainWindow::RestartSearch() { m_restart_timer.start(); }
+
+void MainWindow::DoRestartSearch() {
   if (ui->bEngineOn->isChecked()) {
     m_engine.Stop();
     const bool infinite_search = ui->chInfinite->isChecked();
@@ -138,7 +137,6 @@ bool MainWindow::ResetPosition(const QString& fen_str) {
   const auto active_colour = m_board->GetActiveColour();
   m_board->SetSelectableColour(active_colour);
 
-  m_moves_list.clear();
   ui->teMoves->clear();
 
   m_engine.SetPosition(fen_str);
@@ -155,7 +153,6 @@ void MainWindow::OnMoveDone(const chess::Move& move) {
   m_board->SetSelectableColour(active_colour);
   next_player->Prompt(move);
 
-  m_moves_list.push_back(QString::fromStdString(chess::MoveToUCI(move)));
   UpdateMoveList();
 
   QString fen_str = m_board->GetFEN();
@@ -165,7 +162,9 @@ void MainWindow::OnMoveDone(const chess::Move& move) {
 
 void MainWindow::on_bDownload_clicked() {
   const QString fen_str = m_board->GetFEN();
-  ShowMsgBox("Position", fen_str);
+  const QString pgn_str = m_board->GetPGN();
+  QString text = "FEN:\n" + fen_str + "\n\nPGN:\n" + pgn_str;
+  ShowMsgBox("Position", text);
 }
 
 void MainWindow::ShowMsgBox(const QString& title, const QString& text) {
@@ -189,50 +188,60 @@ int MainWindow::GetColourScore(chess::Colour colour, int score) const {
 }
 
 void MainWindow::OnDepthInfoAvailable() {
+  if (m_board == nullptr) return;
+
+  QSignalBlocker blocker(ui->teLines);
   ui->teLines->clear();
-  std::vector<UCIEngine::DepthInfo> lines = m_engine.GetLines();
+  const auto lines = m_engine.GetLines();
   const auto colour = m_board->GetActiveColour();
+
+  m_engine_lines_data.clear();
 
   for (uint32_t i = 0; i < lines.size(); ++i) {
     auto& info = lines[i];
-    QStringList move_str_chain;
 
-    // Show info in widget
     if (m_show_lines) {
-      /* If black plays, the first move in the sequence belongs to black, and
-       * we must omit white's move:
-       * n... <black> instead of n. <white> <black>
-       */
-      const uint32_t starting_half_move_num = m_board->GetNumHalfMoves();
-      for (int i = 0; i < info.pv.length(); ++i) {
-        const uint32_t half_move_number = (starting_half_move_num + i);
-        if ((half_move_number % 2) == 0) {  // White move
-          move_str_chain.push_back(QString::number(1 + (half_move_number / 2)) +
-                                   ". " + info.pv[i]);
-        } else {  // Black move
-          if (i == 0) {
-            move_str_chain.push_back(
-                QString::number(1 + (half_move_number / 2)) + "... " +
-                info.pv[i]);
-          } else {
-            move_str_chain.push_back(info.pv[i]);
-          }
-        }
-      }
+      m_engine_lines_data.push_back(info.pv);
 
+      const QStringList san_moves = m_board->ConvertUciToSan(info.pv);
+
+      // Format: [score] move move move ...
       const int score = GetColourScore(colour, info.score);
 
       QString score_str;
       if (!info.mate_counter) {
-        score_str = "<b>[" + GetSignedScoreStr(score) + "]</b>";
+        score_str = GetSignedScoreStr(score);
       } else {
         QString signed_mate_str = (score >= 0) ? "M" : "-M";
-        score_str =
-            "<b>[" + signed_mate_str + QString::number(abs(score)) + "]</b>";
+        score_str = signed_mate_str + QString::number(abs(score));
       }
-      ui->teLines->append(score_str + " " + move_str_chain.join(" ") + "<br>");
 
-      // Send score to board widget
+      QStringList parts;
+      parts << ("[" + score_str + "]");
+
+      const uint32_t starting_half_move_num = m_board->GetNumHalfMoves();
+      for (int j = 0; j < san_moves.length(); ++j) {
+        const uint32_t half_move_number = (starting_half_move_num + j);
+        if ((half_move_number % 2) == 0) {
+          parts << (QString::number(1 + (half_move_number / 2)) + "." +
+                    san_moves[j]);
+        } else {
+          if (j == 0) {
+            parts << (QString::number(1 + (half_move_number / 2)) + "..." +
+                      san_moves[j]);
+          } else {
+            parts << san_moves[j];
+          }
+        }
+      }
+
+      auto* item = new QListWidgetItem(parts.join(" "));
+      QFont mono("Monospace");
+      mono.setStyleHint(QFont::TypeWriter);
+      item->setFont(mono);
+      item->setData(Qt::UserRole, static_cast<int>(i));
+      ui->teLines->addItem(item);
+
       if (i == 0) {
         m_board->SetScore(score, info.mate_counter);
       }
@@ -240,24 +249,88 @@ void MainWindow::OnDepthInfoAvailable() {
   }
 }
 
-void MainWindow::UpdateMoveList() {
-  ui->teMoves->clear();
-  const int length = m_moves_list.size();
-  QString moves_str;
-  const uint32_t starting_half_move_num =
-      m_board->GetNumHalfMoves() - m_moves_list.size();
-  for (int i = 0; i < length; ++i) {
-    const QString& move = m_moves_list[i];
-    const uint32_t half_moves = (starting_half_move_num + (i + 1));
-    if ((half_moves % 2) != 0) {
-      moves_str +=
-          QString::number(1 + (half_moves / 2)) + ". " + "<b>" + move + "</b> ";
-    } else {
-      moves_str += "<b>" + move + "</b> ";
+static void BuildLineHtml(const chess::MoveNode* node,
+                          const chess::MoveNode* current, const QString& path,
+                          int& move_num, chess::Colour& turn, QString& html) {
+  if (node->children.empty()) return;
+
+  const chess::MoveNode* main_child = node->children.front().get();
+  const QString child_path = path.isEmpty() ? "0" : path + ",0";
+
+  if (turn == chess::Colour::WHITE) {
+    html += QString::number(move_num) + ". ";
+  }
+  if (main_child == current) {
+    html += "<b><span style=\"background-color:#B4D2FF;\"> " +
+            QString::fromStdString(main_child->san) + " </span></b>";
+  } else {
+    html += "<a href=\"move:" + child_path +
+            "\" style=\"text-decoration:none;color:inherit;\">" +
+            QString::fromStdString(main_child->san) + "</a>";
+  }
+  html += " ";
+
+  turn = chess::ToggleColour(turn);
+  const int var_num_base = move_num;
+  if (turn == chess::Colour::WHITE) move_num++;
+
+  // Render variations (siblings that branch from this position)
+  if (node->children.size() > 1) {
+    html += "<span style=\"color:gray;\">(";
+    for (size_t i = 1; i < node->children.size(); ++i) {
+      const chess::MoveNode* var = node->children[i].get();
+      const QString var_path =
+          path.isEmpty() ? QString::number(i) : path + "," + QString::number(i);
+      chess::Colour var_turn = chess::ToggleColour(turn);
+      int var_num = var_num_base;
+      if (var_turn == chess::Colour::WHITE) {
+        html += QString::number(var_num) + ". ";
+      }
+      if (var == current) {
+        html += "<b><span style=\"background-color:#B4D2FF;\"> " +
+                QString::fromStdString(var->san) + " </span></b>";
+      } else {
+        html += "<a href=\"move:" + var_path +
+                "\" style=\"text-decoration:none;color:inherit;\">" +
+                QString::fromStdString(var->san) + "</a>";
+      }
+      html += " ";
+      var_turn = chess::ToggleColour(var_turn);
+      if (var_turn == chess::Colour::WHITE) var_num++;
+      BuildLineHtml(var, current, var_path, var_num, var_turn, html);
+      if (i < node->children.size() - 1) html += " ";
     }
+    html += ")</span> ";
   }
 
-  ui->teMoves->setHtml(moves_str);
+  BuildLineHtml(main_child, current, child_path, move_num, turn, html);
+}
+
+void MainWindow::UpdateMoveList() {
+  const auto* root = m_board->GetRootNode();
+  if (root == nullptr) return;
+
+  const auto* current = m_board->GetCurrentNode();
+
+  QSignalBlocker blocker(ui->teMoves);
+
+  chess::Colour turn;
+  int move_num;
+  {
+    const QStringList args =
+        QString::fromStdString(m_board->GetStartFEN()).trimmed().split(" ");
+    turn = (args[1] == "w") ? chess::Colour::WHITE : chess::Colour::BLACK;
+    move_num = args[5].toInt();
+  }
+
+  QString html;
+  BuildLineHtml(root, current, QString(), move_num, turn, html);
+
+  if (html.isEmpty()) {
+    html = "<span style=\"color:gray;\">No moves yet</span>";
+  }
+
+  ui->teMoves->setHtml(html);
 }
 
 void MainWindow::SetEngineEnabled(bool enabled) {
@@ -310,8 +383,8 @@ void MainWindow::on_sbThreads_editingFinished() {
   m_engine.SetNumThreads(threads);
 }
 
-void MainWindow::on_sbLines_editingFinished() {
-  const int num_lines = ui->sbLines->value();
+void MainWindow::on_sbLines_valueChanged(int value) {
+  const int num_lines = value;
   m_show_lines = (num_lines > 0);
   ui->teLines->setVisible(m_show_lines);
   SetNumLines(num_lines);
@@ -356,4 +429,97 @@ void MainWindow::on_actionRestart_triggered() {
   const QString fen = m_board->GetFEN();
   m_engine.SetPosition(fen);
   RestartSearch();
+}
+
+void MainWindow::on_bGoStart_clicked() {
+  m_board->GoToStart();
+  m_board->SetSelectableColour(m_board->GetActiveColour());
+  UpdateMoveList();
+  const QString fen = m_board->GetFEN();
+  m_engine.SetPosition(fen);
+  RestartSearch();
+}
+
+void MainWindow::on_bGoBack_clicked() {
+  m_board->GoBack();
+  m_board->SetSelectableColour(m_board->GetActiveColour());
+  UpdateMoveList();
+  const QString fen = m_board->GetFEN();
+  m_engine.SetPosition(fen);
+  RestartSearch();
+}
+
+void MainWindow::on_bGoForward_clicked() {
+  m_board->GoForward();
+  m_board->SetSelectableColour(m_board->GetActiveColour());
+  UpdateMoveList();
+  const QString fen = m_board->GetFEN();
+  m_engine.SetPosition(fen);
+  RestartSearch();
+}
+
+void MainWindow::on_bGoEnd_clicked() {
+  m_board->GoToEnd();
+  m_board->SetSelectableColour(m_board->GetActiveColour());
+  UpdateMoveList();
+  const QString fen = m_board->GetFEN();
+  m_engine.SetPosition(fen);
+  RestartSearch();
+}
+
+void MainWindow::on_actionLoad_PGN_triggered() {
+  QInputDialog* dialog = new QInputDialog(this);
+  dialog->setWindowTitle("Import PGN");
+  dialog->setLabelText("Paste PGN:");
+  dialog->resize(500, 300);
+  dialog->exec();
+
+  QString pgn = dialog->textValue();
+  if (pgn.isEmpty()) return;
+
+  const bool ok = m_board->ImportPGN(pgn);
+  if (!ok) {
+    ShowMsgBox("Error", "Could not parse PGN.");
+    return;
+  }
+
+  m_board->SetSelectableColour(m_board->GetActiveColour());
+  const QString fen = m_board->GetFEN();
+  m_engine.SetPosition(fen);
+  RestartSearch();
+  UpdateMoveList();
+}
+
+void MainWindow::on_teMoves_anchorClicked(const QUrl& url) {
+  if (url.scheme() != "move") return;
+
+  const QString path = url.path();
+
+  disconnect(ui->teMoves, &QTextBrowser::anchorClicked, this,
+             &MainWindow::on_teMoves_anchorClicked);
+
+  m_board->GoToNodeByPath(path);
+  m_board->SetSelectableColour(m_board->GetActiveColour());
+  UpdateMoveList();
+  const QString fen = m_board->GetFEN();
+  m_engine.SetPosition(fen);
+  RestartSearch();
+
+  connect(ui->teMoves, &QTextBrowser::anchorClicked, this,
+          &MainWindow::on_teMoves_anchorClicked);
+}
+
+void MainWindow::on_teLines_itemClicked(QListWidgetItem* item) {
+  if (item == nullptr) return;
+
+  const int line_index = item->data(Qt::UserRole).toInt();
+  if (line_index < 0 ||
+      line_index >= static_cast<int>(m_engine_lines_data.size()))
+    return;
+
+  const QStringList& uci_moves = m_engine_lines_data[line_index];
+  if (uci_moves.isEmpty()) return;
+
+  chess::Move move = chess::UCIToMove(uci_moves.first().toStdString());
+  m_board->DoMove(move);
 }

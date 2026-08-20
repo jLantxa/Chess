@@ -17,10 +17,6 @@
 
 #include "player.hpp"
 
-#include <unistd.h>
-
-#include <thread>
-
 #include "chess.hpp"
 
 Player::Player(chess::Colour colour, ChessBoardWidget* board_widget)

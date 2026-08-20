@@ -23,20 +23,20 @@
 
 namespace resources {
 
-const std::array<QIcon, 6> WHITE_ICONS{
+inline const std::array<QIcon, 6> WHITE_ICONS{
     QIcon("res/icon/wp.svg"), QIcon("res/icon/wn.svg"),
     QIcon("res/icon/wb.svg"), QIcon("res/icon/wr.svg"),
     QIcon("res/icon/wq.svg"), QIcon("res/icon/wk.svg")};
 
-const std::array<QIcon, 6> BLACK_ICONS{
+inline const std::array<QIcon, 6> BLACK_ICONS{
     QIcon("res/icon/bp.svg"), QIcon("res/icon/bn.svg"),
     QIcon("res/icon/bb.svg"), QIcon("res/icon/br.svg"),
     QIcon("res/icon/bq.svg"), QIcon("res/icon/bk.svg")};
 
-const QIcon ROTATE_ICON = QIcon("res/icon/rotate.svg");
-const QIcon SETTINGS_ICON = QIcon("res/icon/settings.svg");
-const QIcon ENGINE_ICON = QIcon("res/icon/power.svg");
-const QIcon DOWNLOAD_ICON = QIcon("res/icon/download.svg");
+inline const QIcon ROTATE_ICON = QIcon("res/icon/rotate.svg");
+inline const QIcon SETTINGS_ICON = QIcon("res/icon/settings.svg");
+inline const QIcon ENGINE_ICON = QIcon("res/icon/power.svg");
+inline const QIcon DOWNLOAD_ICON = QIcon("res/icon/download.svg");
 
 }  // namespace resources
 

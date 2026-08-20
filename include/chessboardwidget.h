@@ -21,8 +21,11 @@
 #include <QIcon>
 #include <QWidget>
 #include <cstdint>
+#include <memory>
 #include <optional>
 #include <set>
+#include <string>
+#include <vector>
 
 #include "board.hpp"
 #include "chess.hpp"
@@ -38,16 +41,16 @@ class ChessBoardWidget : public QWidget {
 
   void Rotate();
   void SetSide(chess::Colour side);
-  chess::Colour GetSide();
+  chess::Colour GetSide() const;
 
   void SetActiveColour(chess::Colour colour);
   chess::Colour GetActiveColour() const;
   void SetSelectableColour(const chess::Colour& colour);
   void SetSelectable(bool selectable);
 
-  QString GetFEN() const;
-
   void paintEvent(QPaintEvent*);
+  bool hasHeightForWidth() const override { return true; }
+  int heightForWidth(int width) const override { return width; }
   void mouseMoveEvent(QMouseEvent*);
   void mousePressEvent(QMouseEvent*);
   void mouseReleaseEvent(QMouseEvent*);
@@ -111,6 +114,32 @@ class ChessBoardWidget : public QWidget {
 
   bool DoMove(const chess::Move& move);
 
+  [[nodiscard]] std::string GetSanMove(const chess::Move& move) const;
+  [[nodiscard]] const std::string& GetLastMoveSan() const;
+
+  // Move tree navigation
+  void GoToStart();
+  void GoBack();
+  void GoForward();
+  void GoToEnd();
+  void GoToNode(const chess::MoveNode* target);
+  void GoToNodeByPath(const QString& path);
+  [[nodiscard]] bool CanGoBack() const;
+  [[nodiscard]] bool CanGoForward() const;
+
+  // Move history / PGN
+  [[nodiscard]] QString GetFEN() const;
+  [[nodiscard]] QString GetPGN() const;
+  [[nodiscard]] std::string GetStartFEN() const;
+  [[nodiscard]] bool ImportPGN(const QString& pgn);
+  [[nodiscard]] size_t GetMoveIndex() const;
+  [[nodiscard]] size_t GetTotalMoves() const;
+  [[nodiscard]] const std::vector<chess::Move> GetMainLineMoves() const;
+  [[nodiscard]] const std::vector<std::string> GetMainLineSan() const;
+  [[nodiscard]] QStringList ConvertUciToSan(const QStringList& uci_moves) const;
+  [[nodiscard]] const chess::MoveNode* GetRootNode() const;
+  [[nodiscard]] const chess::MoveNode* GetCurrentNode() const;
+
  signals:
   void MoveDone(const chess::Move& move);
 
@@ -153,6 +182,16 @@ class ChessBoardWidget : public QWidget {
 
   float GetBalance() const;
   float Transform(float x) const;
+
+  // Move tree state
+  std::string m_start_fen = std::string(chess::STARTPOS_FEN);
+  std::unique_ptr<chess::MoveNode> m_root_node;
+  chess::MoveNode* m_current_node = nullptr;
+  size_t m_move_index = 0;
+
+  void ReplayToCurrentNode();
+  void InitBoardFromFEN(chess::Board& board, const std::string& fen,
+                        chess::Colour& active, uint32_t& half_moves) const;
 };
 
 #endif  // _CHESS_INCLUDE_CHESS_H_

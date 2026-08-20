@@ -53,11 +53,13 @@ void UCIEngine::NewGame() {
 }
 
 void UCIEngine::SetPosition(const QString& fen) {
+  Stop();
   m_best_move.reset();
   Write("position fen " + fen);
 }
 
 void UCIEngine::SetPositionFromMoves(const QStringList& moves) {
+  Stop();
   m_best_move.reset();
   Write("position startpos moves " + moves.join(SEPARATOR));
 }
@@ -65,8 +67,12 @@ void UCIEngine::SetPositionFromMoves(const QStringList& moves) {
 void UCIEngine::Stop() { Write("stop"); }
 
 void UCIEngine::SetNumLines(uint8_t num_lines) {
-  m_lines.clear();
-  m_lines.resize(num_lines);
+  {
+    std::lock_guard<std::mutex> info_mutex(m_info_mutex);
+    m_lines.clear();
+    m_lines.resize(num_lines);
+  }
+  Stop();
   Write("setoption name MultiPV value " + QString::number(num_lines));
 }
 
@@ -88,8 +94,8 @@ void UCIEngine::OnStart() {}
 
 void UCIEngine::OnReadyReadStdout() {
   while (m_engine_process.canReadLine()) {
-    const QString text = m_engine_process.readAllStandardOutput();
-    ParseText(text.trimmed());
+    const QByteArray data = m_engine_process.readLine();
+    ParseText(QString::fromLocal8Bit(data).trimmed());
   }
 }
 
@@ -100,6 +106,8 @@ void UCIEngine::ParseText(const QString& text) {
 
   const QStringList lines = text.split(LINE_SEPARATOR);
   uint8_t max_line = 0;
+  bool emit_depth = false;
+  bool emit_best = false;
 
   {
     std::lock_guard<std::mutex> info_mutex(m_info_mutex);
@@ -110,10 +118,6 @@ void UCIEngine::ParseText(const QString& text) {
       if (args[0] == "bestmove") {
         m_best_move = ParseBestMove(args);
       } else if (args[0] == "info") {
-        /* Ignore currmove messages.
-         * Upperbound and lowerbound messages are for engine debug and we ignore
-         * those messages.
-         */
         const bool ignore_message = args.contains("currmove") ||
                                     args.contains("upperbound") ||
                                     args.contains("lowerbound");
@@ -123,17 +127,20 @@ void UCIEngine::ParseText(const QString& text) {
 
         const DepthInfo info = ParseDepthInfo(args);
         const auto line_id = info.line_id;
-        m_lines[line_id - 1] = info;
-        max_line = std::max(max_line, line_id);
-      } else {
-        continue;
+        if (line_id > 0 && line_id <= m_lines.size()) {
+          m_lines[line_id - 1] = info;
+          max_line = std::max(max_line, line_id);
+        }
       }
     }
+    emit_depth = (static_cast<size_t>(max_line) == m_lines.size());
+    emit_best = m_best_move.has_value();
   }
-  if (max_line == m_lines.size()) {
+
+  if (emit_depth) {
     emit DepthInfoAvailable();
   }
-  if (m_best_move.has_value()) {
+  if (emit_best) {
     emit BestMoveAvailable();
   }
 }
@@ -180,7 +187,7 @@ std::optional<UCIEngine::BestMove> UCIEngine::GetBestMove() {
   return m_best_move;
 }
 
-std::vector<UCIEngine::DepthInfo> UCIEngine::GetLines() {
+std::vector<UCIEngine::DepthInfo> UCIEngine::GetLines() const {
   std::lock_guard<std::mutex> mutex(m_info_mutex);
   return m_lines;
 }

@@ -2,7 +2,7 @@ QT += core gui
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
-CONFIG += c++20
+CONFIG += c++26
 QMAKE_CXXFLAGS += -O3 -Wall -Werror
 
 CONFIG += lrelease

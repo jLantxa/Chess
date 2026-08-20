@@ -32,17 +32,17 @@ class SettingsDialog : public QDialog {
   Q_OBJECT
 
  public:
-  explicit SettingsDialog(QWidget *parent = nullptr);
+  explicit SettingsDialog(QWidget* parent = nullptr);
   ~SettingsDialog();
 
  signals:
-  void PaletteChanged(const ChessBoardWidget::ChessPalette &palette);
+  void PaletteChanged(const ChessBoardWidget::ChessPalette& palette);
 
  private slots:
   void on_buttonBox_accepted();
 
  private:
-  Ui::SettingsDialog *ui;
+  Ui::SettingsDialog* ui;
 
   std::vector<std::pair<QString, QVariant>> PALETTES = {
       {"Green", QVariant::fromValue(ChessBoardWidget::GREEN_PALETTE)},

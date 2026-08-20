@@ -123,9 +123,9 @@ class UCIEngine : public QObject {
   std::optional<BestMove> GetBestMove();
 
   /**
-   * @brief Get a copy of the DepthInfo vector
+   * @brief Get a copy of the lines vector
    */
-  std::vector<DepthInfo> GetLines();
+  [[nodiscard]] std::vector<DepthInfo> GetLines() const;
 
  public slots:
   /**
@@ -147,7 +147,7 @@ class UCIEngine : public QObject {
 
   std::vector<DepthInfo> m_lines;
   std::optional<BestMove> m_best_move;
-  std::mutex m_info_mutex;
+  mutable std::mutex m_info_mutex;
 
   void ConnectProcessSignals();
 

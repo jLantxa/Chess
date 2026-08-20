@@ -18,6 +18,7 @@
 #ifndef _CHESS_INCLUDE_BOARD_H_
 #define _CHESS_INCLUDE_BOARD_H_
 
+#include <array>
 #include <memory>
 #include <optional>
 #include <string>
@@ -81,11 +82,28 @@ class Board {
 
   [[nodiscard]] Board AfterMove(const Move& move) const;
 
+  /**
+   * @brief Generate Standard Algebraic Notation for a move.
+   * Must be called before DoMove (needs current board state).
+   * @param move The move to annotate.
+   * @return SAN string, e.g. "Nf3", "e4", "Bxc6", "O-O", "e8=Q+".
+   */
+  [[nodiscard]] std::string GetSanMove(const Move& move) const;
+
+  /**
+   * @brief Parse a SAN move string into a Move object.
+   * @param san Standard Algebraic Notation string (e.g. "Nf3", "e4", "O-O").
+   * @return The parsed Move, or std::nullopt if invalid.
+   */
+  [[nodiscard]] std::optional<Move> ParseSanMove(const std::string& san) const;
+
   const std::optional<Square>& GetWhiteKing() const;
   const std::optional<Square>& GetBlackKing() const;
 
  private:
-  std::unique_ptr<Piece> m_board[8][8];
+  using BoardArray = std::array<std::array<std::unique_ptr<Piece>, 8>, 8>;
+
+  BoardArray m_board{};
 
   std::optional<Square> m_en_passant;
   std::optional<Square> m_white_king_square;

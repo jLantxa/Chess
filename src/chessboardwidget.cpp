@@ -20,6 +20,7 @@
 #include <QMouseEvent>
 #include <QPainter>
 #include <QRect>
+#include <QRegularExpression>
 #include <algorithm>
 #include <cmath>
 #include <functional>
@@ -32,6 +33,50 @@ ChessBoardWidget::ChessBoardWidget(QWidget* parent) : QWidget(parent) {
   Reset();
 }
 
+void ChessBoardWidget::InitBoardFromFEN(chess::Board& board,
+                                        const std::string& fen,
+                                        chess::Colour& active,
+                                        uint32_t& half_moves) const {
+  board.Clear();
+  const QStringList args = QString::fromStdString(fen).trimmed().split(" ");
+  const QStringList& fen_lines = args[0].trimmed().split("/");
+  for (uint8_t j = 0; j < 8; ++j) {
+    uint8_t fi = 0;
+    const QString& line = fen_lines[7 - j];
+    for (const auto& qch : line) {
+      char ch = qch.toLatin1();
+      if (ch >= '0' && ch <= '9') {
+        fi += (ch - '0');
+      } else {
+        const char lower = qch.toLower().toLatin1();
+        const chess::Colour colour = (ch >= 'A' && ch <= 'Z')
+                                         ? chess::Colour::WHITE
+                                         : chess::Colour::BLACK;
+        const chess::PieceType type = chess::GetPieceTypeFromChar(lower);
+        if (lower == 'p' || lower == 'n' || lower == 'b' || lower == 'r' ||
+            lower == 'q' || lower == 'k') {
+          board.SetPiece(chess::Piece::Factory(type, colour), fi, j);
+          fi++;
+        } else {
+          fi++;
+        }
+      }
+    }
+  }
+  bool wkc = args[2].contains("K");
+  bool wqc = args[2].contains("Q");
+  bool bkc = args[2].contains("k");
+  bool bqc = args[2].contains("q");
+  board.SetCastling(wkc, wqc, bkc, bqc);
+
+  active = (args[1] == "w") ? chess::Colour::WHITE : chess::Colour::BLACK;
+  const uint32_t move_number = args[5].toUInt();
+  half_moves = 2 * (move_number - 1);
+  if (active == chess::Colour::BLACK) {
+    half_moves++;
+  }
+}
+
 void ChessBoardWidget::Reset() {
   m_score = 0;
   m_half_moves = 0;
@@ -41,21 +86,17 @@ void ChessBoardWidget::Reset() {
   m_last_move_dst_square.reset();
   m_in_drag_mode = false;
   m_active_colour = chess::Colour::WHITE;
+  m_start_fen = chess::STARTPOS_FEN;
+  m_root_node = std::make_unique<chess::MoveNode>();
+  m_current_node = m_root_node.get();
+  m_move_index = 0;
 }
 
-static bool IsUpperCase(char ch) {
-  if ((ch >= 'A') && (ch <= 'Z')) {
-    return true;
-  }
-  return false;
+static constexpr bool IsUpperCase(char ch) {
+  return (ch >= 'A') && (ch <= 'Z');
 }
 
-static bool IsNumber(char ch) {
-  if ((ch >= '0') && (ch <= '9')) {
-    return true;
-  }
-  return false;
-}
+static constexpr bool IsNumber(char ch) { return (ch >= '0') && (ch <= '9'); }
 
 void ChessBoardWidget::SetPosition(const QString& fen_str) {
   const QStringList& args = fen_str.trimmed().split(" ");
@@ -123,11 +164,8 @@ void ChessBoardWidget::SetPosition(const QString& fen_str) {
 }
 
 void ChessBoardWidget::Rotate() {
-  if (m_side == chess::Colour::WHITE) {
-    SetSide(chess::Colour::BLACK);
-  } else {
-    SetSide(chess::Colour::WHITE);
-  }
+  m_side = chess::ToggleColour(m_side);
+  repaint();
 }
 
 void ChessBoardWidget::SetSide(chess::Colour side) {
@@ -135,7 +173,7 @@ void ChessBoardWidget::SetSide(chess::Colour side) {
   repaint();
 }
 
-chess::Colour ChessBoardWidget::GetSide() { return m_side; }
+chess::Colour ChessBoardWidget::GetSide() const { return m_side; }
 
 void ChessBoardWidget::SetActiveColour(chess::Colour colour) {
   m_active_colour = colour;
@@ -180,15 +218,8 @@ chess::Square ChessBoardWidget::GetClickedSquare(int x, int y) const {
 bool ChessBoardWidget::IsOnBoard(int x, int y) const {
   const int board_x = MARGIN + SCORE_BAR_WIDTH + SCORE_BAR_SPACING;
   const int board_y = MARGIN;
-  const bool inside = (x > board_x) && (y > board_y) &&
-                      (x < (board_x + m_board_size)) &&
-                      (y < (board_y + m_board_size));
-
-  if (inside) {
-    return true;
-  }
-
-  return false;
+  return (x > board_x) && (y > board_y) && (x < (board_x + m_board_size)) &&
+         (y < (board_y + m_board_size));
 }
 
 void ChessBoardWidget::mousePressEvent(QMouseEvent* event) {
@@ -197,7 +228,6 @@ void ChessBoardWidget::mousePressEvent(QMouseEvent* event) {
 
 void ChessBoardWidget::mouseReleaseEvent(QMouseEvent* event) {
   HandleBoardMouseEvent(event);
-  event->type();
 }
 
 void ChessBoardWidget::HandleBoardMouseEvent(QMouseEvent* event) {
@@ -406,7 +436,6 @@ void ChessBoardWidget::paintEvent(QPaintEvent*) {
   }
 
   // Dragged piece
-  // TODO: Refactor piece draw
   if (m_in_drag_mode && m_selected_square.has_value()) {
     const uint8_t i = m_selected_square->file;
     const uint8_t j = m_selected_square->rank;
@@ -482,18 +511,53 @@ void ChessBoardWidget::SetScoreEnabled(bool enabled) {
 }
 
 bool ChessBoardWidget::DoMove(const chess::Move& move) {
-  if (m_board.IsValidMove(move, m_active_colour)) {
-    m_board.DoMove(move);
-    m_last_move_src_square = move.src;
-    m_last_move_dst_square = move.dst;
-    chess::ToggleColour(&m_active_colour);
-    m_half_moves++;
-    emit MoveDone(move);
-    // TODO: Get FEN, update engine and update status
-    return true;
-  } else {
+  if (m_current_node == nullptr) return false;
+  if (!m_board.IsValidMove(move, m_active_colour)) {
     return false;
   }
+
+  std::string san = m_board.GetSanMove(move);
+
+  // Check if a child with this move already exists
+  for (auto& child : m_current_node->children) {
+    if (child->move == move) {
+      // Move already exists in tree, navigate to it
+      m_current_node = child.get();
+      m_move_index++;
+      m_board.DoMove(move);
+      m_last_move_src_square = move.src;
+      m_last_move_dst_square = move.dst;
+      m_active_colour = chess::ToggleColour(m_active_colour);
+      m_half_moves++;
+      emit MoveDone(move);
+      return true;
+    }
+  }
+
+  // New move: create child node
+  auto new_node = std::make_unique<chess::MoveNode>(move, san, m_current_node);
+  m_current_node->children.push_back(std::move(new_node));
+  m_current_node = m_current_node->children.back().get();
+  m_move_index++;
+
+  m_board.DoMove(move);
+  m_last_move_src_square = move.src;
+  m_last_move_dst_square = move.dst;
+  m_active_colour = chess::ToggleColour(m_active_colour);
+  m_half_moves++;
+
+  emit MoveDone(move);
+  return true;
+}
+
+std::string ChessBoardWidget::GetSanMove(const chess::Move& move) const {
+  return m_board.GetSanMove(move);
+}
+
+const std::string& ChessBoardWidget::GetLastMoveSan() const {
+  static const std::string empty;
+  if (m_current_node == m_root_node.get()) return empty;
+  return m_current_node->san;
 }
 
 void ChessBoardWidget::SetSelectableColour(const chess::Colour& colour) {
@@ -503,15 +567,372 @@ void ChessBoardWidget::SetSelectableColour(const chess::Colour& colour) {
 QString ChessBoardWidget::GetFEN() const {
   const QString board_pos =
       QString::fromStdString(m_board.GetPosition(m_active_colour));
-  // TODO: Use half moves
-  const QString half_moves = QString::number(0);
+  const QString half_moves_str = QString::number(m_half_moves);
+  const QString full_move_str = QString::number(1 + (m_half_moves / 2));
 
-  QString fen_str = board_pos + " " + half_moves + " " +
-                    QString::number(1 + (m_half_moves / 2));
-
-  return fen_str;
+  return board_pos + " " + half_moves_str + " " + full_move_str;
 }
+
+std::string ChessBoardWidget::GetStartFEN() const { return m_start_fen; }
 
 void ChessBoardWidget::SetSelectable(bool selectable) {
   m_selectable = selectable;
+}
+
+void ChessBoardWidget::ReplayToCurrentNode() {
+  if (m_current_node == nullptr) return;
+
+  m_board.Clear();
+  chess::Colour active;
+  uint32_t half_moves;
+  InitBoardFromFEN(m_board, m_start_fen, active, half_moves);
+
+  // Collect path from root to current node
+  std::vector<chess::Move> path;
+  const chess::MoveNode* node = m_current_node;
+  while (node != nullptr && node->parent != nullptr) {
+    path.push_back(node->move);
+    node = node->parent;
+  }
+  std::reverse(path.begin(), path.end());
+
+  // Replay
+  m_half_moves = 0;
+  m_active_colour = active;
+  for (const auto& move : path) {
+    m_board.DoMove(move);
+    m_active_colour = chess::ToggleColour(m_active_colour);
+    m_half_moves++;
+  }
+
+  // Update last move squares
+  m_last_move_src_square.reset();
+  m_last_move_dst_square.reset();
+  if (m_current_node->parent != nullptr) {
+    m_last_move_src_square = m_current_node->move.src;
+    m_last_move_dst_square = m_current_node->move.dst;
+  }
+
+  repaint();
+}
+
+void ChessBoardWidget::GoToStart() {
+  if (m_root_node == nullptr) return;
+  m_current_node = m_root_node.get();
+  m_move_index = 0;
+  ReplayToCurrentNode();
+}
+
+void ChessBoardWidget::GoBack() {
+  if (m_current_node == nullptr || m_current_node->parent == nullptr) return;
+  m_current_node = m_current_node->parent;
+  m_move_index--;
+  ReplayToCurrentNode();
+}
+
+void ChessBoardWidget::GoForward() {
+  if (m_current_node == nullptr || m_current_node->children.empty()) return;
+  m_current_node = m_current_node->children.front().get();
+  m_move_index++;
+  ReplayToCurrentNode();
+}
+
+void ChessBoardWidget::GoToEnd() {
+  if (m_current_node == nullptr) return;
+  while (!m_current_node->children.empty()) {
+    m_current_node = m_current_node->children.front().get();
+    m_move_index++;
+  }
+  ReplayToCurrentNode();
+}
+
+void ChessBoardWidget::GoToNode(const chess::MoveNode* target) {
+  if (target == nullptr) return;
+
+  // Collect path from root to target
+  std::vector<chess::Move> path;
+  const chess::MoveNode* node = target;
+  while (node != nullptr && node->parent != nullptr) {
+    path.push_back(node->move);
+    node = node->parent;
+  }
+  std::reverse(path.begin(), path.end());
+
+  // Set current node and replay
+  m_current_node = const_cast<chess::MoveNode*>(target);
+  m_move_index = path.size();
+  ReplayToCurrentNode();
+}
+
+void ChessBoardWidget::GoToNodeByPath(const QString& path) {
+  if (m_root_node == nullptr) return;
+
+  const QStringList indices = path.split(',', Qt::SkipEmptyParts);
+  chess::MoveNode* node = m_root_node.get();
+
+  for (const auto& idx_str : indices) {
+    int idx = idx_str.toInt();
+    if (idx < 0 || idx >= static_cast<int>(node->children.size())) return;
+    node = node->children[idx].get();
+  }
+
+  GoToNode(node);
+}
+
+bool ChessBoardWidget::CanGoBack() const {
+  return m_current_node->parent != nullptr;
+}
+
+bool ChessBoardWidget::CanGoForward() const {
+  return !m_current_node->children.empty();
+}
+
+size_t ChessBoardWidget::GetMoveIndex() const { return m_move_index; }
+
+size_t ChessBoardWidget::GetTotalMoves() const {
+  // Count total unique moves in the tree (main line depth)
+  size_t total = 0;
+  const chess::MoveNode* node = m_root_node.get();
+  while (!node->children.empty()) {
+    total++;
+    node = node->children.front().get();
+  }
+  return total;
+}
+
+const chess::MoveNode* ChessBoardWidget::GetRootNode() const {
+  return m_root_node.get();
+}
+
+const chess::MoveNode* ChessBoardWidget::GetCurrentNode() const {
+  return m_current_node;
+}
+
+const std::vector<chess::Move> ChessBoardWidget::GetMainLineMoves() const {
+  std::vector<chess::Move> moves;
+  const chess::MoveNode* node = m_root_node.get();
+  while (!node->children.empty()) {
+    node = node->children.front().get();
+    moves.push_back(node->move);
+  }
+  return moves;
+}
+
+const std::vector<std::string> ChessBoardWidget::GetMainLineSan() const {
+  std::vector<std::string> sans;
+  const chess::MoveNode* node = m_root_node.get();
+  while (!node->children.empty()) {
+    node = node->children.front().get();
+    sans.push_back(node->san);
+  }
+  return sans;
+}
+
+QStringList ChessBoardWidget::ConvertUciToSan(
+    const QStringList& uci_moves) const {
+  if (m_current_node == nullptr) return {};
+
+  QStringList san_moves;
+  chess::Board temp_board;
+  chess::Colour active;
+  uint32_t half_moves;
+  InitBoardFromFEN(temp_board, m_start_fen, active, half_moves);
+
+  // Replay path from root to current node (not the full main line)
+  std::vector<chess::Move> path;
+  const chess::MoveNode* node = m_current_node;
+  while (node != nullptr && node->parent != nullptr) {
+    path.push_back(node->move);
+    node = node->parent;
+  }
+  std::reverse(path.begin(), path.end());
+  for (const auto& move : path) {
+    temp_board.DoMove(move);
+    active = chess::ToggleColour(active);
+  }
+
+  // Convert each UCI move to SAN
+  for (const auto& uci : uci_moves) {
+    chess::Move move = chess::UCIToMove(uci.toStdString());
+    if (!temp_board.IsValidMove(move, active)) {
+      break;
+    }
+    std::string san = temp_board.GetSanMove(move);
+    san_moves.push_back(QString::fromStdString(san));
+    temp_board.DoMove(move);
+    active = chess::ToggleColour(active);
+  }
+
+  return san_moves;
+}
+
+QString ChessBoardWidget::GetPGN() const {
+  QString pgn;
+  int move_num = 1;
+
+  chess::Colour active = chess::Colour::WHITE;
+
+  // Walk the main line
+  const auto sans = GetMainLineSan();
+  for (size_t i = 0; i < sans.size(); ++i) {
+    if (active == chess::Colour::WHITE) {
+      pgn += QString::number(move_num) + ". ";
+    }
+    pgn += QString::fromStdString(sans[i]) + " ";
+    active = chess::ToggleColour(active);
+    if (active == chess::Colour::WHITE) {
+      move_num++;
+    }
+  }
+
+  return pgn.trimmed();
+}
+
+bool ChessBoardWidget::ImportPGN(const QString& pgn) {
+  // Extract move text: skip headers
+  QString move_text;
+  bool in_headers = false;
+  for (const auto& line : pgn.split('\n')) {
+    QString trimmed = line.trimmed();
+    if (trimmed.startsWith('[')) {
+      in_headers = true;
+      continue;
+    }
+    if (in_headers && trimmed.isEmpty()) {
+      in_headers = false;
+      continue;
+    }
+    if (in_headers) continue;
+    move_text += " " + trimmed;
+  }
+
+  // Reset
+  m_start_fen = chess::STARTPOS_FEN;
+  m_root_node = std::make_unique<chess::MoveNode>();
+  m_current_node = m_root_node.get();
+  m_move_index = 0;
+  m_half_moves = 0;
+  m_active_colour = chess::Colour::WHITE;
+  InitBoardFromFEN(m_board, m_start_fen, m_active_colour, m_half_moves);
+
+  // Parse with recursive variation support
+  int pos = 0;
+  auto skipWhitespace = [&]() {
+    while (pos < move_text.size() && move_text[pos].isSpace()) pos++;
+  };
+  auto parseMoveToken = [&]() -> QString {
+    skipWhitespace();
+    if (pos >= move_text.size()) return {};
+    int start = pos;
+    while (pos < move_text.size() && !move_text[pos].isSpace() &&
+           move_text[pos] != '(' && move_text[pos] != ')' &&
+           move_text[pos] != '{' && move_text[pos] != '}' &&
+           move_text[pos] != ';')
+      pos++;
+    return move_text.mid(start, pos - start);
+  };
+
+  // Recursive PGN parser
+  std::function<void(chess::MoveNode*)> parseVariation =
+      [&](chess::MoveNode* parent_node) {
+        chess::MoveNode* cur = parent_node;
+        chess::Colour turn =
+            (parent_node == m_root_node.get())
+                ? m_active_colour
+                : chess::ToggleColour(parent_node->move.src.file == 0 &&
+                                              parent_node->move.src.rank == 0
+                                          ? chess::Colour::WHITE
+                                          : chess::Colour::WHITE);
+
+        // Determine turn from board state by counting depth
+        {
+          int depth = 0;
+          const chess::MoveNode* n = parent_node;
+          while (n->parent != nullptr) {
+            depth++;
+            n = n->parent;
+          }
+          chess::Colour start_active = m_active_colour;
+          turn = start_active;
+          for (int i = 0; i < depth; ++i) {
+            turn = chess::ToggleColour(turn);
+          }
+        }
+
+        while (true) {
+          skipWhitespace();
+          if (pos >= move_text.size()) break;
+          QChar c = move_text[pos];
+
+          if (c == ';') {
+            // Line comment to end of line
+            while (pos < move_text.size() && move_text[pos] != '\n') pos++;
+            continue;
+          }
+          if (c == '{') {
+            // Block comment
+            pos++;
+            while (pos < move_text.size() && move_text[pos] != '}') pos++;
+            if (pos < move_text.size()) pos++;
+            continue;
+          }
+          if (c == '(') {
+            pos++;
+            // Variation: parse from current node's parent context
+            // The variation branches off from `cur`'s last move
+            if (cur->parent != nullptr) {
+              parseVariation(cur->parent);
+            } else {
+              parseVariation(cur);
+            }
+            skipWhitespace();
+            if (pos < move_text.size() && move_text[pos] == ')') pos++;
+            continue;
+          }
+          if (c == ')') break;
+
+          QString token = parseMoveToken();
+          if (token.isEmpty()) continue;
+
+          // Skip result tokens
+          if (token == "1-0" || token == "0-1" || token == "1/2-1/2" ||
+              token == "*")
+            continue;
+
+          // Strip move numbers from token (e.g. "1." "1..." "12.")
+          QString san_token = token;
+          // Remove leading digits and dots
+          while (!san_token.isEmpty() &&
+                 (san_token[0].isDigit() || san_token[0] == '.' ||
+                  san_token[0] == '-'))
+            san_token.remove(0, 1);
+          if (san_token.isEmpty()) continue;
+
+          std::optional<chess::Move> move =
+              m_board.ParseSanMove(san_token.toStdString());
+          if (!move.has_value()) break;
+
+          std::string san = m_board.GetSanMove(move.value());
+          auto new_node =
+              std::make_unique<chess::MoveNode>(move.value(), san, cur);
+          chess::MoveNode* child = new_node.get();
+          cur->children.push_back(std::move(new_node));
+
+          m_board.DoMove(move.value());
+          m_active_colour = chess::ToggleColour(m_active_colour);
+          m_half_moves++;
+
+          cur = child;
+          turn = chess::ToggleColour(turn);
+        }
+      };
+
+  parseVariation(m_root_node.get());
+
+  // Navigate to end of main line
+  m_current_node = m_root_node.get();
+  m_move_index = 0;
+  GoToEnd();
+
+  return m_root_node != nullptr && !m_root_node->children.empty();
 }

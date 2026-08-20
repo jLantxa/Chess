@@ -19,7 +19,9 @@
 #define _CHESS_INCLUDE_MAINWINDOW_HPP_
 
 #include <QLabel>
+#include <QListWidget>
 #include <QMainWindow>
+#include <QTimer>
 #include <memory>
 #include <vector>
 
@@ -43,19 +45,8 @@ class MainWindow : public QMainWindow {
   MainWindow(QWidget* parent = nullptr);
   ~MainWindow();
 
-  std::vector<UCIEngine::DepthInfo>& GetLines() const;
-
  public slots:
-  /**
-   * @brief Depth search info available from the engine
-   * @param depth_info
-   */
   void OnDepthInfoAvailable();
-
-  /**
-   * @brief Called when a valid move is done on the board
-   * @param move Move
-   */
   void OnMoveDone(const chess::Move& move);
 
  private slots:
@@ -64,7 +55,7 @@ class MainWindow : public QMainWindow {
   void on_bEngineOn_toggled(bool checked);
   void on_chInfinite_toggled(bool checked);
   void on_sbThreads_editingFinished();
-  void on_sbLines_editingFinished();
+  void on_sbLines_valueChanged(int value);
   void on_sbDepth_editingFinished();
   void on_actionSet_FEN_position_triggered();
   void on_actionNew_game_triggered();
@@ -74,15 +65,20 @@ class MainWindow : public QMainWindow {
   void on_bSettings_clicked();
   void on_actionRestart_triggered();
   void on_bDownload_clicked();
+  void on_bGoStart_clicked();
+  void on_bGoBack_clicked();
+  void on_bGoForward_clicked();
+  void on_bGoEnd_clicked();
+  void on_actionLoad_PGN_triggered();
+
+  void on_teMoves_anchorClicked(const QUrl& url);
+  void on_teLines_itemClicked(QListWidgetItem* item);
 
  private:
   Ui::MainWindow* ui;
 
   friend class EnginePlayer;
 
-  /**
-   * @brief Initialise window.
-   */
   void Init();
 
   const char* WINDOW_TITLE = "Chess";
@@ -90,13 +86,8 @@ class MainWindow : public QMainWindow {
   UCIEngine m_engine;
   const char* DEFAULT_ENGINE_CMD = "stockfish";
 
-  /** Engine search depth. */
-  uint8_t m_depth;
+  uint8_t m_depth = 20;
 
-  /** List of moves from starting position. */
-  QStringList m_moves_list;
-
-  /** Show analysis lines while engine is on */
   bool m_show_lines = true;
 
   std::unique_ptr<Player> m_white_player =
@@ -106,62 +97,25 @@ class MainWindow : public QMainWindow {
 
   ChessBoardWidget* m_board;
 
-  SettingsDialog* m_settings_dialog;
+  std::unique_ptr<SettingsDialog> m_settings_dialog;
 
-  /** Current move number as in game. First move is 1. */
-  uint32_t CurrentMoveNumber() const;
+  /** Engine lines data: UCI move strings for each line */
+  std::vector<QStringList> m_engine_lines_data;
 
-  /** Restart game */
   void NewGame();
-
-  /**
-   * @brief Restart engine search.
-   */
   void RestartSearch();
-
-  /** Update the move list widget*/
+  void ScheduleRestartSearch();
+  void DoRestartSearch();
+  QTimer m_restart_timer;
   void UpdateMoveList();
-
-  /** Set engine enabled or disabled */
   void SetEngineEnabled(bool enabled);
-
-  /** Set number of search lines*/
   void SetNumLines(uint8_t num_lines);
-
-  /**
-   * @brief Set engine search depth.
-   * @param depth Search depth.
-   */
   void SetDepth(uint8_t depth);
-
-  /**
-   * @brief Set position using a FEN string.
-   * @param fen_str FEN string.
-   * @return true if the position is valid.
-   */
   bool ResetPosition(const QString& fen_str);
-
-  /**
-   * @brief Get a score string with a + or - sign.
-   * @param cp_score Score is centipawns.
-   * @return A score string with a + or - sign.
-   */
   QString GetSignedScoreStr(int cp_score) const;
-
   int GetColourScore(chess::Colour colour, int score) const;
-
-  /**
-   * @brief Display a message box.
-   * @param title Window title.
-   * @param text Message.
-   */
   void ShowMsgBox(const QString& title, const QString& text);
-
-  /**
-   * @brief Set the engine controls enabled or disabled.
-   */
   void SetEngineControlsEnabled(bool enabled);
-
   std::unique_ptr<Player>& GetNextPlayer(chess::Colour colour);
 };
 #endif  // _CHESS_INCLUDE_MAINWINDOW_HPP_

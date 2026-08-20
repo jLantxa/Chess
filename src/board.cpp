@@ -65,11 +65,7 @@ const Piece* Board::PieceAt(const chess::Square& square) const {
   return PieceAt(i, j);
 }
 
-void Board::ClearPieceAt(uint8_t i, uint8_t j) {
-  if (m_board[i][j].get() != nullptr) {
-    m_board[i][j].reset();
-  }
-}
+void Board::ClearPieceAt(uint8_t i, uint8_t j) { m_board[i][j].reset(); }
 
 void Board::ClearPieceAt(const chess::Square& square) {
   const uint8_t i = square.file;
@@ -217,11 +213,19 @@ std::string Board::GetPosition(const Colour& active_colour) const {
     return false;
   }
 
-  constexpr std::array<Square, 3> path{Square{5, 0}, {6, 0}, {7, 0}};
+  // Squares the king passes through and lands on must not be attacked
+  constexpr std::array<Square, 2> path{Square{5, 0}, {6, 0}};
   for (const auto& sq : path) {
     if (CanBeCaptured(sq)) {
       return false;
     }
+  }
+
+  // Squares between king and rook must be empty
+  const auto* f1 = PieceAt(5, 0);
+  const auto* g1 = PieceAt(6, 0);
+  if (f1 != nullptr || g1 != nullptr) {
+    return false;
   }
 
   return true;
@@ -232,11 +236,20 @@ std::string Board::GetPosition(const Colour& active_colour) const {
     return false;
   }
 
-  constexpr std::array<Square, 5> path{Square{3, 0}, {2, 0}, {1, 0}, {0, 0}};
+  // Squares the king passes through and lands on must not be attacked
+  constexpr std::array<Square, 3> path{Square{3, 0}, {2, 0}, {1, 0}};
   for (const auto& sq : path) {
     if (CanBeCaptured(sq)) {
       return false;
     }
+  }
+
+  // Squares between king and rook must be empty
+  const auto* b1 = PieceAt(1, 0);
+  const auto* c1 = PieceAt(2, 0);
+  const auto* d1 = PieceAt(3, 0);
+  if (b1 != nullptr || c1 != nullptr || d1 != nullptr) {
+    return false;
   }
 
   return true;
@@ -247,11 +260,19 @@ std::string Board::GetPosition(const Colour& active_colour) const {
     return false;
   }
 
-  constexpr std::array<Square, 3> path{Square{5, 7}, {6, 7}, {7, 7}};
+  // Squares the king passes through and lands on must not be attacked
+  constexpr std::array<Square, 2> path{Square{5, 7}, {6, 7}};
   for (const auto& sq : path) {
     if (CanBeCaptured(sq)) {
       return false;
     }
+  }
+
+  // Squares between king and rook must be empty
+  const auto* f8 = PieceAt(5, 7);
+  const auto* g8 = PieceAt(6, 7);
+  if (f8 != nullptr || g8 != nullptr) {
+    return false;
   }
 
   return true;
@@ -262,11 +283,20 @@ std::string Board::GetPosition(const Colour& active_colour) const {
     return false;
   }
 
-  constexpr std::array<Square, 5> path{Square{3, 7}, {2, 7}, {1, 7}, {0, 7}};
+  // Squares the king passes through and lands on must not be attacked
+  constexpr std::array<Square, 3> path{Square{3, 7}, {2, 7}, {1, 7}};
   for (const auto& sq : path) {
     if (CanBeCaptured(sq)) {
       return false;
     }
+  }
+
+  // Squares between king and rook must be empty
+  const auto* b8 = PieceAt(1, 7);
+  const auto* c8 = PieceAt(2, 7);
+  const auto* d8 = PieceAt(3, 7);
+  if (b8 != nullptr || c8 != nullptr || d8 != nullptr) {
+    return false;
   }
 
   return true;
@@ -452,6 +482,217 @@ void Board::UpdateCastles() {
 [[nodiscard]] bool Board::MoveIsEnPassant(const Move& move) const {
   (void)move;
   return false;
+}
+
+std::string Board::GetSanMove(const Move& move) const {
+  // Castling
+  if (MoveIsWKC(move) || MoveIsBKC(move)) {
+    return "O-O";
+  }
+  if (MoveIsWQC(move) || MoveIsBQC(move)) {
+    return "O-O-O";
+  }
+
+  const auto* src_piece = PieceAt(move.src);
+  if (src_piece == nullptr) {
+    return {};
+  }
+
+  const auto piece_type = src_piece->GetType();
+  const bool is_capture = (PieceAt(move.dst) != nullptr);
+  std::string san;
+
+  if (piece_type == PieceType::PAWN) {
+    if (is_capture) {
+      san += NumberToFile(move.src.file);
+      san += 'x';
+    }
+    san += SquareToString(move.dst);
+    if (move.is_pawn_promotion) {
+      san += '=';
+      san += static_cast<char>(
+          std::toupper(PIECE_CHARS[static_cast<uint8_t>(move.promotion_type)]));
+    }
+  } else {
+    san += static_cast<char>(
+        std::toupper(PIECE_CHARS[static_cast<uint8_t>(piece_type)]));
+
+    // Disambiguation: check if another piece of same type & colour can reach
+    // dst
+    bool need_file_disambig = false;
+    bool need_rank_disambig = false;
+    for (uint8_t fi = 0; fi < 8; ++fi) {
+      for (uint8_t ri = 0; ri < 8; ++ri) {
+        const Square sq{fi, ri};
+        if (sq == move.src) continue;
+        const auto* other = PieceAt(sq);
+        if (other == nullptr || other->GetColour() != src_piece->GetColour() ||
+            other->GetType() != piece_type) {
+          continue;
+        }
+        const auto other_moves =
+            other->GetMoves(*this, Piece::FLAG_EXCLUDE_CASTLES);
+        for (const auto& m : other_moves) {
+          if (m.dst == move.dst) {
+            if (fi != move.src.file) {
+              need_file_disambig = true;
+            } else {
+              need_rank_disambig = true;
+            }
+          }
+        }
+      }
+    }
+    if (need_file_disambig) {
+      san += NumberToFile(move.src.file);
+    }
+    if (need_rank_disambig) {
+      san += static_cast<char>('1' + move.src.rank);
+    }
+
+    if (is_capture) {
+      san += 'x';
+    }
+    san += SquareToString(move.dst);
+  }
+
+  // Promotion suffix (handled above inline for pawns)
+  if (piece_type != PieceType::PAWN && move.is_pawn_promotion) {
+    san += '=';
+    san += static_cast<char>(
+        std::toupper(PIECE_CHARS[static_cast<uint8_t>(move.promotion_type)]));
+  }
+
+  // Check / checkmate detection
+  Board future_board(*this);
+  future_board.DoMove(move);
+  const auto opponent_colour =
+      (src_piece->GetColour() == Colour::WHITE) ? Colour::BLACK : Colour::WHITE;
+  if (future_board.IsInCheck(opponent_colour)) {
+    // Check if opponent has any legal moves (checkmate)
+    bool has_legal_moves = false;
+    for (uint8_t fi = 0; fi < 8 && !has_legal_moves; ++fi) {
+      for (uint8_t ri = 0; ri < 8 && !has_legal_moves; ++ri) {
+        const Square sq{fi, ri};
+        const auto* piece = future_board.PieceAt(sq);
+        if (piece == nullptr || piece->GetColour() != opponent_colour) continue;
+        const auto moves = future_board.GetMovesFrom(sq);
+        for (const auto& m : moves) {
+          if (future_board.IsValidMove(m, opponent_colour)) {
+            has_legal_moves = true;
+            break;
+          }
+        }
+      }
+    }
+    san += has_legal_moves ? '+' : '#';
+  }
+
+  return san;
+}
+
+std::optional<Move> Board::ParseSanMove(const std::string& san) const {
+  if (san.empty()) return std::nullopt;
+
+  // Castling
+  if (san == "O-O" || san == "0-0") {
+    const auto* king =
+        PieceAt(4, (IsInCheck(Colour::WHITE) || PieceAt(4, 0)) ? 0 : 7);
+    if (!king || king->GetType() != PieceType::KING) {
+      for (uint8_t r : {0u, 7u}) {
+        const auto* k = PieceAt(4, r);
+        if (k && k->GetType() == PieceType::KING &&
+            k->GetColour() == Colour::WHITE) {
+          return WHITE_KING_CASTLE;
+        }
+        if (k && k->GetType() == PieceType::KING &&
+            k->GetColour() == Colour::BLACK) {
+          return BLACK_KING_CASTLE;
+        }
+      }
+      return std::nullopt;
+    }
+    return (king->GetColour() == Colour::WHITE) ? WHITE_KING_CASTLE
+                                                : BLACK_KING_CASTLE;
+  }
+  if (san == "O-O-O" || san == "0-0-0") {
+    for (uint8_t r : {0u, 7u}) {
+      const auto* k = PieceAt(4, r);
+      if (k && k->GetType() == PieceType::KING) {
+        return (k->GetColour() == Colour::WHITE) ? WHITE_QUEEN_CASTLE
+                                                 : BLACK_QUEEN_CASTLE;
+      }
+    }
+    return std::nullopt;
+  }
+
+  std::string s = san;
+  // Strip check/mate symbols
+  while (!s.empty() && (s.back() == '+' || s.back() == '#')) {
+    s.pop_back();
+  }
+
+  // Check for promotion
+  PieceType promotion_type = PieceType::QUEEN;
+  bool is_promotion = false;
+  auto eq_pos = s.find('=');
+  if (eq_pos != std::string::npos) {
+    is_promotion = true;
+    char promo_char = std::tolower(s[eq_pos + 1]);
+    promotion_type = GetPieceTypeFromChar(promo_char);
+    s = s.substr(0, eq_pos);
+  }
+
+  // Determine piece type
+  PieceType piece_type = PieceType::PAWN;
+  if (!s.empty() && std::isupper(static_cast<unsigned char>(s[0]))) {
+    piece_type = GetPieceTypeFromChar(s[0]);
+    s = s.substr(1);
+  }
+
+  // Remove capture symbol
+  auto x_pos = s.find('x');
+  if (x_pos != std::string::npos) {
+    s.erase(x_pos, 1);
+  }
+
+  if (s.size() < 2) return std::nullopt;
+
+  Square dst = StringToSquare(s.substr(s.size() - 2));
+
+  // Determine source square by finding the matching piece
+  for (uint8_t fi = 0; fi < 8; ++fi) {
+    for (uint8_t ri = 0; ri < 8; ++ri) {
+      const Square sq{fi, ri};
+      const auto* piece = PieceAt(sq);
+      if (piece == nullptr) continue;
+      if (piece->GetType() != piece_type) continue;
+
+      auto moves = piece->GetMoves(*this, Piece::FLAG_EXCLUDE_CASTLES);
+      for (const auto& m : moves) {
+        if (m.dst != dst) continue;
+        if (!IsValidMove(m, piece->GetColour())) continue;
+
+        // Check disambiguation chars (remaining chars in s after removing dst)
+        std::string disambig = s.substr(0, s.size() - 2);
+        bool file_match =
+            disambig.empty() ||
+            (std::isalpha(static_cast<unsigned char>(disambig[0])) &&
+             disambig[0] == NumberToFile(fi));
+        bool rank_match =
+            disambig.empty() ||
+            (std::isdigit(static_cast<unsigned char>(disambig.back())) &&
+             disambig.back() == ('1' + ri));
+
+        if (file_match && rank_match) {
+          Move move{sq, dst, is_promotion, promotion_type};
+          return move;
+        }
+      }
+    }
+  }
+
+  return std::nullopt;
 }
 
 }  // namespace chess

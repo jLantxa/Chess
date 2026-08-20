@@ -1,6 +1,6 @@
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
-CONFIG += c++20
+CONFIG += c++2c
 QMAKE_CXXFLAGS += -O2 -Wall -Werror
 
 LIBS += -lgtest -lgtest_main

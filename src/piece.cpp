@@ -79,6 +79,17 @@ void Piece::SetMoved(bool moved) { m_has_moved = moved; }
   return moves;
 }
 
+[[nodiscard]] std::vector<Move> Piece::GetSlidingMovesFor(
+    const Board& board, std::initializer_list<Direction> directions) const {
+  std::vector<Move> moves;
+  for (const auto dir : directions) {
+    auto dir_moves = GetSlidingMoves(board, dir);
+    moves.insert(moves.end(), std::make_move_iterator(dir_moves.begin()),
+                 std::make_move_iterator(dir_moves.end()));
+  }
+  return moves;
+}
+
 // PAWN
 Pawn::Pawn(Colour colour) : Piece(colour, PieceType::PAWN, PAWN_VALUE) {}
 
@@ -215,27 +226,10 @@ Bishop::Bishop(Colour colour)
 [[nodiscard]] std::vector<Move> Bishop::GetMoves(const Board& board,
                                                  uint32_t flags) const {
   (void)flags;
-  std::vector<Move> moves;
-
-  std::vector<Move> up_left_moves = GetSlidingMoves(board, Direction::UP_LEFT);
-  std::vector<Move> up_right_moves =
-      GetSlidingMoves(board, Direction::UP_RIGHT);
-  std::vector<Move> down_left_moves =
-      GetSlidingMoves(board, Direction::DOWN_LEFT);
-  std::vector<Move> down_right_moves =
-      GetSlidingMoves(board, Direction::DOWN_RIGHT);
-
-  moves.insert(moves.end(), std::make_move_iterator(up_left_moves.begin()),
-               std::make_move_iterator(up_left_moves.end()));
-  moves.insert(moves.end(), std::make_move_iterator(up_right_moves.begin()),
-               std::make_move_iterator(up_right_moves.end()));
-  moves.insert(moves.end(), std::make_move_iterator(down_left_moves.begin()),
-               std::make_move_iterator(down_left_moves.end()));
-  moves.insert(moves.end(), std::make_move_iterator(down_right_moves.begin()),
-               std::make_move_iterator(down_right_moves.end()));
-
-  return moves;
-};
+  return GetSlidingMovesFor(
+      board, {Direction::UP_LEFT, Direction::UP_RIGHT, Direction::DOWN_LEFT,
+              Direction::DOWN_RIGHT});
+}
 
 // ROOK
 Rook::Rook(Colour colour) : Piece(colour, PieceType::ROOK, ROOK_VALUE) {}
@@ -255,24 +249,9 @@ Rook::Rook(Colour colour) : Piece(colour, PieceType::ROOK, ROOK_VALUE) {}
 [[nodiscard]] std::vector<Move> Rook::GetMoves(const Board& board,
                                                uint32_t flags) const {
   (void)flags;
-  std::vector<Move> moves;
-
-  std::vector<Move> up_moves = GetSlidingMoves(board, Direction::UP);
-  std::vector<Move> down_moves = GetSlidingMoves(board, Direction::DOWN);
-  std::vector<Move> left_moves = GetSlidingMoves(board, Direction::LEFT);
-  std::vector<Move> right_moves = GetSlidingMoves(board, Direction::RIGHT);
-
-  moves.insert(moves.end(), std::make_move_iterator(up_moves.begin()),
-               std::make_move_iterator(up_moves.end()));
-  moves.insert(moves.end(), std::make_move_iterator(down_moves.begin()),
-               std::make_move_iterator(down_moves.end()));
-  moves.insert(moves.end(), std::make_move_iterator(left_moves.begin()),
-               std::make_move_iterator(left_moves.end()));
-  moves.insert(moves.end(), std::make_move_iterator(right_moves.begin()),
-               std::make_move_iterator(right_moves.end()));
-
-  return moves;
-};
+  return GetSlidingMovesFor(board, {Direction::UP, Direction::DOWN,
+                                    Direction::LEFT, Direction::RIGHT});
+}
 
 // QUEEN
 Queen::Queen(Colour colour) : Piece(colour, PieceType::QUEEN, QUEEN_VALUE) {}
@@ -292,39 +271,11 @@ Queen::Queen(Colour colour) : Piece(colour, PieceType::QUEEN, QUEEN_VALUE) {}
 [[nodiscard]] std::vector<Move> Queen::GetMoves(const Board& board,
                                                 uint32_t flags) const {
   (void)flags;
-  std::vector<Move> moves;
-
-  std::vector<Move> up_moves = GetSlidingMoves(board, Direction::UP);
-  std::vector<Move> down_moves = GetSlidingMoves(board, Direction::DOWN);
-  std::vector<Move> left_moves = GetSlidingMoves(board, Direction::LEFT);
-  std::vector<Move> right_moves = GetSlidingMoves(board, Direction::RIGHT);
-  std::vector<Move> up_left_moves = GetSlidingMoves(board, Direction::UP_LEFT);
-  std::vector<Move> up_right_moves =
-      GetSlidingMoves(board, Direction::UP_RIGHT);
-  std::vector<Move> down_left_moves =
-      GetSlidingMoves(board, Direction::DOWN_LEFT);
-  std::vector<Move> down_right_moves =
-      GetSlidingMoves(board, Direction::DOWN_RIGHT);
-
-  moves.insert(moves.end(), std::make_move_iterator(up_moves.begin()),
-               std::make_move_iterator(up_moves.end()));
-  moves.insert(moves.end(), std::make_move_iterator(down_moves.begin()),
-               std::make_move_iterator(down_moves.end()));
-  moves.insert(moves.end(), std::make_move_iterator(left_moves.begin()),
-               std::make_move_iterator(left_moves.end()));
-  moves.insert(moves.end(), std::make_move_iterator(right_moves.begin()),
-               std::make_move_iterator(right_moves.end()));
-  moves.insert(moves.end(), std::make_move_iterator(up_left_moves.begin()),
-               std::make_move_iterator(up_left_moves.end()));
-  moves.insert(moves.end(), std::make_move_iterator(up_right_moves.begin()),
-               std::make_move_iterator(up_right_moves.end()));
-  moves.insert(moves.end(), std::make_move_iterator(down_left_moves.begin()),
-               std::make_move_iterator(down_left_moves.end()));
-  moves.insert(moves.end(), std::make_move_iterator(down_right_moves.begin()),
-               std::make_move_iterator(down_right_moves.end()));
-
-  return moves;
-};
+  return GetSlidingMovesFor(
+      board, {Direction::UP, Direction::DOWN, Direction::LEFT, Direction::RIGHT,
+              Direction::UP_LEFT, Direction::UP_RIGHT, Direction::DOWN_LEFT,
+              Direction::DOWN_RIGHT});
+}
 
 // KING
 King::King(Colour colour) : Piece(colour, PieceType::KING, KING_VALUE) {}

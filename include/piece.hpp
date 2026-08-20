@@ -18,6 +18,7 @@
 #ifndef _CHESS_INCLUDE_PIECE_HPP_
 #define _CHESS_INCLUDE_PIECE_HPP_
 
+#include <initializer_list>
 #include <vector>
 
 #include "board.hpp"
@@ -59,6 +60,9 @@ class Piece {
 
   [[nodiscard]] std::vector<Move> GetSlidingMoves(const Board& board,
                                                   Direction direction) const;
+
+  [[nodiscard]] std::vector<Move> GetSlidingMovesFor(
+      const Board& board, std::initializer_list<Direction> directions) const;
 };
 
 class Pawn final : public Piece {
